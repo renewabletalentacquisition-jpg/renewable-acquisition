@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 type Answers = Record<string, string | string[]>;
 
@@ -48,11 +49,32 @@ export async function POST(req: NextRequest) {
     const outcome = getOutcome(answers);
     const score = calcScore(answers);
 
-    // In-memory store for now — Supabase will replace this once wired
-    console.log("[apply]", { name: `${answers.firstName} ${answers.lastName}`, email: answers.email, score, outcome });
+    const { error } = await supabaseAdmin.from("applicants").insert({
+      first_name: answers.firstName,
+      last_name: answers.lastName,
+      email: answers.email,
+      phone: answers.phone,
+      city: answers.city,
+      start_timing: answers.startTiming,
+      commission_only: answers.commissionOnly,
+      door_to_door: answers.doorToDoor,
+      relocate: answers.relocate,
+      team_housing: answers.teamHousing,
+      background: answers.background || [],
+      coachable: answers.coachable,
+      financial_stability: answers.financialStability,
+      score,
+      outcome,
+    });
+
+    if (error) {
+      console.error("[apply] supabase error:", error);
+      return NextResponse.json({ error: "Failed to save application" }, { status: 500 });
+    }
 
     return NextResponse.json({ outcome, score });
-  } catch {
+  } catch (e) {
+    console.error("[apply] error:", e);
     return NextResponse.json({ error: "Failed to process application" }, { status: 500 });
   }
 }
