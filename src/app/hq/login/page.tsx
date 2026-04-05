@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function HQLoginPage() {
   const router = useRouter();
@@ -17,8 +16,9 @@ export default function HQLoginPage() {
     setError("");
 
     const normalizedUser = email.trim();
+    const normalizedPassword = password.trim();
 
-    if (normalizedUser === "CPF" && password === "CPF123") {
+    if (normalizedUser === "CPF" && normalizedPassword === "CPF123") {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("hq-auth", "ok");
       }
@@ -26,18 +26,8 @@ export default function HQLoginPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setError("Invalid credentials. Try again.");
-      setLoading(false);
-      return;
-    }
-
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("hq-auth", "ok");
-    }
-    router.push("/hq");
+    setError("Invalid credentials. Try again.");
+    setLoading(false);
   }
 
   return (
