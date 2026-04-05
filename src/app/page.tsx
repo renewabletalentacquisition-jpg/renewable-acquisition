@@ -1,159 +1,348 @@
+"use client";
+
+import { useEffect } from "react";
+
 const metrics = [
-  { value: "$10k–$20k+", label: "Monthly upside for top reps" },
-  { value: "$50k+", label: "Possible 4-month run for top setters" },
-  { value: "Limited", label: "Serious spots available" },
+  { value: "$10k–$20k+", label: "Monthly top-rep upside" },
+  { value: "$50k+", label: "Possible 4-month setter run" },
+  { value: "Now", label: "Interviewing immediately" },
 ];
 
-const fitPoints = [
-  "Competitive people who want real upside",
-  "Athletes, gym-driven applicants, and college grinders",
-  "People open to travel, relocation, and team housing",
-  "Coachability, resilience, and hunger over polished resumes",
+const fitCards = [
+  {
+    icon: "🏆",
+    title: "Competitive people",
+    body: "Athletes, gym-driven candidates, and anyone who has trained hard for something.",
+  },
+  {
+    icon: "✈️",
+    title: "Open to relocation",
+    body: "We move fast and we move around. You need to be willing to go.",
+  },
+  {
+    icon: "💰",
+    title: "Commission-minded",
+    body: "You want upside, not a ceiling. You understand performance-based income.",
+  },
+  {
+    icon: "📈",
+    title: "Hungry to grow",
+    body: "Coachable, resilient, and ready to be held accountable to a real standard.",
+  },
 ];
 
 const processSteps = [
-  "Apply through the qualification flow",
-  "Get filtered fast based on real fit",
-  "Qualified candidates move straight toward interview booking",
-  "Top applicants get reviewed quickly while spots remain open",
+  { num: "01", title: "Apply", body: "Complete the short qualification flow. Serious candidates only." },
+  { num: "02", title: "Get filtered", body: "We move fast and filter hard. No time wasted on bad fits." },
+  { num: "03", title: "Interview", body: "Qualified candidates book directly into the interview schedule." },
+  { num: "04", title: "Start", body: "Top applicants are reviewed and moved quickly. Spots are limited." },
+];
+
+const disclaimers = [
+  "This is in-person and door-to-door. Not remote.",
+  "This is commission-only. Not hourly.",
+  "Travel or relocation may be required. You must be willing.",
+  "Top performers earn significant income. Others may earn little early on.",
+  "If comfort is the priority right now, this is the wrong fit.",
 ];
 
 export default function Home() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(196,167,106,0.18),_transparent_28%),linear-gradient(180deg,_#0b0b0d_0%,_#111214_38%,_#0a0a0b_100%)] text-stone-100">
-      <section className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
+    <>
+      {/* ── Nav ───────────────────────────────────────────── */}
+      <nav className="nav">
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-amber-200/70">
-              Renewable Acquisition
-            </p>
-            <p className="mt-1 text-sm text-stone-400">
-              Premium recruiting infrastructure for high-performance solar sales.
-            </p>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--fg)" }}>
+              Renewable <span style={{ color: "var(--accent)" }}>Acquisition</span>
+            </span>
           </div>
-          <div className="hidden items-center gap-4 md:flex">
-            <a href="#process" className="text-sm text-stone-300 transition hover:text-white">
+          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+            <a href="#who" style={{ fontSize: 13.5, color: "var(--fg-muted)", transition: "color 0.2s" }}
+               onMouseEnter={e => (e.currentTarget.style.color = "var(--fg)")}
+               onMouseLeave={e => (e.currentTarget.style.color = "var(--fg-muted)")}>
+              Who It&apos;s For
+            </a>
+            <a href="#process" style={{ fontSize: 13.5, color: "var(--fg-muted)", transition: "color 0.2s" }}
+               onMouseEnter={e => (e.currentTarget.style.color = "var(--fg)")}
+               onMouseLeave={e => (e.currentTarget.style.color = "var(--fg-muted)")}>
               Process
             </a>
-            <a href="#fit" className="text-sm text-stone-300 transition hover:text-white">
-              Who It’s For
-            </a>
-            <a
-              href="/apply"
-              className="rounded-full border border-amber-200/30 bg-amber-200/10 px-5 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-100/60 hover:bg-amber-200/20"
-            >
+            <a href="/apply" className="btn-gold" style={{ padding: "9px 22px", fontSize: 13 }}>
               Apply Now
             </a>
           </div>
         </div>
-      </section>
+      </nav>
 
-      <section className="mx-auto grid max-w-7xl gap-16 px-6 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:px-10 lg:py-28">
-        <div>
-          <p className="mb-5 inline-flex rounded-full border border-amber-200/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.28em] text-amber-100/80">
-            Limited spots • Interviewing immediately
-          </p>
-          <h1 className="max-w-4xl text-5xl leading-[1.02] font-semibold tracking-[-0.04em] text-white md:text-6xl lg:text-7xl">
-            Build a bigger life through a high-performance solar sales team.
-          </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-stone-300 md:text-xl">
-            This is an in-person, commission-driven opportunity for serious people who want
-            more than an average job. Real upside. Real standards. Real pressure. Real growth.
-          </p>
+      <main style={{ paddingTop: 60 }}>
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <a
-              href="/apply"
-              className="inline-flex items-center justify-center rounded-full bg-amber-200 px-7 py-4 text-sm font-semibold text-stone-950 transition hover:bg-amber-100"
-            >
-              Start Application
-            </a>
-            <a
-              href="#fit"
-              className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-4 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              See If You Fit
-            </a>
-          </div>
+        {/* ── Hero ─────────────────────────────────────────── */}
+        <section style={{
+          minHeight: "92vh",
+          display: "flex",
+          alignItems: "center",
+          padding: "100px 32px 80px",
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,169,110,0.12), transparent),
+            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(201,169,110,0.04), transparent),
+            var(--bg)
+          `,
+        }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", width: "100%" }}>
+            <div style={{ maxWidth: 780 }}>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {metrics.map((item) => (
-              <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-                <div className="text-2xl font-semibold tracking-tight text-white">{item.value}</div>
-                <div className="mt-2 text-sm leading-6 text-stone-400">{item.label}</div>
+              <div className="reveal" style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                border: "1px solid rgba(201,169,110,0.22)",
+                background: "rgba(201,169,110,0.07)",
+                borderRadius: 9999,
+                padding: "7px 18px",
+                marginBottom: 36,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block", boxShadow: "0 0 8px var(--accent)" }} />
+                <span style={{ fontSize: 11.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-soft)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
+                  Limited spots · Interviewing now
+                </span>
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/6 p-7 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <div className="rounded-[1.5rem] border border-amber-200/20 bg-black/30 p-6">
-            <p className="text-xs uppercase tracking-[0.35em] text-amber-200/70">Before you apply</p>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white">
-              This is not remote. It is not hourly. It is not for tourists.
-            </h2>
-            <ul className="mt-6 space-y-4 text-sm leading-7 text-stone-300">
-              <li>• You must be open to commission-only performance pay.</li>
-              <li>• You must be willing to travel or relocate if selected.</li>
-              <li>• Team housing and movement with the team may be part of the role.</li>
-              <li>• Top reps can earn strong money. Weak performers can make little early on.</li>
-              <li>• If you want comfort first, this is probably the wrong fit.</li>
-            </ul>
-            <a
-              href="/apply"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-full border border-amber-200/25 bg-amber-200/10 px-6 py-4 text-sm font-semibold text-amber-50 transition hover:bg-amber-200/20"
-            >
-              Continue to Qualification
-            </a>
-          </div>
-        </div>
-      </section>
+              <h1 className="reveal display" style={{
+                fontSize: "clamp(52px, 8vw, 100px)",
+                color: "var(--fg)",
+                margin: "0 0 28px",
+                transitionDelay: "0.08s",
+              }}>
+                Build a bigger life<br />
+                <em style={{ color: "var(--accent)", fontStyle: "italic" }}>on your own terms.</em>
+              </h1>
 
-      <section id="fit" className="mx-auto max-w-7xl px-6 py-6 lg:px-10 lg:py-10">
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-amber-200/65">Who this is for</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              Built for people who want upside, pressure, and a real shot at growth.
-            </h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {fitPoints.map((point) => (
-              <div key={point} className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm leading-7 text-stone-300">
-                {point}
+              <p className="reveal" style={{
+                fontSize: "clamp(16px, 2vw, 19px)",
+                color: "var(--fg-muted)",
+                lineHeight: 1.72,
+                maxWidth: 580,
+                margin: "0 0 48px",
+                transitionDelay: "0.16s",
+              }}>
+                A commission-driven solar sales opportunity for competitive, coachable people
+                who want real income upside — not a comfortable ceiling.
+              </p>
+
+              <div className="reveal" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 64, transitionDelay: "0.22s" }}>
+                <a href="/apply" className="btn-gold">
+                  Start Application →
+                </a>
+                <a href="#who" className="btn-ghost">
+                  See if you fit
+                </a>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section id="process" className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-20">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 md:p-10">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-amber-200/65">Process</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-                Fast funnel. Hard filters. Serious candidates move quickly.
+              <div className="reveal" style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 14,
+                transitionDelay: "0.3s",
+              }}>
+                {metrics.map((m) => (
+                  <div key={m.label} className="card" style={{ padding: "22px 20px" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 600, letterSpacing: "-0.03em", color: "var(--fg)" }}>
+                      {m.value}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginTop: 6, lineHeight: 1.5 }}>
+                      {m.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr className="divider" />
+
+        {/* ── Reality Check ─────────────────────────────────── */}
+        <section style={{ padding: "80px 32px", background: "var(--bg-subtle)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }}>
+
+              <div className="reveal">
+                <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 20 }}>
+                  Before you apply
+                </p>
+                <h2 className="display" style={{ fontSize: "clamp(32px, 4vw, 52px)", color: "var(--fg)", margin: "0 0 20px" }}>
+                  This is not for everyone.<br />
+                  <em style={{ color: "var(--fg-muted)", fontStyle: "italic" }}>That&apos;s the point.</em>
+                </h2>
+                <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.7 }}>
+                  We filter hard and move fast. The people who thrive here already know they want more.
+                </p>
+              </div>
+
+              <div className="reveal" style={{
+                border: "1px solid var(--border-strong)",
+                borderRadius: "var(--radius-lg)",
+                background: "linear-gradient(135deg, rgba(201,169,110,0.06), rgba(201,169,110,0.02))",
+                padding: "32px 36px",
+                transitionDelay: "0.1s",
+              }}>
+                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 18 }}>
+                  {disclaimers.map((d, i) => (
+                    <li key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                      <span style={{ color: "var(--accent)", fontSize: 16, marginTop: 1, flexShrink: 0 }}>—</span>
+                      <span style={{ fontSize: 14.5, color: "var(--fg-muted)", lineHeight: 1.6 }}>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a href="/apply" className="btn-gold" style={{ marginTop: 32, width: "100%", justifyContent: "center" }}>
+                  Apply Anyway
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <hr className="divider" />
+
+        {/* ── Who It's For ──────────────────────────────────── */}
+        <section id="who" style={{ padding: "100px 32px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+
+            <div className="reveal" style={{ marginBottom: 64 }}>
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+                Who this is for
+              </p>
+              <h2 className="display" style={{ fontSize: "clamp(36px, 5vw, 64px)", color: "var(--fg)", maxWidth: 620, margin: 0 }}>
+                People who perform when the pressure is real.
               </h2>
             </div>
-            <a
-              href="/apply"
-              className="inline-flex items-center justify-center rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Begin Qualification
-            </a>
-          </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {processSteps.map((step, index) => (
-              <div key={step} className="rounded-3xl border border-white/10 bg-black/20 p-6">
-                <div className="text-sm font-semibold text-amber-200">0{index + 1}</div>
-                <p className="mt-4 text-sm leading-7 text-stone-300">{step}</p>
-              </div>
-            ))}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+              {fitCards.map((card, i) => (
+                <div key={card.title} className="card reveal" style={{ padding: "32px 28px", transitionDelay: `${i * 0.08}s` }}>
+                  <div style={{ fontSize: 32, marginBottom: 20 }}>{card.icon}</div>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--fg)", margin: "0 0 12px", letterSpacing: "-0.01em" }}>
+                    {card.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.7, margin: 0 }}>
+                    {card.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+
+        <hr className="divider" />
+
+        {/* ── Process ───────────────────────────────────────── */}
+        <section id="process" style={{ padding: "100px 32px", background: "var(--bg-subtle)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+
+            <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 64, flexWrap: "wrap", gap: 24 }}>
+              <div>
+                <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+                  How it works
+                </p>
+                <h2 className="display" style={{ fontSize: "clamp(36px, 5vw, 60px)", color: "var(--fg)", margin: 0 }}>
+                  Fast funnel.<br />Hard filters.
+                </h2>
+              </div>
+              <a href="/apply" className="btn-ghost">Begin Qualification →</a>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}>
+              {processSteps.map((step, i) => (
+                <div key={step.num} className="reveal" style={{
+                  padding: "36px 28px",
+                  borderTop: "1px solid var(--border)",
+                  transitionDelay: `${i * 0.08}s`,
+                }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 600, color: "var(--accent-dim)", letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 24 }}>
+                    {step.num}
+                  </div>
+                  <h3 style={{ fontSize: 17, fontWeight: 600, color: "var(--fg)", margin: "0 0 10px" }}>
+                    {step.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.7, margin: 0 }}>
+                    {step.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── Final CTA ─────────────────────────────────────── */}
+        <section style={{
+          padding: "120px 32px",
+          background: `
+            radial-gradient(ellipse 70% 60% at 50% 100%, rgba(201,169,110,0.09), transparent),
+            var(--bg)
+          `,
+          textAlign: "center",
+        }}>
+          <div style={{ maxWidth: 680, margin: "0 auto" }}>
+            <div className="reveal">
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 24 }}>
+                Ready?
+              </p>
+              <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 80px)", color: "var(--fg)", margin: "0 0 24px" }}>
+                Spots are limited.<br />
+                <em style={{ color: "var(--accent)", fontStyle: "italic" }}>Don&apos;t wait.</em>
+              </h2>
+              <p style={{ fontSize: 16, color: "var(--fg-muted)", lineHeight: 1.7, marginBottom: 48 }}>
+                We are actively interviewing and moving quickly with serious candidates.
+                Qualified applicants may book an interview immediately.
+              </p>
+              <a href="/apply" className="btn-gold" style={{ fontSize: 15, padding: "16px 40px" }}>
+                Start Your Application →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Footer ────────────────────────────────────────── */}
+        <footer style={{
+          borderTop: "1px solid var(--border)",
+          padding: "32px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
+        }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--fg-muted)" }}>
+              Renewable <span style={{ color: "var(--accent)" }}>Acquisition</span>
+            </span>
+            <span style={{ fontSize: 12.5, color: "var(--fg-dim)" }}>
+              Commission-based · In-person · High-performance
+            </span>
+          </div>
+        </footer>
+
+      </main>
+    </>
   );
 }

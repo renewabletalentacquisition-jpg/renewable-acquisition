@@ -11,28 +11,43 @@ function ResultContent() {
 
   if (outcome === "qualified") {
     return (
-      <div className="mx-auto max-w-2xl rounded-[2rem] border border-amber-200/20 bg-white/5 p-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-amber-200/30 bg-amber-200/10">
-          <span className="text-2xl">☀️</span>
+      <div style={{ maxWidth: 580, width: "100%", textAlign: "center" }}>
+        <div style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          border: "1px solid rgba(201,169,110,0.3)",
+          background: "rgba(201,169,110,0.08)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 32,
+          margin: "0 auto 32px",
+          boxShadow: "0 0 40px rgba(201,169,110,0.12)",
+        }}>
+          ☀️
         </div>
-        <p className="text-xs uppercase tracking-[0.32em] text-amber-200/70">You look like a strong fit</p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-          You're cleared to book an interview.
-        </h1>
-        <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-stone-300">
-          We move fast with serious candidates. Grab a time slot that works for you — same-day may be available.
-          Show up on time and be ready.
+
+        <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+          Strong fit
         </p>
-        <a
-          href={CALENDLY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-8 inline-flex items-center justify-center rounded-full bg-amber-200 px-8 py-4 text-sm font-semibold text-stone-950 transition hover:bg-amber-100"
-        >
-          Book Your Interview Now
+
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 600, letterSpacing: "-0.02em", color: "var(--fg)", margin: "0 0 20px", lineHeight: 1.05 }}>
+          You&apos;re cleared to book<br />
+          <em style={{ color: "var(--accent)", fontStyle: "italic" }}>your interview.</em>
+        </h1>
+
+        <p style={{ fontSize: 15.5, color: "var(--fg-muted)", lineHeight: 1.72, marginBottom: 48, maxWidth: 480, margin: "0 auto 48px" }}>
+          We move fast with serious candidates. Grab a time slot now — same-day may be available. Show up on time and ready.
+        </p>
+
+        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer"
+           className="btn-gold" style={{ fontSize: 15, padding: "16px 40px" }}>
+          Book Interview Now →
         </a>
-        <p className="mt-5 text-xs text-stone-500">
-          Only book if you are serious and can commit. We respect your time and expect the same.
+
+        <p style={{ marginTop: 24, fontSize: 12.5, color: "var(--fg-dim)" }}>
+          Only book if you are serious and can commit. We respect your time.
         </p>
       </div>
     );
@@ -40,47 +55,52 @@ function ResultContent() {
 
   if (outcome === "review") {
     return (
-      <div className="mx-auto max-w-2xl rounded-[2rem] border border-white/10 bg-white/5 p-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] text-center">
-        <p className="text-xs uppercase tracking-[0.32em] text-stone-400">Application received</p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-          We're reviewing your application.
-        </h1>
-        <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-stone-300">
-          Thanks for applying. We're looking through your application now. If we decide to move forward, we'll be in touch shortly.
+      <div style={{ maxWidth: 540, width: "100%", textAlign: "center" }}>
+        <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--fg-muted)", fontWeight: 500, marginBottom: 16 }}>
+          Application received
         </p>
-        <a
-          href="/"
-          className="mt-8 inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-8 py-4 text-sm font-medium text-white transition hover:bg-white/10"
-        >
-          Back to Home
-        </a>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 600, letterSpacing: "-0.02em", color: "var(--fg)", margin: "0 0 20px", lineHeight: 1.05 }}>
+          We&apos;re reviewing<br />your application.
+        </h1>
+        <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.72, marginBottom: 48 }}>
+          Thanks for applying. We&apos;ll follow up shortly if we decide to move to the next step.
+        </p>
+        <a href="/" className="btn-ghost">← Back to Home</a>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl rounded-[2rem] border border-white/10 bg-white/5 p-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] text-center">
-      <p className="text-xs uppercase tracking-[0.32em] text-stone-400">Application received</p>
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+    <div style={{ maxWidth: 540, width: "100%", textAlign: "center" }}>
+      <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--fg-muted)", fontWeight: 500, marginBottom: 16 }}>
+        Application received
+      </p>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 600, letterSpacing: "-0.02em", color: "var(--fg)", margin: "0 0 20px", lineHeight: 1.05 }}>
         Thanks for applying.
       </h1>
-      <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-stone-300">
-        At this time we are moving forward with candidates who are a closer fit for the current opportunity. We appreciate your interest.
+      <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.72, marginBottom: 48 }}>
+        At this time we&apos;re moving forward with candidates who are a closer fit for the current opportunity.
+        We appreciate your time.
       </p>
-      <a
-        href="/"
-        className="mt-8 inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-8 py-4 text-sm font-medium text-white transition hover:bg-white/10"
-      >
-        Back to Home
-      </a>
+      <a href="/" className="btn-ghost">← Back to Home</a>
     </div>
   );
 }
 
 export default function ResultPage() {
   return (
-    <main className="flex min-h-screen items-center bg-[#0b0b0d] px-6 py-16 lg:px-10">
-      <Suspense fallback={<div className="text-stone-400">Loading...</div>}>
+    <main style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "80px 32px",
+      background: `
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,169,110,0.07), transparent),
+        var(--bg)
+      `,
+    }}>
+      <Suspense fallback={<div style={{ color: "var(--fg-muted)" }}>Loading…</div>}>
         <ResultContent />
       </Suspense>
     </main>
