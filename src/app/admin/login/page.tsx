@@ -55,10 +55,10 @@ export default function AdminLogin() {
         }}>
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: "block", fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 8, fontWeight: 500 }}>
-              Email
+              Username
             </label>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -74,7 +74,7 @@ export default function AdminLogin() {
                 fontFamily: "var(--font-body)",
                 boxSizing: "border-box",
               }}
-              placeholder="admin@renewableacquisition.com"
+              placeholder="CPF"
             />
           </div>
 
