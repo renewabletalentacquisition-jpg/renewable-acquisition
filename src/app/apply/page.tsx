@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { sendOutcomeEmail } from "@/lib/email";
 
 type Answers = Record<string, string | string[]>;
 
@@ -209,13 +208,6 @@ export default function ApplyPage() {
       });
 
       if (dbError) throw new Error(dbError.message);
-
-      // Send email via Resend
-      await sendOutcomeEmail({
-        firstName: answers.firstName as string,
-        email: answers.email as string,
-        outcome,
-      });
 
       router.push(`/result?outcome=${outcome}`);
     } catch (e: unknown) {
