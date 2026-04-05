@@ -103,10 +103,12 @@ export default function AdminDashboard() {
         alignItems: "center",
         justifyContent: "space-between",
       }}>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>
+        <a href="/" style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, textDecoration: "none", color: "var(--fg)", transition: "opacity 0.2s" }}
+           onMouseEnter={e => (e.currentTarget.style.opacity = "0.7")}
+           onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
           Renewable <span style={{ color: "var(--accent)" }}>Acquisition</span>
           <span style={{ fontSize: 12, color: "var(--fg-dim)", fontFamily: "var(--font-body)", fontWeight: 400, marginLeft: 10 }}>Admin</span>
-        </span>
+        </a>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <a href="/" target="_blank" style={{ fontSize: 13, color: "var(--fg-muted)" }}>View Site ↗</a>
           <button onClick={handleSignOut} className="btn-ghost" style={{ padding: "7px 18px", fontSize: 13 }}>
