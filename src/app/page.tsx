@@ -67,24 +67,24 @@ export default function Home() {
     <>
       {/* ── Nav ───────────────────────────────────────────── */}
       <nav className="nav">
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--fg)" }}>
+        <div className="site-nav-inner">
+          <div className="site-nav-brand-wrap">
+            <span className="site-nav-brand">
               Renewable <span style={{ color: "var(--accent)" }}>Acquisition</span>
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <a href="#who" style={{ fontSize: 13.5, color: "var(--fg-muted)", transition: "color 0.2s" }}
+          <div className="site-nav-links">
+            <a href="#who" className="site-nav-link"
                onMouseEnter={e => (e.currentTarget.style.color = "var(--fg)")}
                onMouseLeave={e => (e.currentTarget.style.color = "var(--fg-muted)")}>
               Who It&apos;s For
             </a>
-            <a href="#process" style={{ fontSize: 13.5, color: "var(--fg-muted)", transition: "color 0.2s" }}
+            <a href="#process" className="site-nav-link"
                onMouseEnter={e => (e.currentTarget.style.color = "var(--fg)")}
                onMouseLeave={e => (e.currentTarget.style.color = "var(--fg-muted)")}>
               Process
             </a>
-            <a href="/apply" className="btn-gold" style={{ padding: "9px 22px", fontSize: 13 }}>
+            <a href="/apply" className="btn-gold site-nav-cta">
               Apply Now
             </a>
           </div>
@@ -255,29 +255,25 @@ export default function Home() {
         <hr className="divider" />
 
         {/* ── Process ───────────────────────────────────────── */}
-        <section id="process" style={{ padding: "100px 32px", background: "var(--bg-subtle)" }}>
+        <section id="process" style={{ padding: "clamp(72px, 10vw, 100px) clamp(20px, 5vw, 32px)", background: "var(--bg-subtle)" }}>
           <div style={{ maxWidth: 1280, margin: "0 auto" }}>
 
-            <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 64, flexWrap: "wrap", gap: 24 }}>
-              <div>
+            <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "clamp(36px, 7vw, 64px)", flexWrap: "wrap", gap: 20 }}>
+              <div style={{ maxWidth: 560 }}>
                 <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
                   How it works
                 </p>
-                <h2 className="display" style={{ fontSize: "clamp(36px, 5vw, 60px)", color: "var(--fg)", margin: 0 }}>
+                <h2 className="display" style={{ fontSize: "clamp(34px, 8vw, 60px)", color: "var(--fg)", margin: 0 }}>
                   Fast funnel.<br />Hard filters.
                 </h2>
               </div>
-              <a href="/apply" className="btn-ghost">Begin Qualification →</a>
+              <a href="/apply" className="btn-ghost process-cta">Begin Qualification →</a>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 2 }}>
+            <div className="process-grid">
               {processSteps.map((step, i) => (
-                <div key={step.num} className="reveal" style={{
-                  padding: "36px 28px",
-                  borderTop: "1px solid var(--border)",
-                  transitionDelay: `${i * 0.08}s`,
-                }}>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 52, fontWeight: 600, color: "var(--accent-dim)", letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 24 }}>
+                <div key={step.num} className="reveal process-step" style={{ transitionDelay: `${i * 0.08}s` }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(42px, 10vw, 52px)", fontWeight: 600, color: "var(--accent-dim)", letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 18 }}>
                     {step.num}
                   </div>
                   <h3 style={{ fontSize: 17, fontWeight: 600, color: "var(--fg)", margin: "0 0 10px" }}>
