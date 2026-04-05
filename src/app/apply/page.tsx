@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type Answers = Record<string, string | string[]>;
 
@@ -94,14 +95,14 @@ const steps: Step[] = [
       },
       {
         name: "coachable",
-        label: "Are you willing to be coached directly and held accountable to performance standards?",
+        label: "Are you willing to be coached directly and held accountable?",
         type: "radio",
         required: true,
         options: ["Yes", "Maybe", "No"],
       },
       {
         name: "financialStability",
-        label: "Do you have enough financial stability to get through an initial ramp-up period before results come in?",
+        label: "Do you have enough financial stability to get through an initial ramp-up period?",
         type: "radio",
         required: true,
         options: ["Yes", "Probably", "Not sure", "No"],
@@ -111,12 +112,13 @@ const steps: Step[] = [
 ];
 
 function isDQ(answers: Answers): boolean {
-  if (answers.commissionOnly === "No") return true;
-  if (answers.doorToDoor === "No") return true;
-  if (answers.relocate === "No") return true;
-  if (answers.teamHousing === "No") return true;
-  if (answers.coachable === "No") return true;
-  return false;
+  return (
+    answers.commissionOnly === "No" ||
+    answers.doorToDoor === "No" ||
+    answers.relocate === "No" ||
+    answers.teamHousing === "No" ||
+    answers.coachable === "No"
+  );
 }
 
 function calcScore(answers: Answers): number {
@@ -142,6 +144,14 @@ function calcScore(answers: Answers): number {
   return score;
 }
 
+function getOutcome(answers: Answers): "qualified" | "review" | "disqualified" {
+  if (isDQ(answers)) return "disqualified";
+  const score = calcScore(answers);
+  if (score >= 20) return "qualified";
+  if (score >= 12) return "review";
+  return "disqualified";
+}
+
 export default function ApplyPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -157,10 +167,8 @@ export default function ApplyPage() {
   }
 
   function handleCheckbox(name: string, option: string, checked: boolean) {
-    const current = (answers[name] as string[]) || [];
-    const updated = checked
-      ? [...current, option]
-      : current.filter((o) => o !== option);
+    const cur = (answers[name] as string[]) || [];
+    const updated = checked ? [...cur, option] : cur.filter((o) => o !== option);
     handleChange(name, updated);
   }
 
@@ -178,14 +186,30 @@ export default function ApplyPage() {
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/apply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(answers),
+      const outcome = getOutcome(answers);
+      const score = calcScore(answers);
+
+      const { error: dbError } = await supabase.from("applicants").insert({
+        first_name: answers.firstName,
+        last_name: answers.lastName,
+        email: answers.email,
+        phone: answers.phone,
+        city: answers.city,
+        start_timing: answers.startTiming,
+        commission_only: answers.commissionOnly,
+        door_to_door: answers.doorToDoor,
+        relocate: answers.relocate,
+        team_housing: answers.teamHousing,
+        background: answers.background || [],
+        coachable: answers.coachable,
+        financial_stability: answers.financialStability,
+        score,
+        outcome,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Submission failed");
-      router.push(`/result?outcome=${data.outcome}`);
+
+      if (dbError) throw new Error(dbError.message);
+
+      router.push(`/result?outcome=${outcome}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
@@ -224,7 +248,7 @@ export default function ApplyPage() {
                   {field.label}
                 </label>
 
-                {field.type === "text" || field.type === "email" || field.type === "tel" ? (
+                {(field.type === "text" || field.type === "email" || field.type === "tel") ? (
                   <input
                     type={field.type}
                     value={(answers[field.name] as string) || ""}
@@ -234,7 +258,7 @@ export default function ApplyPage() {
                   />
                 ) : field.type === "radio" ? (
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {field.options?.map((opt) => (
+                    {field.options.map((opt) => (
                       <button
                         key={opt}
                         type="button"
@@ -249,9 +273,9 @@ export default function ApplyPage() {
                       </button>
                     ))}
                   </div>
-                ) : field.type === "checkbox" ? (
+                ) : (
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {field.options?.map((opt) => {
+                    {("options" in field ? field.options : []).map((opt) => {
                       const checked = ((answers[field.name] as string[]) || []).includes(opt);
                       return (
                         <button
@@ -269,14 +293,12 @@ export default function ApplyPage() {
                       );
                     })}
                   </div>
-                ) : null}
+                )}
               </div>
             ))}
           </div>
 
-          {error && (
-            <p className="mt-4 text-sm text-red-400">{error}</p>
-          )}
+          {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
           <div className="mt-10 flex gap-4">
             {step > 0 && (
@@ -311,4 +333,4 @@ export default function ApplyPage() {
   );
 }
 
-export { isDQ, calcScore, CALENDLY_URL };
+export { CALENDLY_URL };
