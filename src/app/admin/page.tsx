@@ -311,7 +311,7 @@ export default function AdminDashboard() {
                     Email →
                   </a>
                   {selected.outcome === "qualified" && (
-                    <a href="https://calendly.com/chasepinedawow/30min" target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13 }}>
+                    <a href="https://calendly.com/chasepinedawow/interview" target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13 }}>
                       Calendly
                     </a>
                   )}

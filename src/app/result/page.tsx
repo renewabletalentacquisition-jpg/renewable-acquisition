@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 
-const CALENDLY_URL = "https://calendly.com/chasepinedawow/30min";
+const CALENDLY_URL = "https://calendly.com/chasepinedawow/interview";
 
 function RealisticSun() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

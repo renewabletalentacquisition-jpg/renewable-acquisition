@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 type Answers = Record<string, string | string[]>;
 
-const CALENDLY_URL = "https://calendly.com/chasepinedawow/30min";
+const CALENDLY_URL = "https://calendly.com/chasepinedawow/interview";
 
 type Field =
   | { name: string; label: string; type: "text" | "email" | "tel"; required: boolean }
