@@ -127,6 +127,10 @@ export default function HQDashboardPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    const hasLocalAccess = typeof window !== "undefined" && window.localStorage.getItem("hq-auth") === "ok";
+
+    if (hasLocalAccess) return;
+
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) router.push("/hq/login");
     });
@@ -172,6 +176,9 @@ export default function HQDashboardPage() {
   }
 
   async function handleSignOut() {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("hq-auth");
+    }
     await supabase.auth.signOut();
     router.push("/hq/login");
   }
