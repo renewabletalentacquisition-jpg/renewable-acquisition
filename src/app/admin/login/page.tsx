@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -15,13 +14,20 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError("Invalid credentials. Try again.");
-      setLoading(false);
-    } else {
+
+    const normalizedUser = email.trim();
+    const normalizedPassword = password.trim();
+
+    if (normalizedUser === "CPF" && normalizedPassword === "CPF123") {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("admin-auth", "ok");
+      }
       router.push("/admin");
+      return;
     }
+
+    setError("Invalid credentials. Try again.");
+    setLoading(false);
   }
 
   return (

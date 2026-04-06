@@ -56,9 +56,14 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState<"all" | "qualified" | "review" | "disqualified">("all");
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push("/admin/login");
-    });
+    const hasLocalAccess = typeof window !== "undefined" && window.localStorage.getItem("admin-auth") === "ok";
+
+    if (!hasLocalAccess) {
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data.user) router.push("/admin/login");
+      });
+    }
+
     fetchApplicants();
   }, [router]);
 
@@ -73,6 +78,9 @@ export default function AdminDashboard() {
   }
 
   async function handleSignOut() {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("admin-auth");
+    }
     await supabase.auth.signOut();
     router.push("/admin/login");
   }
