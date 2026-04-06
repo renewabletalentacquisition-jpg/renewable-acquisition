@@ -4,99 +4,153 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type FilterKey = "all" | "lead" | "interview" | "onboarding" | "active";
-type StatusKey = "lead" | "contacted" | "interview-booked" | "interview-complete" | "onboarding" | "active" | "hold";
+type FilterKey = "all" | "active" | "onboarding" | "flight" | "needs-work";
+type StatusKey = "active" | "onboarding" | "pitch-sent" | "flight-booked" | "needs-follow-up" | "inactive";
+
+type WeeklyStatus = {
+  label: string;
+  value: string;
+};
 
 type RepRecord = {
   id: number;
   name: string;
-  phone: string;
   state: string;
-  source: string;
-  track: string;
-  status: StatusKey;
+  phone: string;
+  position: string;
   owner: string;
-  nextAction: string;
+  pitchSent: string;
+  onboardingComplete: string;
+  flightBooked: string;
+  status: StatusKey;
+  weekly: WeeklyStatus[];
   notes: string;
-  priority: "High" | "Medium" | "Low";
 };
 
 const initialRecords: RepRecord[] = [
   {
     id: 1,
-    name: "Malik Thompson",
-    phone: "(702) 555-0192",
+    name: "Joseph",
     state: "NV",
-    source: "Indeed",
-    track: "Setter",
-    status: "interview-booked",
+    phone: "—",
+    position: "Leader / Closer",
     owner: "Chase",
-    nextAction: "Interview Monday at 2:00 PM",
-    notes: "Athletic background. Good energy. Strong upside if coachable.",
-    priority: "High",
+    pitchSent: "Yes",
+    onboardingComplete: "Yes",
+    flightBooked: "Yes",
+    status: "active",
+    weekly: [
+      { label: "Oct 12-22", value: "Yes" },
+      { label: "Nov 12-22", value: "Yes" },
+      { label: "Dec 7-17", value: "Yes" },
+      { label: "Jan 4-14", value: "Yes" },
+    ],
+    notes: "Leadership lane. Already active and part of the core team structure.",
   },
   {
     id: 2,
-    name: "Joshua Bell",
-    phone: "(602) 555-0184",
-    state: "AZ",
-    source: "Website",
-    track: "Setter",
-    status: "contacted",
-    owner: "Joseph",
-    nextAction: "Push toward interview booking",
-    notes: "Interested, but needs urgency and tighter follow-up.",
-    priority: "High",
+    name: "Expert",
+    state: "CA",
+    phone: "—",
+    position: "Setter",
+    owner: "Team",
+    pitchSent: "Yes",
+    onboardingComplete: "No",
+    flightBooked: "No",
+    status: "onboarding",
+    weekly: [
+      { label: "Oct 12-22", value: "Kinda" },
+      { label: "Nov 12-22", value: "Yes" },
+      { label: "Dec 7-17", value: "No" },
+      { label: "Jan 4-14", value: "No" },
+    ],
+    notes: "Needs cleaner follow-up and onboarding pressure.",
   },
   {
     id: 3,
-    name: "Andres Ruiz",
-    phone: "(909) 555-0144",
-    state: "CA",
-    source: "Referral",
-    track: "Closer",
-    status: "onboarding",
-    owner: "Chase",
-    nextAction: "Confirm training docs + first field day",
-    notes: "Warm referral. Strong talker. Wants path to leadership.",
-    priority: "Medium",
+    name: "Athlete",
+    state: "AZ",
+    phone: "—",
+    position: "Setter",
+    owner: "Joseph",
+    pitchSent: "Yes",
+    onboardingComplete: "No",
+    flightBooked: "No",
+    status: "pitch-sent",
+    weekly: [
+      { label: "Oct 12-22", value: "Yes" },
+      { label: "Nov 12-22", value: "Kinda" },
+      { label: "Dec 7-17", value: "No" },
+      { label: "Jan 4-14", value: "No" },
+    ],
+    notes: "Good archetype. Not fully activated yet.",
   },
   {
     id: 4,
-    name: "Isaiah Brooks",
-    phone: "(702) 555-0111",
-    state: "NV",
-    source: "DM Funnel",
-    track: "Setter",
-    status: "lead",
+    name: "Rep 4",
+    state: "TX",
+    phone: "—",
+    position: "Setter",
     owner: "Unassigned",
-    nextAction: "Initial outreach",
-    notes: "Need first contact and qualification.",
-    priority: "Medium",
+    pitchSent: "No",
+    onboardingComplete: "No",
+    flightBooked: "No",
+    status: "needs-follow-up",
+    weekly: [
+      { label: "Oct 12-22", value: "No" },
+      { label: "Nov 12-22", value: "No" },
+      { label: "Dec 7-17", value: "No" },
+      { label: "Jan 4-14", value: "No" },
+    ],
+    notes: "Needs immediate cleanup or removal after review.",
   },
   {
     id: 5,
-    name: "Eric Salazar",
-    phone: "(480) 555-0138",
-    state: "AZ",
-    source: "Indeed",
-    track: "Setter",
-    status: "active",
-    owner: "Team",
-    nextAction: "Track first week performance",
-    notes: "Recently activated. Needs accountability and daily rhythm.",
-    priority: "Low",
+    name: "Rep 5",
+    state: "NV",
+    phone: "—",
+    position: "Closer",
+    owner: "Chase",
+    pitchSent: "Yes",
+    onboardingComplete: "Yes",
+    flightBooked: "No",
+    status: "onboarding",
+    weekly: [
+      { label: "Oct 12-22", value: "Yes" },
+      { label: "Nov 12-22", value: "Yes" },
+      { label: "Dec 7-17", value: "Yes" },
+      { label: "Jan 4-14", value: "Kinda" },
+    ],
+    notes: "Strong upside. Travel logistics still open.",
+  },
+  {
+    id: 6,
+    name: "Rep 6",
+    state: "CA",
+    phone: "—",
+    position: "Setter",
+    owner: "Joseph",
+    pitchSent: "No",
+    onboardingComplete: "No",
+    flightBooked: "No",
+    status: "inactive",
+    weekly: [
+      { label: "Oct 12-22", value: "No" },
+      { label: "Nov 12-22", value: "No" },
+      { label: "Dec 7-17", value: "No" },
+      { label: "Jan 4-14", value: "No" },
+    ],
+    notes: "Inactive lane. Keep visible for reference, but not priority.",
   },
 ];
 
 const statusMeta: Record<StatusKey, { label: string; color: string; bg: string }> = {
-  lead: { label: "Lead", color: "#9ca3af", bg: "rgba(156,163,175,0.12)" },
-  contacted: { label: "Contacted", color: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
-  "interview-booked": { label: "Interview Booked", color: "#c9a96e", bg: "rgba(201,169,110,0.15)" },
-  "interview-complete": { label: "Interview Complete", color: "#f59e0b", bg: "rgba(245,158,11,0.14)" },
-  onboarding: { label: "Onboarding", color: "#a78bfa", bg: "rgba(167,139,250,0.14)" },
   active: { label: "Active", color: "#4ade80", bg: "rgba(74,222,128,0.14)" },
-  hold: { label: "Hold", color: "#f87171", bg: "rgba(248,113,113,0.12)" },
+  onboarding: { label: "Onboarding", color: "#a78bfa", bg: "rgba(167,139,250,0.14)" },
+  "pitch-sent": { label: "Pitch Sent", color: "#c9a96e", bg: "rgba(201,169,110,0.15)" },
+  "flight-booked": { label: "Flight Booked", color: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
+  "needs-follow-up": { label: "Needs Follow-Up", color: "#f59e0b", bg: "rgba(245,158,11,0.14)" },
+  inactive: { label: "Inactive", color: "#9ca3af", bg: "rgba(156,163,175,0.12)" },
 };
 
 function StatusBadge({ status }: { status: StatusKey }) {
@@ -115,6 +169,18 @@ function StatusBadge({ status }: { status: StatusKey }) {
       }}
     >
       {meta.label}
+    </span>
+  );
+}
+
+function ValuePill({ value }: { value: string }) {
+  const clean = value.toLowerCase();
+  const color = clean === "yes" ? "#4ade80" : clean === "no" ? "#f87171" : clean === "kinda" ? "#f59e0b" : "var(--fg-muted)";
+  const bg = clean === "yes" ? "rgba(74,222,128,0.12)" : clean === "no" ? "rgba(248,113,113,0.10)" : clean === "kinda" ? "rgba(245,158,11,0.12)" : "rgba(255,255,255,0.04)";
+
+  return (
+    <span style={{ fontSize: 11.5, fontWeight: 600, padding: "4px 10px", borderRadius: 9999, background: bg, color }}>
+      {value}
     </span>
   );
 }
@@ -141,23 +207,30 @@ export default function HQDashboardPage() {
       const matchesFilter =
         filter === "all"
           ? true
-          : filter === "lead"
-            ? ["lead", "contacted"].includes(record.status)
-            : filter === "interview"
-              ? ["interview-booked", "interview-complete"].includes(record.status)
-              : filter === "onboarding"
-                ? record.status === "onboarding"
-                : record.status === "active";
+          : filter === "active"
+            ? record.status === "active"
+            : filter === "onboarding"
+              ? record.status === "onboarding"
+              : filter === "flight"
+                ? record.flightBooked === "Yes"
+                : ["needs-follow-up", "inactive", "pitch-sent"].includes(record.status);
 
       const q = search.trim().toLowerCase();
-      const matchesSearch =
-        !q ||
-        [record.name, record.phone, record.state, record.source, record.track, record.owner, record.notes]
-          .join(" ")
-          .toLowerCase()
-          .includes(q);
+      const haystack = [
+        record.name,
+        record.state,
+        record.phone,
+        record.position,
+        record.owner,
+        record.notes,
+        record.pitchSent,
+        record.onboardingComplete,
+        record.flightBooked,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      return matchesFilter && matchesSearch;
+      return matchesFilter && (!q || haystack.includes(q));
     });
   }, [records, filter, search]);
 
@@ -165,9 +238,9 @@ export default function HQDashboardPage() {
 
   const stats = {
     total: records.length,
-    pipeline: records.filter((r) => ["lead", "contacted", "interview-booked", "interview-complete"].includes(r.status)).length,
-    onboarding: records.filter((r) => r.status === "onboarding").length,
     active: records.filter((r) => r.status === "active").length,
+    onboarding: records.filter((r) => r.status === "onboarding").length,
+    flights: records.filter((r) => r.flightBooked === "Yes").length,
   };
 
   function updateSelected(patch: Partial<RepRecord>) {
@@ -212,13 +285,13 @@ export default function HQDashboardPage() {
             </span>
           </div>
           <div style={{ fontSize: 12.5, color: "var(--fg-dim)", marginTop: 4 }}>
-            Private recruiting and rep-management board for closers and leadership.
+            Rep readiness board reflecting your sheet structure, cleaned into a usable operating view.
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <a href="/" target="_blank" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 12.5 }}>
-            Public Site ↗
+          <a href="/warroom" className="btn-ghost" style={{ padding: "8px 16px", fontSize: 12.5 }}>
+            WarRoom
           </a>
           <button onClick={handleSignOut} className="btn-ghost" style={{ padding: "8px 16px", fontSize: 12.5 }}>
             Sign Out
@@ -229,10 +302,10 @@ export default function HQDashboardPage() {
       <div style={{ maxWidth: 1480, margin: "0 auto", padding: "34px 24px 56px" }}>
         <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 14, marginBottom: 26 }}>
           {[
-            { label: "Total Reps / Prospects", value: stats.total, color: "var(--fg)" },
-            { label: "Pipeline", value: stats.pipeline, color: "#c9a96e" },
-            { label: "Onboarding", value: stats.onboarding, color: "#a78bfa" },
+            { label: "Total Team Records", value: stats.total, color: "var(--fg)" },
             { label: "Active", value: stats.active, color: "#4ade80" },
+            { label: "Onboarding", value: stats.onboarding, color: "#a78bfa" },
+            { label: "Flights Booked", value: stats.flights, color: "#60a5fa" },
           ].map((card) => (
             <div key={card.label} className="card" style={{ padding: "22px 20px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 40, fontWeight: 600, letterSpacing: "-0.04em", color: card.color }}>
@@ -243,17 +316,17 @@ export default function HQDashboardPage() {
           ))}
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: selected ? "minmax(0, 1.2fr) 420px" : "1fr", gap: 20, alignItems: "start" }}>
+        <section style={{ display: "grid", gridTemplateColumns: selected ? "minmax(0, 1.15fr) 440px" : "1fr", gap: 20, alignItems: "start" }}>
           <div>
             <div className="card" style={{ padding: 18, marginBottom: 16 }}>
               <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {([
                     { key: "all", label: "All" },
-                    { key: "lead", label: "Lead Flow" },
-                    { key: "interview", label: "Interviews" },
-                    { key: "onboarding", label: "Onboarding" },
                     { key: "active", label: "Active" },
+                    { key: "onboarding", label: "Onboarding" },
+                    { key: "flight", label: "Flights" },
+                    { key: "needs-work", label: "Needs Work" },
                   ] as { key: FilterKey; label: string }[]).map((tab) => (
                     <button
                       key={tab.key}
@@ -281,7 +354,7 @@ export default function HQDashboardPage() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search reps, sources, notes..."
+                  placeholder="Search names, owners, notes..."
                   style={{
                     width: "min(320px, 100%)",
                     background: "rgba(255,255,255,0.05)",
@@ -302,7 +375,7 @@ export default function HQDashboardPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-panel)" }}>
-                    {["Name", "Track", "Source", "Status", "Owner", "Next Action", "Priority"].map((heading) => (
+                    {["Name", "State", "Position", "Pitch", "Onboarding", "Flight", "Status"].map((heading) => (
                       <th key={heading} style={{ padding: "12px 16px", textAlign: "left", fontSize: 11.5, fontWeight: 600, color: "var(--fg-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                         {heading}
                       </th>
@@ -320,22 +393,14 @@ export default function HQDashboardPage() {
                         background: selected?.id === record.id ? "var(--bg-panel-strong)" : "transparent",
                         transition: "background 0.15s ease",
                       }}
-                      onMouseEnter={(e) => {
-                        if (selected?.id !== record.id) (e.currentTarget as HTMLElement).style.background = "var(--bg-panel)";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selected?.id !== record.id) (e.currentTarget as HTMLElement).style.background = "transparent";
-                      }}
                     >
                       <td style={{ padding: "14px 16px", color: "var(--fg)", fontWeight: 600 }}>{record.name}</td>
-                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)" }}>{record.track}</td>
-                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)" }}>{record.source}</td>
+                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)" }}>{record.state}</td>
+                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)" }}>{record.position}</td>
+                      <td style={{ padding: "14px 16px" }}><ValuePill value={record.pitchSent} /></td>
+                      <td style={{ padding: "14px 16px" }}><ValuePill value={record.onboardingComplete} /></td>
+                      <td style={{ padding: "14px 16px" }}><ValuePill value={record.flightBooked} /></td>
                       <td style={{ padding: "14px 16px" }}><StatusBadge status={record.status} /></td>
-                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)" }}>{record.owner}</td>
-                      <td style={{ padding: "14px 16px", color: "var(--fg-muted)", maxWidth: 260 }}>{record.nextAction}</td>
-                      <td style={{ padding: "14px 16px", color: record.priority === "High" ? "#f59e0b" : record.priority === "Medium" ? "#60a5fa" : "var(--fg-dim)", fontWeight: 600 }}>
-                        {record.priority}
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -362,10 +427,8 @@ export default function HQDashboardPage() {
                   <StatusBadge status={selected.status} />
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 11, color: "var(--fg-dim)", marginBottom: 6 }}>Priority</div>
-                  <div style={{ color: selected.priority === "High" ? "#f59e0b" : selected.priority === "Medium" ? "#60a5fa" : "var(--fg-dim)", fontWeight: 700, fontSize: 14 }}>
-                    {selected.priority}
-                  </div>
+                  <div style={{ fontSize: 11, color: "var(--fg-dim)", marginBottom: 6 }}>Owner</div>
+                  <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 14 }}>{selected.owner}</div>
                 </div>
               </div>
 
@@ -373,8 +436,7 @@ export default function HQDashboardPage() {
                 {[
                   { label: "Phone", value: selected.phone },
                   { label: "State", value: selected.state },
-                  { label: "Source", value: selected.source },
-                  { label: "Track", value: selected.track },
+                  { label: "Position", value: selected.position },
                   { label: "Owner", value: selected.owner },
                 ].map((row) => (
                   <div key={row.label} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", paddingBottom: 10, borderBottom: "1px solid var(--border)" }}>
@@ -384,8 +446,23 @@ export default function HQDashboardPage() {
                 ))}
               </div>
 
+              <div style={{ marginTop: 18, display: "grid", gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--fg-muted)" }}>Pitch Sent</span>
+                  <ValuePill value={selected.pitchSent} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--fg-muted)" }}>Onboarding Complete</span>
+                  <ValuePill value={selected.onboardingComplete} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--fg-muted)" }}>Flight Booked</span>
+                  <ValuePill value={selected.flightBooked} />
+                </div>
+              </div>
+
               <div style={{ marginTop: 22 }}>
-                <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 8 }}>Status</div>
+                <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 10 }}>Status</div>
                 <select
                   value={selected.status}
                   onChange={(e) => updateSelected({ status: e.target.value as StatusKey })}
@@ -409,34 +486,26 @@ export default function HQDashboardPage() {
                 </select>
               </div>
 
-              <div style={{ marginTop: 18 }}>
-                <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 8 }}>Next action</div>
-                <input
-                  value={selected.nextAction}
-                  onChange={(e) => updateSelected({ nextAction: e.target.value })}
-                  style={{
-                    width: "100%",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid var(--border-strong)",
-                    borderRadius: 14,
-                    padding: "12px 14px",
-                    color: "var(--fg)",
-                    fontSize: 14,
-                    outline: "none",
-                    fontFamily: "var(--font-body)",
-                    boxSizing: "border-box",
-                  }}
-                />
+              <div style={{ marginTop: 22 }}>
+                <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 10 }}>Weekly History</div>
+                <div style={{ display: "grid", gap: 8 }}>
+                  {selected.weekly.map((entry) => (
+                    <div key={entry.label} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", padding: "10px 12px", borderRadius: 14, border: "1px solid var(--border)", background: "rgba(255,255,255,0.025)" }}>
+                      <span style={{ fontSize: 12.5, color: "var(--fg-muted)" }}>{entry.label}</span>
+                      <ValuePill value={entry.value} />
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div style={{ marginTop: 18 }}>
+              <div style={{ marginTop: 22 }}>
                 <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 8 }}>Notes</div>
                 <textarea
                   value={selected.notes}
                   onChange={(e) => updateSelected({ notes: e.target.value })}
                   style={{
                     width: "100%",
-                    minHeight: 130,
+                    minHeight: 120,
                     resize: "vertical",
                     background: "rgba(255,255,255,0.05)",
                     border: "1px solid var(--border-strong)",
@@ -450,19 +519,6 @@ export default function HQDashboardPage() {
                     lineHeight: 1.65,
                   }}
                 />
-              </div>
-
-              <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
-                <a href={`tel:${selected.phone}`} className="btn-gold" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13 }}>
-                  Call
-                </a>
-                <button className="btn-ghost" type="button" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13 }}>
-                  Save Update
-                </button>
-              </div>
-
-              <div style={{ marginTop: 16, fontSize: 12.5, color: "var(--fg-dim)", lineHeight: 1.65 }}>
-                This first HQ build is structured for clean manual updating. Next step is wiring these updates into persistent backend storage so closers can use it live.
               </div>
             </aside>
           )}
