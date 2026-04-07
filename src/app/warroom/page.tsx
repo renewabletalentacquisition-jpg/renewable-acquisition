@@ -89,11 +89,9 @@ export default function WarRoomPage() {
 
   function openLane(prompt: string, lane: string) {
     const sessionKey = encodeURIComponent(SESSION_KEYS[lane]);
-    // Hash params first, session key after — prevents browser from stripping query string
     const url = `${BASE_URL}/#token=${TOKEN}&session=${sessionKey}`;
-    // Use a timestamp-based unique name so each click always gets its own tab
-    const tabName = `warroom-${lane}-${Date.now()}`;
-    window.open(url, tabName);
+    // Always use _blank — never reuse an existing tab
+    window.open(url, "_blank", "noopener");
     navigator.clipboard.writeText(prompt).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
