@@ -76,20 +76,22 @@ export default function WarRoomPage() {
     if (!hasAccess) router.push("/warroom/login");
   }, [router]);
 
-  // OpenClaw Control UI runs on the local gateway
-  const OPENCLAW_URL = "http://127.0.0.1:18789";
+  // OpenClaw Control UI — pre-authenticated with gateway token
+  const OPENCLAW_URL = "http://127.0.0.1:18789/#token=4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
 
   function openLane(prompt: string, lane: string) {
-    // Copy the prompt to clipboard so user can paste into the chat immediately
+    // Copy the lane prompt to clipboard so user can paste immediately after tab opens
     navigator.clipboard.writeText(prompt).catch(() => {});
-    // Open the OpenClaw Control UI in a new tab
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+    // Open the authenticated OpenClaw Control UI in a new tab
     window.open(OPENCLAW_URL, `warroom-${lane}`);
   }
 
   function copyAndOpen(prompt: string) {
     navigator.clipboard.writeText(prompt).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 2500);
     }).catch(() => {});
     window.open(OPENCLAW_URL, "_blank");
   }
