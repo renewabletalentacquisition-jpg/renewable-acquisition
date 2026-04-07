@@ -1,290 +1,443 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type LaneKey = "TAIYOU" | "REC" | "MARK" | "REF";
+type LaneKey = "RECRUITING" | "MARKETING" | "REFERRALS";
 
 type Lane = {
   key: LaneKey;
   title: string;
-  subtitle: string;
-  description: string;
-  badge: string;
+  role: string;
   accent: string;
   glow: string;
   emoji: string;
+  sessionKey: string;
   prompt: string;
+  status: string;
 };
 
 const lanes: Lane[] = [
   {
-    key: "REC",
+    key: "RECRUITING",
     title: "Recruiting",
-    subtitle: "Recruiting machine",
-    description: "Applicants · funnels · interviews · onboarding · rep ops",
-    badge: "Recruiting",
+    role: "Rep acquisition · funnels · onboarding",
     accent: "#c9a96e",
-    glow: "rgba(201,169,110,0.18)",
+    glow: "rgba(201,169,110,0.3)",
     emoji: "🎯",
-    prompt: "You are the Recruiting specialist working under Sunny. You own the recruiting machine: renewableacquisition.com, applicant funnel, qualification logic, interview routing, onboarding, rep tracking, and recruiting outreach. Stay in the recruiting lane. Be direct, execution-focused, and practical. Chase is 'Sir'. What do you want to work on?",
+    sessionKey: "agent:main:explicit:warroom-rec",
+    prompt: "You are Recruiting, a specialist under Sunny ☀️. You own the recruiting machine: renewableacquisition.com, applicant funnel, qualification, interview routing, onboarding, rep tracking. Goal: 20 reps in 20 days before April 27. Stay in the recruiting lane. What do you want to work on?",
+    status: "Standing by",
   },
   {
-    key: "MARK",
+    key: "MARKETING",
     title: "Marketing",
-    subtitle: "Brand + marketing lane",
-    description: "REVELATION · website · Instagram · visual identity · team brand",
-    badge: "Marketing",
+    role: "REVELATION · brand · website · Instagram",
     accent: "#8dd6c9",
-    glow: "rgba(141,214,201,0.18)",
+    glow: "rgba(141,214,201,0.3)",
     emoji: "✦",
-    prompt: "You are the Marketing specialist working under Sunny. You own the REVELATION team brand: website, Instagram, logo direction, visual identity, and marketing assets. Stay in the brand lane. Be sharp, creative, and execution-focused. Chase is 'Sir'. What do you want to work on?",
+    sessionKey: "agent:main:explicit:warroom-mark",
+    prompt: "You are Marketing, a specialist under Sunny ☀️. You own REVELATION brand, website, Instagram, visual identity, logo direction. Everything you build should increase team attractiveness. What do you want to work on?",
+    status: "Standing by",
   },
   {
-    key: "REF",
+    key: "REFERRALS",
     title: "Referrals",
-    subtitle: "Referral + lead machine",
-    description: "Installed customers · referrals · reactivation · appointments",
-    badge: "Referrals",
+    role: "Installs · referrals · warm appointments",
     accent: "#d98db8",
-    glow: "rgba(217,141,184,0.18)",
+    glow: "rgba(217,141,184,0.3)",
     emoji: "🔗",
-    prompt: "You are the Referrals specialist working under Sunny. You own referral generation, installed-customer follow-up, reactivation outreach, local lead generation, and appointment-pipeline support. Stay in the referral lane. Be direct, practical, and execution-focused. Chase is 'Sir'. What do you want to work on?",
+    sessionKey: "agent:main:explicit:warroom-ref",
+    prompt: "You are Referrals, a specialist under Sunny ☀️. You own installed-customer follow-up, referral generation, reactivation, and appointment pipeline. Sir has 65+ installs. What do you want to work on?",
+    status: "Standing by",
   },
 ];
 
-const quickActions = [
-  { label: "Morning Brief", prompt: "Sunny: Give me a morning brief. Review Recruiting, Marketing, and Referrals — what matters most today and what order do I attack it in?" },
-  { label: "Recruiting Push", prompt: "Recruiting: Focus only on increasing recruiting volume and speeding up the applicant-to-interview pipeline. What are the next 3 highest-leverage actions?" },
-  { label: "Marketing Sprint", prompt: "Marketing: Focus only on REVELATION. What is the highest-leverage brand action I can take today?" },
-  { label: "Referral Sprint", prompt: "Referrals: Focus only on installed-customer referrals and appointment generation. What is the fastest path to new appointments today?" },
-  { label: "Parallel Command", prompt: "Sunny: Coordinate Recruiting, Marketing, and Referrals in parallel. Have each lane identify its top action, then merge into one execution order for Sir." },
-  { label: "20 in 20 Plan", prompt: "Sunny: The goal is 20 new reps in 20 days before April 27. Build the exact plan: what funnels, what actions, what order, what gets done today." },
-];
+const SUNNY_SESSION = "agent:main:explicit:warroom-taiyou";
+const SUNNY_PROMPT = "You are Sunny ☀️, the main hub orchestrator for Sir (Chase). You coordinate Recruiting, Marketing, and Referrals. You own priorities, sequencing, coordination, and synthesis. What do you want to work on?";
+const TOKEN = "4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
+const BASE_URL = "http://127.0.0.1:18789";
 
-const TAIYOU_PROMPT = "Sunny: You are the main hub. Review everything in motion across Recruiting, Marketing, and Referrals. Identify the highest-leverage next actions and give Sir the clearest execution order. What do you want to work on?";
+type Activity = { lane: string; action: string; time: string; accent: string };
+
+const initialActivity: Activity[] = [
+  { lane: "SUNNY", action: "WarRoom initialized", time: "just now", accent: "#f0d7a1" },
+  { lane: "RECRUITING", action: "Session ready", time: "just now", accent: "#c9a96e" },
+  { lane: "MARKETING", action: "Session ready", time: "just now", accent: "#8dd6c9" },
+  { lane: "REFERRALS", action: "Session ready", time: "just now", accent: "#d98db8" },
+];
 
 export default function WarRoomPage() {
   const router = useRouter();
-  const [draft, setDraft] = useState(TAIYOU_PROMPT);
-  const [copied, setCopied] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const [activity, setActivity] = useState<Activity[]>(initialActivity);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const hasAccess =
-      typeof window !== "undefined" &&
-      window.localStorage.getItem("warroom-auth") === "ok";
-    if (!hasAccess) router.push("/warroom/login");
+    const hasAccess = typeof window !== "undefined" && window.localStorage.getItem("warroom-auth") === "ok";
+    if (!hasAccess) { router.push("/warroom/login"); return; }
+    setTimeout(() => setLoaded(true), 100);
   }, [router]);
 
-  const TOKEN = "4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
-  const BASE_URL = "http://127.0.0.1:18789";
+  // Parallax mouse tracking
+  useEffect(() => {
+    function handleMouseMove(e: MouseEvent) {
+      const x = (e.clientX / window.innerWidth - 0.5) * 2;
+      const y = (e.clientY / window.innerHeight - 0.5) * 2;
+      setMousePos({ x, y });
+    }
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
-  // Session keys for each dedicated lane — use the session= query param the Control UI reads
-  const SESSION_KEYS: Record<string, string> = {
-    TAIYOU: "agent:main:explicit:warroom-taiyou",
-    REC:    "agent:main:explicit:warroom-rec",
-    MARK:   "agent:main:explicit:warroom-mark",
-    REF:    "agent:main:explicit:warroom-ref",
-  };
-
-  function openLane(prompt: string, lane: string) {
-    const sessionKey = encodeURIComponent(SESSION_KEYS[lane]);
-    const url = `${BASE_URL}/#token=${TOKEN}&session=${sessionKey}`;
-    // Always use _blank — never reuse an existing tab
+  function openSession(sessionKey: string, prompt: string, laneName: string, accent: string) {
+    const encoded = encodeURIComponent(sessionKey);
+    const url = `${BASE_URL}/#token=${TOKEN}&session=${encoded}`;
     window.open(url, "_blank", "noopener");
     navigator.clipboard.writeText(prompt).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  }
-
-  function copyAndOpen(prompt: string) {
-    navigator.clipboard.writeText(prompt).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }).catch(() => {});
-    const sessionKey = encodeURIComponent(SESSION_KEYS["TAIYOU"]);
-    const url = `${BASE_URL}/#token=${TOKEN}&session=${sessionKey}`;
-    window.open(url, `warroom-draft-${Date.now()}`);
+    const now = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    setActivity(prev => [{ lane: laneName.toUpperCase(), action: "Session opened", time: now, accent }, ...prev].slice(0, 10));
   }
 
   function signOut() {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem("warroom-auth");
-    }
+    if (typeof window !== "undefined") window.localStorage.removeItem("warroom-auth");
     router.push("/warroom/login");
   }
 
+  const bgX = mousePos.x * -18;
+  const bgY = mousePos.y * -18;
+  const fgX = mousePos.x * 8;
+  const fgY = mousePos.y * 8;
+  const cardX = mousePos.x * 4;
+  const cardY = mousePos.y * 4;
+
   return (
-    <main className="warroom-shell">
-      <div className="warroom-container">
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        background: "#000",
+        overflow: "hidden",
+        fontFamily: "var(--font-body)",
+        color: "#f4f3f0",
+      }}
+    >
+      {/* ── Parallax background image ── */}
+      <div
+        ref={bgRef}
+        style={{
+          position: "fixed",
+          inset: "-8%",
+          backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Guido_Reni_-_St_Michael_the_Archangel_defeating_Satan_%281636%29.jpg/800px-Guido_Reni_-_St_Michael_the_Archangel_defeating_Satan_%281636%29.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
+          transform: `translate(${bgX}px, ${bgY}px)`,
+          transition: "transform 0.12s ease-out",
+          opacity: 0.22,
+          zIndex: 0,
+          filter: "grayscale(30%) contrast(1.1)",
+        }}
+      />
 
-        {/* ── Header ─── */}
-        <header className="warroom-header">
-          <div>
-            <div className="warroom-kicker">Private command layer</div>
-            <h1 className="warroom-title">WarRoom.</h1>
-            <p className="warroom-subtitle">
-              Sunny at the center. Recruiting, Marketing, and Referrals underneath.<br />
-              Click any lane — the prompt is copied, OpenClaw opens. Just paste and send.
-            </p>
-          </div>
-          <div className="warroom-top-actions">
-            <a href="/hq" className="warroom-secondary-btn">Team HQ</a>
-            <a href="/admin" className="warroom-secondary-btn">Applicants</a>
-            <button className="warroom-secondary-btn" onClick={signOut}>Sign Out</button>
-          </div>
-        </header>
+      {/* ── Dark gradient overlays ── */}
+      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.85) 100%)", zIndex: 1 }} />
+      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,169,110,0.08), transparent)", zIndex: 1 }} />
 
-        {/* ── Taiyou Hub ─── */}
-        <section style={{ marginBottom: 18 }}>
-          <button
-            type="button"
-            className="warroom-hub-card"
-            onClick={() => openLane(TAIYOU_PROMPT, "TAIYOU")}
-            style={{ cursor: "pointer", transition: "transform 0.18s ease, box-shadow 0.18s ease" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 1px rgba(240,215,161,0.35), 0 32px 72px rgba(0,0,0,0.30)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 1px rgba(240,215,161,0.18), 0 24px 60px rgba(0,0,0,0.22)";
+      {/* ── Content ── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          maxWidth: 1400,
+          margin: "0 auto",
+          padding: "0 32px 80px",
+          opacity: loaded ? 1 : 0,
+          transform: loaded ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.8s ease, transform 0.8s ease",
+        }}
+      >
+        {/* ── Nav ── */}
+        <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "28px 0", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <div style={{ fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+            Private Command Layer
+          </div>
+          <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+            <a href="/hq" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", textDecoration: "none", transition: "color 0.2s" }}
+               onMouseEnter={e => (e.currentTarget.style.color = "#f4f3f0")}
+               onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}>Team HQ</a>
+            <a href="/admin" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", textDecoration: "none", transition: "color 0.2s" }}
+               onMouseEnter={e => (e.currentTarget.style.color = "#f4f3f0")}
+               onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}>Applicants</a>
+            <button onClick={signOut} style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", transition: "color 0.2s", padding: 0 }}
+               onMouseEnter={e => (e.currentTarget.style.color = "#f4f3f0")}
+               onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}>Sign Out</button>
+          </div>
+        </nav>
+
+        {/* ── Hero title ── */}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "72px 0 60px",
+            transform: `translate(${fgX}px, ${fgY}px)`,
+            transition: "transform 0.08s ease-out",
+          }}
+        >
+          <div style={{ fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 28 }}>
+            Revelation · Solar Sales Command
+          </div>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(72px, 14vw, 180px)",
+              fontWeight: 600,
+              letterSpacing: "-0.04em",
+              lineHeight: 0.9,
+              margin: "0 0 20px",
+              color: "#fff",
             }}
           >
-            <div style={{ flex: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 14 }}>
-                <span className="warroom-hub-badge">Main Hub</span>
-                <span style={{ fontSize: 12, color: "rgba(240,215,161,0.6)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Click to open in new tab</span>
-              </div>
-              <div className="warroom-hub-name">Sunny ☀️</div>
-              <div className="warroom-hub-copy">
-                Central operator. Priorities, coordination, synthesis, and final execution direction across every lane. When you don't want to manage the lanes manually, this is the button.
-              </div>
-            </div>
-            <div style={{ fontSize: 48, opacity: 0.18, flexShrink: 0 }}>→</div>
-          </button>
-        </section>
+            WarRoom.
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+            Sunny at the center · Specialists underneath
+          </p>
+        </div>
 
-        {/* ── Specialist Lanes ─── */}
-        <section className="warroom-lanes-grid" style={{ marginBottom: 28 }}>
-          {lanes.map((lane) => (
-            <button
-              key={lane.key}
-              type="button"
-              onClick={() => openLane(lane.prompt, lane.key)}
-              className="warroom-lane-card"
-              style={{ cursor: "pointer", transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease", textAlign: "left" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-                (e.currentTarget as HTMLElement).style.borderColor = `${lane.accent}80`;
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${lane.glow}, 0 16px 40px rgba(0,0,0,0.22)`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+        {/* ── Main layout: agent cards + activity ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24, alignItems: "start" }}>
+          <div>
+            {/* ── Sunny hub card ── */}
+            <div
+              style={{
+                transform: `translate(${cardX * 0.6}px, ${cardY * 0.6}px)`,
+                transition: "transform 0.1s ease-out",
+                marginBottom: 16,
               }}
             >
-              <div className="warroom-lane-top">
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-                    <span className="warroom-mini-badge" style={{ color: lane.accent, borderColor: `${lane.accent}40`, background: `${lane.accent}14` }}>
-                      {lane.badge}
-                    </span>
-                    <span style={{ fontSize: 11, color: "var(--fg-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Opens in new tab</span>
+              <button
+                type="button"
+                onClick={() => openSession(SUNNY_SESSION, SUNNY_PROMPT, "Sunny", "#f0d7a1")}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "36px 40px",
+                  background: "linear-gradient(135deg, rgba(240,215,161,0.12), rgba(240,215,161,0.04))",
+                  border: "1px solid rgba(240,215,161,0.25)",
+                  borderRadius: 24,
+                  cursor: "pointer",
+                  backdropFilter: "blur(20px)",
+                  transition: "all 0.25s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget;
+                  el.style.background = "linear-gradient(135deg, rgba(240,215,161,0.2), rgba(240,215,161,0.08))";
+                  el.style.borderColor = "rgba(240,215,161,0.5)";
+                  el.style.transform = "translateY(-4px)";
+                  el.style.boxShadow = "0 24px 60px rgba(0,0,0,0.4), 0 0 80px rgba(240,215,161,0.08)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget;
+                  el.style.background = "linear-gradient(135deg, rgba(240,215,161,0.12), rgba(240,215,161,0.04))";
+                  el.style.borderColor = "rgba(240,215,161,0.25)";
+                  el.style.transform = "translateY(0)";
+                  el.style.boxShadow = "none";
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+                      <span style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(240,215,161,0.7)", padding: "5px 12px", border: "1px solid rgba(240,215,161,0.25)", borderRadius: 9999 }}>
+                        Main Hub
+                      </span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 8px #4ade80", display: "inline-block" }} />
+                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em" }}>LIVE</span>
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(42px, 5vw, 64px)", fontWeight: 600, letterSpacing: "-0.03em", color: "#fff", lineHeight: 1, marginBottom: 12 }}>
+                      Sunny ☀️
+                    </div>
+                    <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: 600 }}>
+                      Orchestrator · Priority engine · Synthesizer. Give Sunny a goal and she routes it to the right specialists, tracks all lanes, and delivers one clear execution order.
+                    </div>
                   </div>
-                  <div className="warroom-lane-title" style={{ color: lane.accent }}>{lane.title} {lane.emoji}</div>
-                  <div style={{ fontSize: 14, color: "var(--fg)", fontWeight: 600, marginBottom: 6 }}>{lane.subtitle}</div>
-                  <div className="warroom-lane-subtitle">{lane.description}</div>
+                  <div style={{ fontSize: 28, color: "rgba(240,215,161,0.3)", flexShrink: 0 }}>↗</div>
                 </div>
-                <div style={{ color: lane.accent, fontSize: 22, opacity: 0.5, flexShrink: 0 }}>↗</div>
-              </div>
-            </button>
-          ))}
-        </section>
+              </button>
+            </div>
 
-        {/* ── Quick Actions + Draft ─── */}
-        <section className="warroom-main-grid">
-          <div className="warroom-panel">
-            <div className="warroom-section-label" style={{ marginBottom: 14 }}>Quick Actions</div>
-            <div className="warroom-mode-grid" style={{ marginBottom: 22 }}>
-              {quickActions.map((action) => (
+            {/* ── Specialist lane cards ── */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 12,
+                transform: `translate(${cardX * 0.3}px, ${cardY * 0.3}px)`,
+                transition: "transform 0.14s ease-out",
+              }}
+            >
+              {lanes.map((lane) => (
                 <button
-                  key={action.label}
+                  key={lane.key}
                   type="button"
-                  className="warroom-mode-chip"
-                  onClick={() => setDraft(action.prompt)}
+                  onClick={() => openSession(lane.sessionKey, lane.prompt, lane.title, lane.accent)}
+                  style={{
+                    textAlign: "left",
+                    padding: "26px 24px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid rgba(255,255,255,0.1)`,
+                    borderRadius: 20,
+                    cursor: "pointer",
+                    backdropFilter: "blur(20px)",
+                    transition: "all 0.25s ease",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget;
+                    el.style.background = `${lane.accent}12`;
+                    el.style.borderColor = `${lane.accent}50`;
+                    el.style.transform = "translateY(-4px)";
+                    el.style.boxShadow = `0 20px 50px rgba(0,0,0,0.4), 0 0 40px ${lane.accent}10`;
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget;
+                    el.style.background = "rgba(255,255,255,0.03)";
+                    el.style.borderColor = "rgba(255,255,255,0.1)";
+                    el.style.transform = "translateY(0)";
+                    el.style.boxShadow = "none";
+                  }}
                 >
-                  {action.label}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                    <span style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: lane.accent, padding: "4px 10px", border: `1px solid ${lane.accent}40`, borderRadius: 9999, background: `${lane.accent}12` }}>
+                      {lane.emoji} {lane.title}
+                    </span>
+                    <span style={{ color: `${lane.accent}60`, fontSize: 16 }}>↗</span>
+                  </div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff", marginBottom: 8, lineHeight: 1 }}>
+                    {lane.title}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.4)", lineHeight: 1.6 }}>
+                    {lane.role}
+                  </div>
+                  <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 6px #4ade80", display: "inline-block" }} />
+                    <span style={{ fontSize: 10.5, color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em" }}>{lane.status}</span>
+                  </div>
                 </button>
               ))}
             </div>
 
-            <div className="warroom-toolbar">
-              <div>
-                <div className="warroom-section-label">Command Draft</div>
-                <div className="warroom-section-copy">Edit the prompt below, then open it in a new tab.</div>
-              </div>
-              <div className="warroom-toolbar-actions">
-                <button type="button" className="warroom-secondary-btn" onClick={() => {
-                  navigator.clipboard.writeText(draft).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {});
-                }}>
-                  {copied ? "Copied ✓" : "Copy"}
+            {/* ── Quick commands ── */}
+            <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+              {[
+                { label: "☀️ Morning Brief", prompt: "Sunny: Give me a morning brief. What matters most today across Recruiting, Marketing, and Referrals? Give me the priority order." },
+                { label: "🎯 Recruiting Push", prompt: "Recruiting: Focus only on increasing recruiting volume. What are the top 3 actions to push toward 20 reps before April 27?" },
+                { label: "✦ Brand Sprint", prompt: "Marketing: What is the highest-leverage brand action I can take today for REVELATION?" },
+                { label: "🔗 Referral Sprint", prompt: "Referrals: What is the fastest path to new appointments from my installed customer base today?" },
+                { label: "⚡ Parallel Command", prompt: "Sunny: Run a coordinated pass. Route the top task to Recruiting, Marketing, and Referrals simultaneously. Merge results into one execution order." },
+                { label: "🏆 20 in 20", prompt: "Sunny: The goal is 20 reps in 20 days before April 27. Build the exact plan right now." },
+              ].map((cmd) => (
+                <button
+                  key={cmd.label}
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(cmd.prompt).catch(() => {});
+                    const url = `${BASE_URL}/#token=${TOKEN}&session=${encodeURIComponent(SUNNY_SESSION)}`;
+                    window.open(url, "_blank", "noopener");
+                    const now = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+                    setActivity(prev => [{ lane: "SYSTEM", action: cmd.label, time: now, accent: "#f0d7a1" }, ...prev].slice(0, 10));
+                  }}
+                  style={{
+                    textAlign: "left",
+                    padding: "14px 16px",
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 14,
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: 12.5,
+                    fontFamily: "var(--font-body)",
+                    transition: "all 0.2s ease",
+                    lineHeight: 1.4,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget).style.background = "rgba(255,255,255,0.07)"; (e.currentTarget).style.color = "#fff"; (e.currentTarget).style.borderColor = "rgba(255,255,255,0.2)"; }}
+                  onMouseLeave={e => { (e.currentTarget).style.background = "rgba(255,255,255,0.03)"; (e.currentTarget).style.color = "rgba(255,255,255,0.6)"; (e.currentTarget).style.borderColor = "rgba(255,255,255,0.08)"; }}
+                >
+                  {cmd.label}
                 </button>
-                <button type="button" className="warroom-primary-btn" onClick={() => copyAndOpen(draft)}>
-                  Open in Chat →
-                </button>
-              </div>
+              ))}
             </div>
-
-            <textarea
-              className="warroom-draft"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-            />
           </div>
 
-          <div className="warroom-side-stack">
-            <div className="warroom-panel">
-              <div className="warroom-section-label" style={{ marginBottom: 14 }}>How it works</div>
-              <div style={{ display: "grid", gap: 12 }}>
-                {[
-                  { step: "01", title: "Click any lane", body: "The lane prompt is automatically copied to your clipboard. OpenClaw opens in a new tab." },
-                  { step: "02", title: "Paste and send", body: "In the new OpenClaw tab, paste the prompt and send it. The lane context is already set." },
-                  { step: "03", title: "Run all four", body: "Open Sunny, Recruiting, Marketing, and Referrals in separate tabs. Swap between them freely while each runs independently." },
-                  { step: "04", title: "Use quick actions", body: "Load any preset into the draft below, then click Open in Chat. Same flow — prompt copies, tab opens." },
-                ].map((item) => (
-                  <div key={item.step} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600, color: "rgba(201,169,110,0.25)", letterSpacing: "-0.04em", lineHeight: 1, flexShrink: 0, width: 32 }}>{item.step}</div>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--fg)", marginBottom: 4 }}>{item.title}</div>
-                      <div style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65 }}>{item.body}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* ── Live activity feed ── */}
+          <div
+            style={{
+              background: "rgba(0,0,0,0.6)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 20,
+              padding: "22px 20px",
+              backdropFilter: "blur(20px)",
+              position: "sticky",
+              top: 24,
+              transform: `translate(${cardX * -0.2}px, ${cardY * -0.2}px)`,
+              transition: "transform 0.16s ease-out",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 8px #4ade80", display: "inline-block" }} />
+              <span style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Live Activity</span>
             </div>
 
-            <div className="warroom-panel">
-              <div className="warroom-section-label" style={{ marginBottom: 14 }}>Lane Overview</div>
-              <div style={{ display: "grid", gap: 10 }}>
-                {[
-                  { label: "Sunny ☀️", role: "Main hub. Priorities + coordination.", color: "#f0d7a1" },
-                  { label: "Recruiting", role: "Recruiting machine. Volume + pipeline.", color: "#c9a96e" },
-                  { label: "Marketing", role: "REVELATION brand + marketing.", color: "#8dd6c9" },
-                  { label: "Referrals", role: "Referrals + warm appointments.", color: "#d98db8" },
-                ].map((item) => (
-                  <div key={item.label} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", padding: "12px 14px", borderRadius: 16, border: "1px solid var(--border)", background: "rgba(255,255,255,0.025)" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: item.color, letterSpacing: "-0.02em" }}>{item.label}</div>
-                    <div style={{ fontSize: 12.5, color: "var(--fg-muted)", textAlign: "right" }}>{item.role}</div>
+            <div style={{ display: "grid", gap: 10 }}>
+              {activity.map((item, i) => (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "flex-start" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: item.accent, marginTop: 6, flexShrink: 0, boxShadow: `0 0 6px ${item.accent}` }} />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: item.accent, marginBottom: 2, letterSpacing: "0.04em" }}>{item.lane}</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{item.action}</div>
+                    <div style={{ fontSize: 10.5, color: "rgba(255,255,255,0.2)", marginTop: 3 }}>{item.time}</div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: 12 }}>Agent Status</div>
+              {[
+                { name: "Sunny ☀️", accent: "#f0d7a1" },
+                { name: "Recruiting", accent: "#c9a96e" },
+                { name: "Marketing", accent: "#8dd6c9" },
+                { name: "Referrals", accent: "#d98db8" },
+              ].map((agent) => (
+                <div key={agent.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                  <span style={{ fontSize: 12.5, color: agent.accent, fontWeight: 600 }}>{agent.name}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block", boxShadow: "0 0 5px #4ade80" }} />
+                    Ready
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
 
+        {/* ── Footer ── */}
+        <div style={{ marginTop: 60, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>
+            Revelation <span style={{ color: "#c9a96e" }}>Solar</span>
+          </span>
+          <span style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)" }}>
+            Powered by Sunny ☀️
+          </span>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
