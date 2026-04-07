@@ -20,49 +20,49 @@ type Lane = {
 const lanes: Lane[] = [
   {
     key: "REC",
-    title: "REC",
+    title: "Recruiting",
     subtitle: "Recruiting machine",
     description: "Applicants · funnels · interviews · onboarding · rep ops",
     badge: "Recruiting",
     accent: "#c9a96e",
     glow: "rgba(201,169,110,0.18)",
     emoji: "🎯",
-    prompt: "You are REC, the Recruiting Bot working under Taiyou. You own the recruiting machine: renewableacquisition.com, applicant funnel, qualification logic, interview routing, onboarding, rep tracking, and recruiting outreach. Stay in the recruiting lane. Be direct, execution-focused, and practical. Chase is 'Sir'. What do you want to work on?",
+    prompt: "You are the Recruiting specialist working under Sunny. You own the recruiting machine: renewableacquisition.com, applicant funnel, qualification logic, interview routing, onboarding, rep tracking, and recruiting outreach. Stay in the recruiting lane. Be direct, execution-focused, and practical. Chase is 'Sir'. What do you want to work on?",
   },
   {
     key: "MARK",
-    title: "MARK",
+    title: "Marketing",
     subtitle: "Brand + marketing lane",
     description: "REVELATION · website · Instagram · visual identity · team brand",
-    badge: "Brand",
+    badge: "Marketing",
     accent: "#8dd6c9",
     glow: "rgba(141,214,201,0.18)",
     emoji: "✦",
-    prompt: "You are MARK, the Brand Bot working under Taiyou. You own the REVELATION team brand: website, Instagram, logo direction, visual identity, and marketing assets. Stay in the brand lane. Be sharp, creative, and execution-focused. Chase is 'Sir'. What do you want to work on?",
+    prompt: "You are the Marketing specialist working under Sunny. You own the REVELATION team brand: website, Instagram, logo direction, visual identity, and marketing assets. Stay in the brand lane. Be sharp, creative, and execution-focused. Chase is 'Sir'. What do you want to work on?",
   },
   {
     key: "REF",
-    title: "REF",
+    title: "Referrals",
     subtitle: "Referral + lead machine",
     description: "Installed customers · referrals · reactivation · appointments",
     badge: "Referrals",
     accent: "#d98db8",
     glow: "rgba(217,141,184,0.18)",
     emoji: "🔗",
-    prompt: "You are REF, the Referral Bot working under Taiyou. You own referral generation, installed-customer follow-up, reactivation outreach, local lead generation, and appointment-pipeline support. Stay in the referral lane. Be direct, practical, and execution-focused. Chase is 'Sir'. What do you want to work on?",
+    prompt: "You are the Referrals specialist working under Sunny. You own referral generation, installed-customer follow-up, reactivation outreach, local lead generation, and appointment-pipeline support. Stay in the referral lane. Be direct, practical, and execution-focused. Chase is 'Sir'. What do you want to work on?",
   },
 ];
 
 const quickActions = [
-  { label: "Morning Brief", prompt: "Taiyou: Give me a morning brief. Review REC, MARK, and REF — what matters most today and what order do I attack it in?" },
-  { label: "Recruiting Push", prompt: "REC: Focus only on increasing recruiting volume and speeding up the applicant-to-interview pipeline. What are the next 3 highest-leverage actions?" },
-  { label: "Brand Sprint", prompt: "MARK: Focus only on REVELATION. What is the highest-leverage brand action I can take today?" },
-  { label: "Referral Sprint", prompt: "REF: Focus only on installed-customer referrals and appointment generation. What is the fastest path to new appointments today?" },
-  { label: "Parallel Command", prompt: "Taiyou: Coordinate REC, MARK, and REF in parallel. Have each lane identify its top action, then merge into one execution order for Sir." },
-  { label: "20 in 20 Plan", prompt: "Taiyou: The goal is 20 new reps in 20 days before April 27. Build the exact plan: what funnels, what actions, what order, what gets done today." },
+  { label: "Morning Brief", prompt: "Sunny: Give me a morning brief. Review Recruiting, Marketing, and Referrals — what matters most today and what order do I attack it in?" },
+  { label: "Recruiting Push", prompt: "Recruiting: Focus only on increasing recruiting volume and speeding up the applicant-to-interview pipeline. What are the next 3 highest-leverage actions?" },
+  { label: "Marketing Sprint", prompt: "Marketing: Focus only on REVELATION. What is the highest-leverage brand action I can take today?" },
+  { label: "Referral Sprint", prompt: "Referrals: Focus only on installed-customer referrals and appointment generation. What is the fastest path to new appointments today?" },
+  { label: "Parallel Command", prompt: "Sunny: Coordinate Recruiting, Marketing, and Referrals in parallel. Have each lane identify its top action, then merge into one execution order for Sir." },
+  { label: "20 in 20 Plan", prompt: "Sunny: The goal is 20 new reps in 20 days before April 27. Build the exact plan: what funnels, what actions, what order, what gets done today." },
 ];
 
-const TAIYOU_PROMPT = "Taiyou: You are the main hub. Review everything in motion across REC, MARK, and REF. Identify the highest-leverage next actions and give Sir the clearest execution order. What do you want to work on?";
+const TAIYOU_PROMPT = "Sunny: You are the main hub. Review everything in motion across Recruiting, Marketing, and Referrals. Identify the highest-leverage next actions and give Sir the clearest execution order. What do you want to work on?";
 
 export default function WarRoomPage() {
   const router = useRouter();
@@ -126,7 +126,7 @@ export default function WarRoomPage() {
             <div className="warroom-kicker">Private command layer</div>
             <h1 className="warroom-title">WarRoom.</h1>
             <p className="warroom-subtitle">
-              Taiyou at the center. REC, MARK, and REF underneath.<br />
+              Sunny at the center. Recruiting, Marketing, and Referrals underneath.<br />
               Click any lane — the prompt is copied, OpenClaw opens. Just paste and send.
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function WarRoomPage() {
                 <span className="warroom-hub-badge">Main Hub</span>
                 <span style={{ fontSize: 12, color: "rgba(240,215,161,0.6)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Click to open in new tab</span>
               </div>
-              <div className="warroom-hub-name">TAIYOU ☀️</div>
+              <div className="warroom-hub-name">Sunny ☀️</div>
               <div className="warroom-hub-copy">
                 Central operator. Priorities, coordination, synthesis, and final execution direction across every lane. When you don't want to manage the lanes manually, this is the button.
               </div>
@@ -253,7 +253,7 @@ export default function WarRoomPage() {
                 {[
                   { step: "01", title: "Click any lane", body: "The lane prompt is automatically copied to your clipboard. OpenClaw opens in a new tab." },
                   { step: "02", title: "Paste and send", body: "In the new OpenClaw tab, paste the prompt and send it. The lane context is already set." },
-                  { step: "03", title: "Run all four", body: "Open Taiyou, REC, MARK, and REF in separate tabs. Swap between them freely while each runs independently." },
+                  { step: "03", title: "Run all four", body: "Open Sunny, Recruiting, Marketing, and Referrals in separate tabs. Swap between them freely while each runs independently." },
                   { step: "04", title: "Use quick actions", body: "Load any preset into the draft below, then click Open in Chat. Same flow — prompt copies, tab opens." },
                 ].map((item) => (
                   <div key={item.step} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
@@ -271,10 +271,10 @@ export default function WarRoomPage() {
               <div className="warroom-section-label" style={{ marginBottom: 14 }}>Lane Overview</div>
               <div style={{ display: "grid", gap: 10 }}>
                 {[
-                  { label: "TAIYOU", role: "Main hub. Priorities + coordination.", color: "#f0d7a1" },
-                  { label: "REC", role: "Recruiting machine. Volume + pipeline.", color: "#c9a96e" },
-                  { label: "MARK", role: "REVELATION brand + marketing.", color: "#8dd6c9" },
-                  { label: "REF", role: "Referrals + warm appointments.", color: "#d98db8" },
+                  { label: "Sunny ☀️", role: "Main hub. Priorities + coordination.", color: "#f0d7a1" },
+                  { label: "Recruiting", role: "Recruiting machine. Volume + pipeline.", color: "#c9a96e" },
+                  { label: "Marketing", role: "REVELATION brand + marketing.", color: "#8dd6c9" },
+                  { label: "Referrals", role: "Referrals + warm appointments.", color: "#d98db8" },
                 ].map((item) => (
                   <div key={item.label} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", padding: "12px 14px", borderRadius: 16, border: "1px solid var(--border)", background: "rgba(255,255,255,0.025)" }}>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: item.color, letterSpacing: "-0.02em" }}>{item.label}</div>
