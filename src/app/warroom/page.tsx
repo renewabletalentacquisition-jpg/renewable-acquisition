@@ -1,146 +1,95 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type LaneKey = "TAIYOU" | "REC" | "MARK" | "REF";
 
-type LaneCard = {
+type Lane = {
   key: LaneKey;
   title: string;
   subtitle: string;
+  description: string;
   badge: string;
   accent: string;
-  prompts: string[];
+  glow: string;
+  emoji: string;
+  prompt: string;
 };
 
-type Activity = {
-  lane: string;
-  action: string;
-  time: string;
-};
-
-const laneCards: LaneCard[] = [
-  {
-    key: "TAIYOU",
-    title: "TAIYOU",
-    subtitle: "Main hub · priorities · sequencing · synthesis",
-    badge: "Hub",
-    accent: "#f0d7a1",
-    prompts: [
-      "Taiyou: Review all active business lanes, prioritize what matters most, and give me the clearest execution order.",
-      "Taiyou: Coordinate REC, MARK, and REF under one plan and push the business forward without making me manage the lanes manually.",
-      "Taiyou: Decide the next highest-leverage actions and protect my time by focusing only on what moves the business fastest.",
-    ],
-  },
+const lanes: Lane[] = [
   {
     key: "REC",
     title: "REC",
-    subtitle: "Recruiting machine · applicants · interviews · onboarding",
+    subtitle: "Recruiting machine",
+    description: "Applicants · funnels · interviews · onboarding · rep ops",
     badge: "Recruiting",
     accent: "#c9a96e",
-    prompts: [
-      "REC: Review current recruiting state and execute the next highest-leverage recruiting task.",
-      "REC: Increase applicant volume and tighten the recruiting pipeline from lead to interview.",
-      "REC: Clean the team/recruiting operations structure and reduce backend chaos.",
-    ],
+    glow: "rgba(201,169,110,0.18)",
+    emoji: "🎯",
+    prompt: "You are REC, the Recruiting Bot working under Taiyou. You own the recruiting machine: renewableacquisition.com, applicant funnel, qualification logic, interview routing, onboarding, rep tracking, and recruiting outreach. Stay in the recruiting lane. Be direct, execution-focused, and practical. Chase is 'Sir'. What do you want to work on?",
   },
   {
     key: "MARK",
     title: "MARK",
-    subtitle: "Brand engine · REVELATION · website · Instagram",
+    subtitle: "Brand + marketing lane",
+    description: "REVELATION · website · Instagram · visual identity · team brand",
     badge: "Brand",
     accent: "#8dd6c9",
-    prompts: [
-      "MARK: Build the REVELATION brand system and define the next highest-leverage brand deliverable.",
-      "MARK: Structure the REVELATION site so it strengthens recruiting and credibility fast.",
-      "MARK: Turn the visual references into a clean elite identity and Instagram direction.",
-    ],
+    glow: "rgba(141,214,201,0.18)",
+    emoji: "✦",
+    prompt: "You are MARK, the Brand Bot working under Taiyou. You own the REVELATION team brand: website, Instagram, logo direction, visual identity, and marketing assets. Stay in the brand lane. Be sharp, creative, and execution-focused. Chase is 'Sir'. What do you want to work on?",
   },
   {
     key: "REF",
     title: "REF",
-    subtitle: "Referral machine · installs · reactivation · appointments",
+    subtitle: "Referral + lead machine",
+    description: "Installed customers · referrals · reactivation · appointments",
     badge: "Referrals",
     accent: "#d98db8",
-    prompts: [
-      "REF: Build the referral engine from installed customers and define the first outreach sequence.",
-      "REF: Turn the customer list into appointments through a clean referral pipeline.",
-      "REF: Create the highest-leverage referral and follow-up actions right now.",
-    ],
+    glow: "rgba(217,141,184,0.18)",
+    emoji: "🔗",
+    prompt: "You are REF, the Referral Bot working under Taiyou. You own referral generation, installed-customer follow-up, reactivation outreach, local lead generation, and appointment-pipeline support. Stay in the referral lane. Be direct, practical, and execution-focused. Chase is 'Sir'. What do you want to work on?",
   },
 ];
 
-const quickModes = [
-  {
-    label: "Morning Brief",
-    prompt: "Taiyou: Give me a morning brief across REC, MARK, and REF. Tell me what matters most today and what order to attack it in.",
-  },
-  {
-    label: "Recruiting Push",
-    prompt: "REC: Focus only on increasing recruiting volume and speeding up the applicant-to-interview pipeline.",
-  },
-  {
-    label: "Brand Sprint",
-    prompt: "MARK: Focus only on the REVELATION site, brand system, and strongest public-facing assets.",
-  },
-  {
-    label: "Referral Sprint",
-    prompt: "REF: Focus only on installed-customer follow-up, referral requests, and appointment generation.",
-  },
-  {
-    label: "Parallel Command",
-    prompt: "Taiyou: Run a coordinated pass across REC, MARK, and REF. Have each lane identify its highest-leverage next actions, then merge the result into one execution order.",
-  },
+const quickActions = [
+  { label: "Morning Brief", prompt: "Taiyou: Give me a morning brief. Review REC, MARK, and REF — what matters most today and what order do I attack it in?" },
+  { label: "Recruiting Push", prompt: "REC: Focus only on increasing recruiting volume and speeding up the applicant-to-interview pipeline. What are the next 3 highest-leverage actions?" },
+  { label: "Brand Sprint", prompt: "MARK: Focus only on REVELATION. What is the highest-leverage brand action I can take today?" },
+  { label: "Referral Sprint", prompt: "REF: Focus only on installed-customer referrals and appointment generation. What is the fastest path to new appointments today?" },
+  { label: "Parallel Command", prompt: "Taiyou: Coordinate REC, MARK, and REF in parallel. Have each lane identify its top action, then merge into one execution order for Sir." },
+  { label: "20 in 20 Plan", prompt: "Taiyou: The goal is 20 new reps in 20 days before April 27. Build the exact plan: what funnels, what actions, what order, what gets done today." },
 ];
 
-const timeStamp = () =>
-  new Date().toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+const TAIYOU_PROMPT = "Taiyou: You are the main hub. Review everything in motion across REC, MARK, and REF. Identify the highest-leverage next actions and give Sir the clearest execution order. What do you want to work on?";
 
 export default function WarRoomPage() {
   const router = useRouter();
-  const [selectedLane, setSelectedLane] = useState<LaneKey>("TAIYOU");
-  const [draft, setDraft] = useState(laneCards[0].prompts[0]);
-  const [status, setStatus] = useState("WarRoom online. Awaiting command.");
-  const [activity, setActivity] = useState<Activity[]>([
-    { lane: "TAIYOU", action: "WarRoom initialized", time: timeStamp() },
-  ]);
+  const [draft, setDraft] = useState(TAIYOU_PROMPT);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const hasAccess = typeof window !== "undefined" && window.localStorage.getItem("warroom-auth") === "ok";
+    const hasAccess =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("warroom-auth") === "ok";
     if (!hasAccess) router.push("/warroom/login");
   }, [router]);
 
-  const current = useMemo(
-    () => laneCards.find((lane) => lane.key === selectedLane) ?? laneCards[0],
-    [selectedLane]
-  );
-
-  function addActivity(lane: string, action: string) {
-    setActivity((prev) => [{ lane, action, time: timeStamp() }, ...prev].slice(0, 8));
+  function openLane(prompt: string, lane: string) {
+    const text = encodeURIComponent(prompt);
+    // Open in a new tab — routes into the webchat with prompt pre-filled via query param
+    // The main OpenClaw webchat is at the root of this site with ?prompt= support
+    window.open(`/?prompt=${text}&lane=${lane}`, `warroom-${lane}`, "noopener");
   }
 
-  function selectLane(lane: LaneCard) {
-    setSelectedLane(lane.key);
-    setDraft(lane.prompts[0]);
-    setStatus(`${lane.title} selected.`);
-    addActivity(lane.title, "Lane selected");
-  }
-
-  function copyPrompt() {
-    navigator.clipboard.writeText(draft).then(() => {
-      setStatus(`${current.title} prompt copied.`);
-      addActivity(current.title, "Prompt copied");
-    });
-  }
-
-  function sendToChat(prompt: string, lane = current.title, label = "Prompt sent to chat") {
-    setStatus(`${lane} prompt sent into chat.`);
-    addActivity(lane, label);
-    window.location.href = `/?prompt=${encodeURIComponent(prompt)}`;
+  function copyAndOpen(prompt: string) {
+    navigator.clipboard.writeText(prompt).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+    // Also open a new tab to the chat
+    window.open(`/?prompt=${encodeURIComponent(prompt)}`, "_blank", "noopener");
   }
 
   function signOut() {
@@ -153,68 +102,105 @@ export default function WarRoomPage() {
   return (
     <main className="warroom-shell">
       <div className="warroom-container">
+
+        {/* ── Header ─── */}
         <header className="warroom-header">
           <div>
             <div className="warroom-kicker">Private command layer</div>
             <h1 className="warroom-title">WarRoom.</h1>
             <p className="warroom-subtitle">
-              Taiyou at the center. REC, MARK, and REF underneath. Shared continuity. Cleaner execution.
+              Taiyou at the center. REC, MARK, and REF underneath.<br />
+              Click any lane to open it in a dedicated tab.
             </p>
           </div>
           <div className="warroom-top-actions">
-            <a href="/hq" className="warroom-secondary-btn">Open HQ</a>
+            <a href="/hq" className="warroom-secondary-btn">Team HQ</a>
+            <a href="/admin" className="warroom-secondary-btn">Applicants</a>
             <button className="warroom-secondary-btn" onClick={signOut}>Sign Out</button>
           </div>
         </header>
 
-        <section className="warroom-hub-wrap">
-          <button className="warroom-hub-card" onClick={() => selectLane(laneCards[0])}>
-            <div>
-              <div className="warroom-hub-badge">Main Hub</div>
-              <div className="warroom-hub-name">Taiyou</div>
+        {/* ── Taiyou Hub ─── */}
+        <section style={{ marginBottom: 18 }}>
+          <button
+            type="button"
+            className="warroom-hub-card"
+            onClick={() => openLane(TAIYOU_PROMPT, "TAIYOU")}
+            style={{ cursor: "pointer", transition: "transform 0.18s ease, box-shadow 0.18s ease" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 1px rgba(240,215,161,0.35), 0 32px 72px rgba(0,0,0,0.30)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 1px rgba(240,215,161,0.18), 0 24px 60px rgba(0,0,0,0.22)";
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 14 }}>
+                <span className="warroom-hub-badge">Main Hub</span>
+                <span style={{ fontSize: 12, color: "rgba(240,215,161,0.6)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Click to open in new tab</span>
+              </div>
+              <div className="warroom-hub-name">TAIYOU ☀️</div>
               <div className="warroom-hub-copy">
-                Central operator. Owns prioritization, sequencing, coordination, and final synthesis across every lane.
+                Central operator. Priorities, coordination, synthesis, and final execution direction across every lane. When you don't want to manage the lanes manually, this is the button.
               </div>
             </div>
-            <div className="warroom-hub-mark">☀️</div>
+            <div style={{ fontSize: 48, opacity: 0.18, flexShrink: 0 }}>→</div>
           </button>
         </section>
 
-        <section className="warroom-lanes-grid">
-          {laneCards.slice(1).map((lane) => (
+        {/* ── Specialist Lanes ─── */}
+        <section className="warroom-lanes-grid" style={{ marginBottom: 28 }}>
+          {lanes.map((lane) => (
             <button
               key={lane.key}
+              type="button"
+              onClick={() => openLane(lane.prompt, lane.key)}
               className="warroom-lane-card"
-              onClick={() => selectLane(lane)}
-              style={{ borderColor: selectedLane === lane.key ? `${lane.accent}80` : undefined, boxShadow: selectedLane === lane.key ? `0 0 0 1px ${lane.accent}30` : undefined }}
+              style={{ cursor: "pointer", transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease", textAlign: "left" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                (e.currentTarget as HTMLElement).style.borderColor = `${lane.accent}80`;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${lane.glow}, 0 16px 40px rgba(0,0,0,0.22)`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+              }}
             >
               <div className="warroom-lane-top">
-                <div>
-                  <div className="warroom-lane-title">{lane.title}</div>
-                  <div className="warroom-lane-subtitle">{lane.subtitle}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+                    <span className="warroom-mini-badge" style={{ color: lane.accent, borderColor: `${lane.accent}40`, background: `${lane.accent}14` }}>
+                      {lane.badge}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--fg-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Opens in new tab</span>
+                  </div>
+                  <div className="warroom-lane-title" style={{ color: lane.accent }}>{lane.title} {lane.emoji}</div>
+                  <div style={{ fontSize: 14, color: "var(--fg)", fontWeight: 600, marginBottom: 6 }}>{lane.subtitle}</div>
+                  <div className="warroom-lane-subtitle">{lane.description}</div>
                 </div>
-                <span className="warroom-mini-badge" style={{ color: lane.accent, borderColor: `${lane.accent}40`, background: `${lane.accent}14` }}>
-                  {lane.badge}
-                </span>
+                <div style={{ color: lane.accent, fontSize: 22, opacity: 0.5, flexShrink: 0 }}>↗</div>
               </div>
             </button>
           ))}
         </section>
 
+        {/* ── Quick Actions + Draft ─── */}
         <section className="warroom-main-grid">
           <div className="warroom-panel">
-            <div className="warroom-mode-grid">
-              {quickModes.map((mode) => (
+            <div className="warroom-section-label" style={{ marginBottom: 14 }}>Quick Actions</div>
+            <div className="warroom-mode-grid" style={{ marginBottom: 22 }}>
+              {quickActions.map((action) => (
                 <button
-                  key={mode.label}
+                  key={action.label}
+                  type="button"
                   className="warroom-mode-chip"
-                  onClick={() => {
-                    setDraft(mode.prompt);
-                    setStatus(`${mode.label} loaded.`);
-                    addActivity("SYSTEM", `${mode.label} loaded`);
-                  }}
+                  onClick={() => setDraft(action.prompt)}
                 >
-                  {mode.label}
+                  {action.label}
                 </button>
               ))}
             </div>
@@ -222,66 +208,67 @@ export default function WarRoomPage() {
             <div className="warroom-toolbar">
               <div>
                 <div className="warroom-section-label">Command Draft</div>
-                <div className="warroom-section-copy">Select a lane, load a preset, edit the prompt, then run it through Taiyou.</div>
+                <div className="warroom-section-copy">Edit the prompt below, then open it in a new tab.</div>
               </div>
               <div className="warroom-toolbar-actions">
-                <button className="warroom-secondary-btn" onClick={copyPrompt}>Copy</button>
-                <button className="warroom-secondary-btn" onClick={() => sendToChat(draft, current.title, "Run current lane")}>Run Lane</button>
-                <button className="warroom-primary-btn" onClick={() => sendToChat(draft)}>Send →</button>
+                <button type="button" className="warroom-secondary-btn" onClick={() => {
+                  navigator.clipboard.writeText(draft).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {});
+                }}>
+                  {copied ? "Copied ✓" : "Copy"}
+                </button>
+                <button type="button" className="warroom-primary-btn" onClick={() => copyAndOpen(draft)}>
+                  Open in Chat →
+                </button>
               </div>
             </div>
 
             <textarea
               className="warroom-draft"
               value={draft}
-              onChange={(e) => {
-                setDraft(e.target.value);
-                setStatus("Command updated.");
-              }}
+              onChange={(e) => setDraft(e.target.value)}
             />
-
-            <div className="warroom-status-card">
-              <div className="warroom-section-label">Status</div>
-              <div className="warroom-status-copy">{status}</div>
-            </div>
           </div>
 
           <div className="warroom-side-stack">
             <div className="warroom-panel">
-              <div className="warroom-section-label">{current.title} Quick Actions</div>
-              <div className="warroom-action-stack">
-                {current.prompts.map((prompt) => (
-                  <button
-                    key={prompt}
-                    className="warroom-action-row"
-                    onClick={() => {
-                      setDraft(prompt);
-                      setStatus(`${current.title} quick action loaded.`);
-                      addActivity(current.title, "Quick action loaded");
-                    }}
-                  >
-                    {prompt}
-                  </button>
+              <div className="warroom-section-label" style={{ marginBottom: 14 }}>How it works</div>
+              <div style={{ display: "grid", gap: 12 }}>
+                {[
+                  { step: "01", title: "Click Taiyou", body: "Opens a new tab with Taiyou as your main operator. Best for coordination, priorities, and big-picture work." },
+                  { step: "02", title: "Click a lane", body: "Opens a new tab focused on that specialist lane. REC for recruiting. MARK for brand. REF for referrals." },
+                  { step: "03", title: "Use quick actions", body: "Load a preset command into the draft, then open it into chat. All lanes use Taiyou as the underlying brain." },
+                  { step: "04", title: "Run all four", body: "Open Taiyou + REC + MARK + REF in separate tabs. Work each lane independently and swap between them freely." },
+                ].map((item) => (
+                  <div key={item.step} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600, color: "rgba(201,169,110,0.25)", letterSpacing: "-0.04em", lineHeight: 1, flexShrink: 0, width: 32 }}>{item.step}</div>
+                    <div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--fg)", marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65 }}>{item.body}</div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
             <div className="warroom-panel">
-              <div className="warroom-section-label">Recent Activity</div>
-              <div className="warroom-activity-stack">
-                {activity.map((item, index) => (
-                  <div key={`${item.time}-${item.lane}-${index}`} className="warroom-activity-row">
-                    <div>
-                      <div className="warroom-activity-lane">{item.lane}</div>
-                      <div className="warroom-activity-action">{item.action}</div>
-                    </div>
-                    <div className="warroom-activity-time">{item.time}</div>
+              <div className="warroom-section-label" style={{ marginBottom: 14 }}>Lane Overview</div>
+              <div style={{ display: "grid", gap: 10 }}>
+                {[
+                  { label: "TAIYOU", role: "Main hub. Priorities + coordination.", color: "#f0d7a1" },
+                  { label: "REC", role: "Recruiting machine. Volume + pipeline.", color: "#c9a96e" },
+                  { label: "MARK", role: "REVELATION brand + marketing.", color: "#8dd6c9" },
+                  { label: "REF", role: "Referrals + warm appointments.", color: "#d98db8" },
+                ].map((item) => (
+                  <div key={item.label} style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", padding: "12px 14px", borderRadius: 16, border: "1px solid var(--border)", background: "rgba(255,255,255,0.025)" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: item.color, letterSpacing: "-0.02em" }}>{item.label}</div>
+                    <div style={{ fontSize: 12.5, color: "var(--fg-muted)", textAlign: "right" }}>{item.role}</div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         </section>
+
       </div>
     </main>
   );
