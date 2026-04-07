@@ -77,22 +77,20 @@ export default function WarRoomPage() {
   }, [router]);
 
   const TOKEN = "4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
-  const BASE_URL = `http://127.0.0.1:18789`;
+  const BASE_URL = "http://127.0.0.1:18789";
 
-  // Real persistent session IDs — each lane has its own isolated session
-  const SESSION_IDS: Record<string, string> = {
-    TAIYOU: "a49bb8f7-59ec-41bc-b0cc-8d28334af6c8",
-    REC:    "8c887bfe-bfdc-43d9-88ab-02805f6642fa",
-    MARK:   "b58a59db-8e85-47e4-a399-b1e26273f5fa",
-    REF:    "c56edeae-dbd9-408e-a800-5908786443fe",
+  // Session keys for each dedicated lane — use the session= query param the Control UI reads
+  const SESSION_KEYS: Record<string, string> = {
+    TAIYOU: "agent:main:explicit:warroom-taiyou",
+    REC:    "agent:main:explicit:warroom-rec",
+    MARK:   "agent:main:explicit:warroom-mark",
+    REF:    "agent:main:explicit:warroom-ref",
   };
 
   function openLane(prompt: string, lane: string) {
-    const sessionId = SESSION_IDS[lane];
-    // Deep-link directly into this lane's dedicated session
-    const url = `${BASE_URL}/chat?session=${sessionId}#token=${TOKEN}`;
+    const sessionKey = encodeURIComponent(SESSION_KEYS[lane]);
+    const url = `${BASE_URL}/?session=${sessionKey}#token=${TOKEN}`;
     window.open(url, `warroom-lane-${lane}`);
-    // Also copy the prompt to clipboard for context
     navigator.clipboard.writeText(prompt).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -103,7 +101,7 @@ export default function WarRoomPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }).catch(() => {});
-    const url = `${BASE_URL}/#token=${TOKEN}`;
+    const url = `${BASE_URL}/?session=${encodeURIComponent(SESSION_KEYS["TAIYOU"])}#token=${TOKEN}`;
     window.open(url, "_blank");
   }
 
