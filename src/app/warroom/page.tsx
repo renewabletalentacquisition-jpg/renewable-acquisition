@@ -89,8 +89,11 @@ export default function WarRoomPage() {
 
   function openLane(prompt: string, lane: string) {
     const sessionKey = encodeURIComponent(SESSION_KEYS[lane]);
-    const url = `${BASE_URL}/?session=${sessionKey}#token=${TOKEN}`;
-    window.open(url, `warroom-lane-${lane}`);
+    // Hash params first, session key after — prevents browser from stripping query string
+    const url = `${BASE_URL}/#token=${TOKEN}&session=${sessionKey}`;
+    // Use a timestamp-based unique name so each click always gets its own tab
+    const tabName = `warroom-${lane}-${Date.now()}`;
+    window.open(url, tabName);
     navigator.clipboard.writeText(prompt).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -101,8 +104,9 @@ export default function WarRoomPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }).catch(() => {});
-    const url = `${BASE_URL}/?session=${encodeURIComponent(SESSION_KEYS["TAIYOU"])}#token=${TOKEN}`;
-    window.open(url, "_blank");
+    const sessionKey = encodeURIComponent(SESSION_KEYS["TAIYOU"]);
+    const url = `${BASE_URL}/#token=${TOKEN}&session=${sessionKey}`;
+    window.open(url, `warroom-draft-${Date.now()}`);
   }
 
   function signOut() {
