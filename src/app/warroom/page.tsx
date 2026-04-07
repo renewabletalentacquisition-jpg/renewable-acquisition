@@ -76,11 +76,14 @@ export default function WarRoomPage() {
     if (!hasAccess) router.push("/warroom/login");
   }, [router]);
 
+  // OpenClaw Control UI runs on the local gateway
+  const OPENCLAW_URL = "http://127.0.0.1:18789";
+
   function openLane(prompt: string, lane: string) {
-    const text = encodeURIComponent(prompt);
-    // Open in a new tab — routes into the webchat with prompt pre-filled via query param
-    // The main OpenClaw webchat is at the root of this site with ?prompt= support
-    window.open(`/?prompt=${text}&lane=${lane}`, `warroom-${lane}`, "noopener");
+    // Copy the prompt to clipboard so user can paste into the chat immediately
+    navigator.clipboard.writeText(prompt).catch(() => {});
+    // Open the OpenClaw Control UI in a new tab
+    window.open(OPENCLAW_URL, `warroom-${lane}`);
   }
 
   function copyAndOpen(prompt: string) {
@@ -88,8 +91,7 @@ export default function WarRoomPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {});
-    // Also open a new tab to the chat
-    window.open(`/?prompt=${encodeURIComponent(prompt)}`, "_blank", "noopener");
+    window.open(OPENCLAW_URL, "_blank");
   }
 
   function signOut() {
@@ -110,7 +112,7 @@ export default function WarRoomPage() {
             <h1 className="warroom-title">WarRoom.</h1>
             <p className="warroom-subtitle">
               Taiyou at the center. REC, MARK, and REF underneath.<br />
-              Click any lane to open it in a dedicated tab.
+              Click any lane — the prompt is copied, OpenClaw opens. Just paste and send.
             </p>
           </div>
           <div className="warroom-top-actions">
@@ -234,10 +236,10 @@ export default function WarRoomPage() {
               <div className="warroom-section-label" style={{ marginBottom: 14 }}>How it works</div>
               <div style={{ display: "grid", gap: 12 }}>
                 {[
-                  { step: "01", title: "Click Taiyou", body: "Opens a new tab with Taiyou as your main operator. Best for coordination, priorities, and big-picture work." },
-                  { step: "02", title: "Click a lane", body: "Opens a new tab focused on that specialist lane. REC for recruiting. MARK for brand. REF for referrals." },
-                  { step: "03", title: "Use quick actions", body: "Load a preset command into the draft, then open it into chat. All lanes use Taiyou as the underlying brain." },
-                  { step: "04", title: "Run all four", body: "Open Taiyou + REC + MARK + REF in separate tabs. Work each lane independently and swap between them freely." },
+                  { step: "01", title: "Click any lane", body: "The lane prompt is automatically copied to your clipboard. OpenClaw opens in a new tab." },
+                  { step: "02", title: "Paste and send", body: "In the new OpenClaw tab, paste the prompt and send it. The lane context is already set." },
+                  { step: "03", title: "Run all four", body: "Open Taiyou, REC, MARK, and REF in separate tabs. Swap between them freely while each runs independently." },
+                  { step: "04", title: "Use quick actions", body: "Load any preset into the draft below, then click Open in Chat. Same flow — prompt copies, tab opens." },
                 ].map((item) => (
                   <div key={item.step} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600, color: "rgba(201,169,110,0.25)", letterSpacing: "-0.04em", lineHeight: 1, flexShrink: 0, width: 32 }}>{item.step}</div>
