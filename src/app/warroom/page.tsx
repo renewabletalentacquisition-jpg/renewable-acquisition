@@ -76,16 +76,26 @@ export default function WarRoomPage() {
     if (!hasAccess) router.push("/warroom/login");
   }, [router]);
 
-  // OpenClaw Control UI — pre-authenticated with gateway token
-  const OPENCLAW_URL = "http://127.0.0.1:18789/#token=4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
+  const TOKEN = "4585c4d851a3d2918c549530c8b234e5563f53389aaa78c6";
+  const BASE_URL = `http://127.0.0.1:18789`;
+
+  // Real persistent session IDs — each lane has its own isolated session
+  const SESSION_IDS: Record<string, string> = {
+    TAIYOU: "a49bb8f7-59ec-41bc-b0cc-8d28334af6c8",
+    REC:    "8c887bfe-bfdc-43d9-88ab-02805f6642fa",
+    MARK:   "b58a59db-8e85-47e4-a399-b1e26273f5fa",
+    REF:    "c56edeae-dbd9-408e-a800-5908786443fe",
+  };
 
   function openLane(prompt: string, lane: string) {
-    // Copy the lane prompt to clipboard so user can paste immediately after tab opens
+    const sessionId = SESSION_IDS[lane];
+    // Deep-link directly into this lane's dedicated session
+    const url = `${BASE_URL}/chat?session=${sessionId}#token=${TOKEN}`;
+    window.open(url, `warroom-lane-${lane}`);
+    // Also copy the prompt to clipboard for context
     navigator.clipboard.writeText(prompt).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
-    // Open the authenticated OpenClaw Control UI in a new tab
-    window.open(OPENCLAW_URL, `warroom-${lane}`);
   }
 
   function copyAndOpen(prompt: string) {
@@ -93,7 +103,8 @@ export default function WarRoomPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }).catch(() => {});
-    window.open(OPENCLAW_URL, "_blank");
+    const url = `${BASE_URL}/#token=${TOKEN}`;
+    window.open(url, "_blank");
   }
 
   function signOut() {
