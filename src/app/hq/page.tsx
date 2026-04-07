@@ -99,6 +99,17 @@ export default function HQDashboardPage() {
   const [selectedId, setSelectedId] = useState<number>(initialRecords[0].id);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newRep, setNewRep] = useState<Omit<RepRecord, "id">>({
+    name: "",
+    state: "",
+    phone: "",
+    position: "Prospect",
+    pitchSent: "No",
+    onboardingComplete: "No",
+    status: "not-started",
+    notes: "",
+  });
 
   useEffect(() => {
     const hasLocalAccess = typeof window !== "undefined" && window.localStorage.getItem("hq-auth") === "ok";
@@ -139,6 +150,34 @@ export default function HQDashboardPage() {
   function updateSelected(patch: Partial<RepRecord>) {
     if (!selected) return;
     setRecords((prev) => prev.map((record) => (record.id === selected.id ? { ...record, ...patch } : record)));
+  }
+
+  function addRep() {
+    if (!newRep.name.trim()) return;
+    const nextId = Math.max(...records.map((r) => r.id), 0) + 1;
+    const created = { ...newRep, id: nextId };
+    setRecords((prev) => [...prev, created]);
+    setSelectedId(nextId);
+    setShowAddForm(false);
+    setNewRep({
+      name: "",
+      state: "",
+      phone: "",
+      position: "Prospect",
+      pitchSent: "No",
+      onboardingComplete: "No",
+      status: "not-started",
+      notes: "",
+    });
+  }
+
+  function deleteSelected() {
+    if (!selected) return;
+    const remaining = records.filter((record) => record.id !== selected.id);
+    setRecords(remaining);
+    if (remaining.length > 0) {
+      setSelectedId(remaining[0].id);
+    }
   }
 
   async function handleSignOut() {
@@ -197,9 +236,33 @@ export default function HQDashboardPage() {
                   ))}
                 </div>
 
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search names, phone, notes..." style={{ width: "min(320px, 100%)", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 9999, padding: "10px 16px", color: "var(--fg)", fontSize: 13.5, outline: "none", fontFamily: "var(--font-body)", boxSizing: "border-box" }} />
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: "min(480px, 100%)", justifyContent: "flex-end" }}>
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search names, phone, notes..." style={{ flex: 1, minWidth: 180, background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 9999, padding: "10px 16px", color: "var(--fg)", fontSize: 13.5, outline: "none", fontFamily: "var(--font-body)", boxSizing: "border-box" }} />
+                  <button type="button" className="btn-gold" style={{ padding: "10px 16px", fontSize: 12.5 }} onClick={() => setShowAddForm((v) => !v)}>
+                    + Add Person
+                  </button>
+                </div>
               </div>
             </div>
+
+            {showAddForm && (
+              <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+                <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 14 }}>Add Team Member</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: 12 }}>
+                  <input value={newRep.name} onChange={(e) => setNewRep({ ...newRep, name: e.target.value })} placeholder="Name" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }} />
+                  <input value={newRep.state} onChange={(e) => setNewRep({ ...newRep, state: e.target.value })} placeholder="State" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }} />
+                  <input value={newRep.phone} onChange={(e) => setNewRep({ ...newRep, phone: e.target.value })} placeholder="Phone" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }} />
+                  <input value={newRep.position} onChange={(e) => setNewRep({ ...newRep, position: e.target.value })} placeholder="Position" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }} />
+                  <select value={newRep.pitchSent} onChange={(e) => setNewRep({ ...newRep, pitchSent: e.target.value })} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }}><option>Yes</option><option>No</option></select>
+                  <select value={newRep.onboardingComplete} onChange={(e) => setNewRep({ ...newRep, onboardingComplete: e.target.value })} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 14, padding: "12px 14px", color: "var(--fg)", fontSize: 14, outline: "none" }}><option>Yes</option><option>No</option></select>
+                </div>
+                <textarea value={newRep.notes} onChange={(e) => setNewRep({ ...newRep, notes: e.target.value })} placeholder="Notes" style={{ width: "100%", minHeight: 90, resize: "vertical", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 18, padding: "14px 16px", color: "var(--fg)", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                  <button type="button" className="btn-ghost" style={{ padding: "10px 16px", fontSize: 12.5 }} onClick={() => setShowAddForm(false)}>Cancel</button>
+                  <button type="button" className="btn-gold" style={{ padding: "10px 16px", fontSize: 12.5 }} onClick={addRep}>Save Person</button>
+                </div>
+              </div>
+            )}
 
             <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
@@ -219,7 +282,20 @@ export default function HQDashboardPage() {
                       <td style={{ padding: "14px 16px", color: closerNames.has(record.name) ? "var(--accent)" : "var(--fg-muted)", fontWeight: closerNames.has(record.name) ? 700 : 500 }}>{record.position}</td>
                       <td style={{ padding: "14px 16px" }}><ValuePill value={record.pitchSent} /></td>
                       <td style={{ padding: "14px 16px" }}><ValuePill value={record.onboardingComplete} /></td>
-                      <td style={{ padding: "14px 16px" }}><StatusBadge status={record.status} /></td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <select
+                          value={record.status}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setRecords((prev) => prev.map((item) => item.id === record.id ? { ...item, status: e.target.value as StatusKey } : item));
+                          }}
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 12, padding: "8px 10px", color: "var(--fg)", fontSize: 12.5, outline: "none", fontFamily: "var(--font-body)" }}
+                        >
+                          {Object.entries(statusMeta).map(([key, meta]) => (
+                            <option key={key} value={key}>{meta.label}</option>
+                          ))}
+                        </select>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -271,6 +347,11 @@ export default function HQDashboardPage() {
               <div style={{ marginTop: 22 }}>
                 <div style={{ fontSize: 12.5, color: "var(--fg-muted)", marginBottom: 8 }}>Notes</div>
                 <textarea value={selected.notes} onChange={(e) => updateSelected({ notes: e.target.value })} style={{ width: "100%", minHeight: 120, resize: "vertical", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 18, padding: "14px 16px", color: "var(--fg)", fontSize: 14, outline: "none", fontFamily: "var(--font-body)", boxSizing: "border-box", lineHeight: 1.65 }} />
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+                <button type="button" className="btn-ghost" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13 }} onClick={() => updateSelected({ status: "needs-follow-up" })}>Mark Needs Follow-Up</button>
+                <button type="button" className="btn-ghost" style={{ flex: 1, justifyContent: "center", padding: "11px 0", fontSize: 13, color: "#f87171", borderColor: "rgba(248,113,113,0.25)" }} onClick={deleteSelected}>Delete Person</button>
               </div>
             </aside>
           )}
