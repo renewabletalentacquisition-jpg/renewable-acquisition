@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const stats = [
   { value: "$10k–$20k+", label: "Top closer monthly" },
   { value: "$5k–$15k+", label: "Top setter monthly" },
-  { value: "#1", label: "Solar company in the US" },
+  { value: "Sunrun", label: "#1 residential solar company" },
 ];
 
 const truths = [
@@ -71,22 +71,34 @@ export default function RevelationPage() {
 
       {/* ── Hero ── */}
       <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-        {/* Parallax painting background */}
+        {/* Parallax dramatic background */}
         <div
           ref={bgRef}
           style={{
             position: "absolute",
             inset: "-10%",
-            backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Guido_Reni_-_St_Michael_the_Archangel_defeating_Satan_%281636%29.jpg/800px-Guido_Reni_-_St_Michael_the_Archangel_defeating_Satan_%281636%29.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center 15%",
+            background: `
+              radial-gradient(ellipse 60% 80% at 30% 40%, rgba(139,90,43,0.35), transparent),
+              radial-gradient(ellipse 50% 60% at 70% 60%, rgba(80,50,20,0.25), transparent),
+              radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,169,110,0.12), transparent),
+              linear-gradient(160deg, #0a0805 0%, #12090a 30%, #0d0a06 60%, #080508 100%)
+            `,
             transform: `translate(${mouse.x * -18}px, ${mouse.y * -18}px)`,
             transition: "transform 0.14s ease-out",
-            opacity: 0.28,
-            filter: "sepia(15%) contrast(1.1)",
           }}
         />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(5,5,7,0.65) 0%, rgba(5,5,7,0.40) 50%, rgba(5,5,7,0.95) 100%)" }} />
+        {/* Dramatic light rays effect */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: `
+            conic-gradient(from 200deg at 35% 25%, transparent 0deg, rgba(201,169,110,0.06) 15deg, transparent 30deg),
+            conic-gradient(from 220deg at 65% 35%, transparent 0deg, rgba(180,130,60,0.05) 12deg, transparent 25deg)
+          `,
+          transform: `translate(${mouse.x * -8}px, ${mouse.y * -8}px)`,
+          transition: "transform 0.1s ease-out",
+        }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(5,5,7,0.5) 0%, transparent 40%, rgba(5,5,7,0.95) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,169,110,0.1), transparent)" }} />
 
         {/* Nav */}
@@ -136,7 +148,7 @@ export default function RevelationPage() {
           transition: loaded ? "opacity 0.9s ease, transform 0.1s ease-out" : "opacity 0.9s ease, transform 0.9s ease",
         }}>
           <div style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 26 }}>
-            Elite Solar Sales · Sunrun · Summer Program
+            SUNRUN × REVELATION · Summer Program 2026
           </div>
           <h1 style={{
             fontFamily: "var(--font-display)",
@@ -151,7 +163,7 @@ export default function RevelationPage() {
             REVELATION.
           </h1>
           <p style={{ fontSize: "clamp(16px, 2vw, 20px)", color: "rgba(255,255,255,0.55)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 48px" }}>
-            Elite solar sales. Built for those who perform.
+            A high-performance solar sales team under Sunrun. Built for those who perform.
           </p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/apply" style={{
@@ -219,7 +231,7 @@ export default function RevelationPage() {
               <em style={{ color: "rgba(255,255,255,0.4)", fontStyle: "italic" }}>That&apos;s the point.</em>
             </h2>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, marginBottom: 20 }}>
-              REVELATION is a performance-driven solar sales team operating under Sunrun — the largest residential solar company in the United States.
+              REVELATION is a named high-performance sales team under Sunrun — the largest residential solar company in the United States.
             </p>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, marginBottom: 20 }}>
               We grow fast, earn real, and we do not carry people who don&apos;t produce. The standard is high because the upside is real.
@@ -372,7 +384,7 @@ export default function RevelationPage() {
         </span>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           <a href="/apply" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none", letterSpacing: "0.06em", textTransform: "uppercase" }}>Apply</a>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", letterSpacing: "0.06em" }}>Powered by Sunrun</span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", letterSpacing: "0.06em" }}>SUNRUN × REVELATION</span>
         </div>
       </footer>
 
