@@ -137,7 +137,7 @@ export default function RevelationPage() {
           transition: loaded ? "opacity 0.9s ease, transform 0.1s ease-out" : "opacity 0.9s ease, transform 0.9s ease",
         }}>
           <div style={{ fontSize: "clamp(9px, 1.5vw, 11px)", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(201,169,110,0.75)", marginBottom: 24 }}>
-            SUNRUN × REVELATION · Summer Program 2026
+            SUNRUN × REVELATION · Door to Door Sales · Summer 2026
           </div>
 
           <h1 style={{
@@ -160,7 +160,7 @@ export default function RevelationPage() {
             maxWidth: 560,
             margin: "0 auto clamp(36px, 5vw, 52px)",
           }}>
-            A high-performance solar sales team under Sunrun. Built for those who perform.
+            A high-performance door-to-door solar sales team under Sunrun. Built for those who perform.
           </p>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
