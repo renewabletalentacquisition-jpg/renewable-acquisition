@@ -180,30 +180,7 @@ function ApplyForm() {
         next_action: ops.nextAction,
       };
 
-      let { error: dbError } = await supabase.from("applicants").insert(applicantPayload);
-
-      if (dbError?.message?.includes("schema cache")) {
-        const fallbackPayload = {
-          first_name: answers.firstName,
-          last_name: answers.lastName,
-          email: answers.email,
-          phone: answers.phone,
-          city: answers.city,
-          start_timing: answers.startTiming,
-          commission_only: answers.commissionOnly,
-          door_to_door: answers.doorToDoor,
-          relocate: answers.relocate,
-          team_housing: answers.teamHousing,
-          background: answers.background || [],
-          coachable: answers.coachable,
-          financial_stability: answers.financialStability,
-          score,
-          outcome,
-        };
-
-        const fallbackResult = await supabase.from("applicants").insert(fallbackPayload);
-        dbError = fallbackResult.error;
-      }
+      const { error: dbError } = await supabase.from("applicants").insert(applicantPayload);
 
       if (dbError) throw new Error(dbError.message);
 
