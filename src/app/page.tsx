@@ -8,6 +8,12 @@ const metrics = [
   { value: "Now", label: "Interviewing immediately" },
 ];
 
+const credibilityPoints = [
+  "Team operates under Sunrun",
+  "REVELATION team brand live",
+  "Fast interview funnel for serious applicants",
+];
+
 const fitCards = [
   {
     icon: "🏆",
@@ -36,6 +42,47 @@ const processSteps = [
   { num: "02", title: "Get filtered", body: "We move fast and filter hard. No time wasted on bad fits." },
   { num: "03", title: "Interview", body: "Qualified candidates book directly into the interview schedule." },
   { num: "04", title: "Start", body: "Top applicants are reviewed and moved quickly. Spots are limited." },
+];
+
+const proofPoints = [
+  {
+    title: "Real standards",
+    body: "In-person, commission-only, coachable, and open to travel. We say the hard parts early so the right people lean in.",
+  },
+  {
+    title: "Fast movement",
+    body: "Strong applicants can book directly into interview slots instead of waiting days for manual follow-up.",
+  },
+  {
+    title: "Performance upside",
+    body: "The offer is built for people who care more about upside, growth, and pace than comfort and predictability.",
+  },
+];
+
+const candidateChecklist = [
+  "You want a real income swing, not a safe base-pay routine.",
+  "You can handle direct coaching, accountability, and repetition.",
+  "You are open to door-to-door work, travel, and team movement.",
+  "You want a team with urgency, standards, and a fast start.",
+];
+
+const faqs = [
+  {
+    question: "Is this remote?",
+    answer: "No. This is an in-person, door-to-door sales role.",
+  },
+  {
+    question: "Is this hourly or salary?",
+    answer: "No. This opportunity is commission-only and built for people who want upside tied to performance.",
+  },
+  {
+    question: "How fast do you move?",
+    answer: "Fast. Qualified applicants can book directly into an interview slot as soon as they finish the application.",
+  },
+  {
+    question: "Who usually does well here?",
+    answer: "Competitive, coachable people with resilience, urgency, and enough stability to handle a ramp period.",
+  },
 ];
 
 const disclaimers = [
@@ -155,7 +202,7 @@ export default function Home() {
                 </a>
               </div>
 
-              <div className="reveal" style={{
+              <div className="reveal hero-metrics" style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
                 gap: 14,
@@ -171,6 +218,31 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="reveal" style={{ transitionDelay: "0.36s", marginTop: 20 }}>
+                <div className="card" style={{ padding: "18px 20px", display: "grid", gap: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+                    <div>
+                      <p style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--accent)", margin: "0 0 8px" }}>
+                        Want to check the team first?
+                      </p>
+                      <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.65, margin: 0, maxWidth: 520 }}>
+                        View the REVELATION team page before you apply. It gives candidates a sharper trust check than a standard job post.
+                      </p>
+                    </div>
+                    <a href="/revelation" className="btn-ghost" style={{ whiteSpace: "nowrap" }}>
+                      View REVELATION →
+                    </a>
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    {credibilityPoints.map((point) => (
+                      <span key={point} style={{ border: "1px solid var(--border)", borderRadius: 9999, padding: "8px 12px", fontSize: 12, color: "var(--fg-muted)", background: "rgba(255,255,255,0.02)" }}>
+                        {point}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -216,6 +288,39 @@ export default function Home() {
                 </a>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        <hr className="divider" />
+
+        {/* ── Proof ─────────────────────────────────────────── */}
+        <section style={{ padding: "90px 32px 84px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+            <div className="reveal" style={{ marginBottom: 40, maxWidth: 700 }}>
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+                Why this funnel works
+              </p>
+              <h2 className="display" style={{ fontSize: "clamp(34px, 5vw, 58px)", color: "var(--fg)", margin: "0 0 18px" }}>
+                Clear expectations,
+                <em style={{ color: "var(--accent)", fontStyle: "italic" }}> higher intent.</em>
+              </h2>
+              <p style={{ fontSize: 15, color: "var(--fg-muted)", lineHeight: 1.72, margin: 0 }}>
+                The site should help weak fits self-select out and make serious candidates feel momentum immediately.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+              {proofPoints.map((item, i) => (
+                <div key={item.title} className="card reveal" style={{ padding: "30px 26px", transitionDelay: `${i * 0.08}s` }}>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, color: "var(--fg)", margin: "0 0 10px" }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.7, margin: 0 }}>
+                    {item.body}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -286,6 +391,45 @@ export default function Home() {
               ))}
             </div>
 
+          </div>
+        </section>
+
+        <hr className="divider" />
+
+        {/* ── Checklist + FAQ ───────────────────────────────── */}
+        <section style={{ padding: "96px 32px", background: "var(--bg-subtle)" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 28, alignItems: "start" }}>
+            <div className="card reveal" style={{ padding: "34px 30px" }}>
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+                Self-check before you apply
+              </p>
+              <h2 className="display" style={{ fontSize: "clamp(32px, 4vw, 52px)", color: "var(--fg)", margin: "0 0 18px" }}>
+                If these feel true,
+                <em style={{ color: "var(--accent)", fontStyle: "italic" }}> apply now.</em>
+              </h2>
+              <div style={{ display: "grid", gap: 14, marginTop: 26 }}>
+                {candidateChecklist.map((item, i) => (
+                  <div key={item} className="reveal" style={{ display: "flex", gap: 14, alignItems: "flex-start", transitionDelay: `${i * 0.06}s` }}>
+                    <span style={{ color: "var(--accent)", fontSize: 17, lineHeight: 1 }}>✓</span>
+                    <span style={{ fontSize: 14.5, color: "var(--fg-muted)", lineHeight: 1.65 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card reveal" style={{ padding: "34px 30px", transitionDelay: "0.08s" }}>
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)", fontWeight: 500, marginBottom: 16 }}>
+                Quick answers
+              </p>
+              <div style={{ display: "grid", gap: 18 }}>
+                {faqs.map((item, i) => (
+                  <div key={item.question} style={{ paddingBottom: 18, borderBottom: i === faqs.length - 1 ? "none" : "1px solid var(--border)" }}>
+                    <h3 style={{ fontSize: 15, color: "var(--fg)", margin: "0 0 8px", fontWeight: 600 }}>{item.question}</h3>
+                    <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.7, margin: 0 }}>{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 

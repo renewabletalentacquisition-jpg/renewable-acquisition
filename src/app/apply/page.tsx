@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { buildApplicantOps } from "@/lib/applicant-ops";
 
 type Answers = Record<string, string | string[]>;
 
@@ -30,47 +31,17 @@ const steps: Step[] = [
     id: "commitment",
     title: "This opportunity requires full commitment.",
     fields: [
-      {
-        name: "startTiming",
-        label: "How soon can you start?",
-        type: "radio",
-        required: true,
-        options: ["Immediately", "Within 7 days", "Within 2 weeks", "More than 2 weeks"],
-      },
-      {
-        name: "commissionOnly",
-        label: "Are you open to a commission-only pay structure?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Maybe", "No"],
-      },
-      {
-        name: "doorToDoor",
-        label: "Are you willing to work in an in-person, door-to-door sales role?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Maybe", "No"],
-      },
+      { name: "startTiming", label: "How soon can you start?", type: "radio", required: true, options: ["Immediately", "Within 7 days", "Within 2 weeks", "More than 2 weeks"] },
+      { name: "commissionOnly", label: "Are you open to a commission-only pay structure?", type: "radio", required: true, options: ["Yes", "Maybe", "No"] },
+      { name: "doorToDoor", label: "Are you willing to work in an in-person, door-to-door sales role?", type: "radio", required: true, options: ["Yes", "Maybe", "No"] },
     ],
   },
   {
     id: "relocation",
-    title: "This role requires movement.",
+    title: "Summer program flexibility.",
     fields: [
-      {
-        name: "relocate",
-        label: "Are you willing to relocate and live away from home for work?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Maybe", "No"],
-      },
-      {
-        name: "teamHousing",
-        label: "Are you comfortable with team housing and moving with the team as needed?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Maybe", "No"],
-      },
+      { name: "relocate", label: "Are you willing to relocate and travel for the summer program?", type: "radio", required: true, options: ["Yes", "Maybe", "No"] },
+      { name: "teamHousing", label: "Are you comfortable with team housing and moving with the team as needed?", type: "radio", required: true, options: ["Yes", "Maybe", "No"] },
     ],
   },
   {
@@ -93,32 +64,15 @@ const steps: Step[] = [
           "None of the above",
         ],
       },
-      {
-        name: "coachable",
-        label: "Are you willing to be coached directly and held accountable?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Maybe", "No"],
-      },
-      {
-        name: "financialStability",
-        label: "Do you have enough financial stability to get through an initial ramp-up period?",
-        type: "radio",
-        required: true,
-        options: ["Yes", "Probably", "Not sure", "No"],
-      },
+      { name: "coachable", label: "Are you willing to be coached directly and held accountable?", type: "radio", required: true, options: ["Yes", "Maybe", "No"] },
+      { name: "financialStability", label: "Do you have enough financial stability to get through an initial ramp-up period?", type: "radio", required: true, options: ["Yes", "Probably", "Not sure", "No"] },
+      { name: "heardAbout", label: "Where or who did you hear about this job from?", type: "text", required: true },
     ],
   },
 ];
 
 function isDQ(answers: Answers): boolean {
-  return (
-    answers.commissionOnly === "No" ||
-    answers.doorToDoor === "No" ||
-    answers.relocate === "No" ||
-    answers.teamHousing === "No" ||
-    answers.coachable === "No"
-  );
+  return answers.commissionOnly === "No" || answers.doorToDoor === "No" || answers.relocate === "No" || answers.teamHousing === "No" || answers.coachable === "No";
 }
 
 function calcScore(answers: Answers): number {
@@ -152,8 +106,9 @@ function getOutcome(answers: Answers): "qualified" | "review" | "disqualified" {
   return "disqualified";
 }
 
-export default function ApplyPage() {
+function ApplyForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [submitting, setSubmitting] = useState(false);
@@ -161,6 +116,10 @@ export default function ApplyPage() {
 
   const current = steps[step];
   const isLast = step === steps.length - 1;
+  const applicantOps = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    return buildApplicantOps(getOutcome(answers), params);
+  }, [answers, searchParams]);
 
   function handleChange(name: string, value: string | string[]) {
     setAnswers((prev) => ({ ...prev, [name]: value }));
@@ -188,8 +147,10 @@ export default function ApplyPage() {
     try {
       const outcome = getOutcome(answers);
       const score = calcScore(answers);
+      const params = new URLSearchParams(searchParams.toString());
+      const ops = buildApplicantOps(outcome, params);
 
-      const { error: dbError } = await supabase.from("applicants").insert({
+      const applicantPayload = {
         first_name: answers.firstName,
         last_name: answers.lastName,
         email: answers.email,
@@ -205,7 +166,44 @@ export default function ApplyPage() {
         financial_stability: answers.financialStability,
         score,
         outcome,
-      });
+        source: ops.source,
+        source_detail: ops.sourceDetail,
+        heard_about: answers.heardAbout,
+        utm_source: ops.utmSource,
+        utm_medium: ops.utmMedium,
+        utm_campaign: ops.utmCampaign,
+        utm_content: ops.utmContent,
+        utm_term: ops.utmTerm,
+        booking_status: ops.bookingStatus,
+        applicant_status: ops.applicantStatus,
+        priority_bucket: ops.priorityBucket,
+        next_action: ops.nextAction,
+      };
+
+      let { error: dbError } = await supabase.from("applicants").insert(applicantPayload);
+
+      if (dbError?.message?.includes("schema cache")) {
+        const fallbackPayload = {
+          first_name: answers.firstName,
+          last_name: answers.lastName,
+          email: answers.email,
+          phone: answers.phone,
+          city: answers.city,
+          start_timing: answers.startTiming,
+          commission_only: answers.commissionOnly,
+          door_to_door: answers.doorToDoor,
+          relocate: answers.relocate,
+          team_housing: answers.teamHousing,
+          background: answers.background || [],
+          coachable: answers.coachable,
+          financial_stability: answers.financialStability,
+          score,
+          outcome,
+        };
+
+        const fallbackResult = await supabase.from("applicants").insert(fallbackPayload);
+        dbError = fallbackResult.error;
+      }
 
       if (dbError) throw new Error(dbError.message);
 
@@ -220,55 +218,50 @@ export default function ApplyPage() {
   return (
     <main className="min-h-screen bg-[#0b0b0d] px-6 py-12 text-stone-100 lg:px-10">
       <div className="mx-auto max-w-2xl">
-        <a href="/" className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-stone-400 transition hover:text-white">
-          ← Back
-        </a>
+        <a href="/" className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-stone-400 transition hover:text-white">← Back</a>
+
+        <div className="mb-4 rounded-[1.75rem] border border-amber-200/15 bg-amber-200/[0.06] p-5 text-sm text-stone-300 shadow-[0_18px_50px_rgba(0,0,0,0.2)]">
+          <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">Before you start</p>
+          <div className="mt-3 grid gap-2 md:grid-cols-3 md:gap-3">
+            <div>Commission-only, in-person, and performance-driven.</div>
+            <div>Qualified applicants may book an interview immediately.</div>
+            <div>This takes about 2 minutes if you are a serious fit.</div>
+          </div>
+          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs leading-6 text-stone-400">
+            Current operator flow: <span className="text-stone-200">{applicantOps.nextAction}</span>
+            {applicantOps.source !== "direct" && <span className="ml-2 text-amber-200/80">Tracked source: {applicantOps.source}</span>}
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-stone-300">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-stone-500">Need a credibility check first?</p>
+            <p className="mt-1 max-w-xl text-stone-400">View the REVELATION page for team positioning, standards, and opportunity context before finishing your application.</p>
+          </div>
+          <a href="/revelation" className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-stone-200 transition hover:border-white/30 hover:bg-white/10">View REVELATION →</a>
+        </div>
 
         <div className="mb-8 flex gap-2">
           {steps.map((s, i) => (
-            <div
-              key={s.id}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-amber-200" : "bg-white/10"}`}
-            />
+            <div key={s.id} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-amber-200" : "bg-white/10"}`} />
           ))}
         </div>
 
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-[0.32em] text-amber-200/70">
-            Step {step + 1} of {steps.length}
-          </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
-            {current.title}
-          </h1>
+          <p className="text-xs uppercase tracking-[0.32em] text-amber-200/70">Step {step + 1} of {steps.length}</p>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">{current.title}</h1>
 
           <div className="mt-8 space-y-6">
             {current.fields.map((field) => (
               <div key={field.name}>
-                <label className="mb-2 block text-sm font-medium text-stone-200">
-                  {field.label}
-                </label>
+                <label className="mb-2 block text-sm font-medium text-stone-200">{field.label}</label>
 
-                {(field.type === "text" || field.type === "email" || field.type === "tel") ? (
-                  <input
-                    type={field.type}
-                    value={(answers[field.name] as string) || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-white/8 px-4 py-3 text-sm text-white placeholder-stone-500 outline-none transition focus:border-amber-200/40 focus:bg-white/10"
-                    placeholder={field.label}
-                  />
+                {field.type === "text" || field.type === "email" || field.type === "tel" ? (
+                  <input type={field.type} value={(answers[field.name] as string) || ""} onChange={(e) => handleChange(field.name, e.target.value)} className="w-full rounded-xl border border-white/15 bg-white/8 px-4 py-3 text-sm text-white placeholder-stone-500 outline-none transition focus:border-amber-200/40 focus:bg-white/10" placeholder={field.label} />
                 ) : field.type === "radio" ? (
                   <div className="grid gap-2 sm:grid-cols-2">
                     {field.options.map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => handleChange(field.name, opt)}
-                        className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
-                          answers[field.name] === opt
-                            ? "border-amber-200/60 bg-amber-200/10 text-amber-100"
-                            : "border-white/10 bg-white/5 text-stone-300 hover:border-white/25 hover:bg-white/10"
-                        }`}
-                      >
+                      <button key={opt} type="button" onClick={() => handleChange(field.name, opt)} className={`rounded-xl border px-4 py-3 text-left text-sm transition ${answers[field.name] === opt ? "border-amber-200/60 bg-amber-200/10 text-amber-100" : "border-white/10 bg-white/5 text-stone-300 hover:border-white/25 hover:bg-white/10"}`}>
                         {opt}
                       </button>
                     ))}
@@ -278,16 +271,7 @@ export default function ApplyPage() {
                     {("options" in field ? field.options : []).map((opt) => {
                       const checked = ((answers[field.name] as string[]) || []).includes(opt);
                       return (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => handleCheckbox(field.name, opt, !checked)}
-                          className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
-                            checked
-                              ? "border-amber-200/60 bg-amber-200/10 text-amber-100"
-                              : "border-white/10 bg-white/5 text-stone-300 hover:border-white/25 hover:bg-white/10"
-                          }`}
-                        >
+                        <button key={opt} type="button" onClick={() => handleCheckbox(field.name, opt, !checked)} className={`rounded-xl border px-4 py-3 text-left text-sm transition ${checked ? "border-amber-200/60 bg-amber-200/10 text-amber-100" : "border-white/10 bg-white/5 text-stone-300 hover:border-white/25 hover:bg-white/10"}`}>
                           {opt}
                         </button>
                       );
@@ -300,36 +284,31 @@ export default function ApplyPage() {
 
           {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-6 text-stone-400">
+            We filter hard on commitment, coachability, commission fit, and willingness to travel with the team.
+          </div>
+
           <div className="mt-10 flex gap-4">
-            {step > 0 && (
-              <button
-                onClick={() => setStep((s) => s - 1)}
-                className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-              >
-                Back
-              </button>
-            )}
+            {step > 0 && <button onClick={() => setStep((s) => s - 1)} className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10">Back</button>}
             {isLast ? (
-              <button
-                onClick={handleSubmit}
-                disabled={!canAdvance() || submitting}
-                className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40"
-              >
+              <button onClick={handleSubmit} disabled={!canAdvance() || submitting} className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40">
                 {submitting ? "Submitting..." : "Submit Application"}
               </button>
             ) : (
-              <button
-                onClick={() => setStep((s) => s + 1)}
-                disabled={!canAdvance()}
-                className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40"
-              >
-                Continue
-              </button>
+              <button onClick={() => setStep((s) => s + 1)} disabled={!canAdvance()} className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40">Continue</button>
             )}
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", color: "var(--fg-muted)" }}>Loading…</div>}>
+      <ApplyForm />
+    </Suspense>
   );
 }
 
