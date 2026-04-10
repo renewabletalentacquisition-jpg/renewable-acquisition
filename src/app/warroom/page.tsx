@@ -162,6 +162,7 @@ export default function WarRoomPage() {
             {[
               { label: "Team HQ", href: "/hq" },
               { label: "Applicants", href: "/admin" },
+              { label: "DM", href: "/dm" },
             ].map(link => (
               <a key={link.href} href={link.href} style={{
                 fontSize: 12,
