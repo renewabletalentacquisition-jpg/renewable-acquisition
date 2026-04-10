@@ -299,8 +299,20 @@ export default function PipelinePage() {
                     onClick={() => openSelected(p)}
                     style={{ padding: "12px 14px", marginBottom: 8, borderRadius: 16, border: `1px solid ${selected?.id === p.id ? stage.accent : "rgba(255,255,255,0.08)"}`, background: selected?.id === p.id ? `${stage.accent}18` : "rgba(8,8,10,0.6)", cursor: "grab", transition: "all 0.15s" }}
                   >
-                    <div style={{ fontWeight: 600, fontSize: 13.5, color: "var(--fg)", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {p.full_name || `@${p.username}`}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, marginBottom: 4 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13.5, color: "var(--fg)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
+                        {p.full_name || `@${p.username}`}
+                      </div>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          void deleteProspect(p.id);
+                        }}
+                        style={{ border: "1px solid rgba(248,113,113,0.22)", background: "rgba(248,113,113,0.08)", color: "#f87171", width: 24, height: 24, borderRadius: 9999, cursor: "pointer", fontSize: 12, lineHeight: 1, flexShrink: 0 }}
+                        title="Delete prospect"
+                      >
+                        ×
+                      </button>
                     </div>
                     {p.username && <div style={{ fontSize: 11.5, color: "var(--fg-dim)", marginBottom: 6 }}>@{p.username}</div>}
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
