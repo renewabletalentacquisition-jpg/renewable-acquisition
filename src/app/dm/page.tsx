@@ -38,10 +38,19 @@ const STAGES: { id: Stage; label: string; color: string; accent: string }[] = [
   { id: "rejected",            label: "Rejected",           color: "rgba(248,113,113,0.06)", accent: "#f87171" },
 ];
 
+const DAILY_DM_LIMIT = 30;
+
 const DM_TEMPLATES = [
-  `Hey [name], quick question — you in SoCal for the summer? We're building a sales team and looking for competitive guys who want to make real money. No experience needed, just drive. Worth a quick convo?`,
-  `What's up [name] — we're putting together a summer sales team in SoCal, commission-based, high earning potential. Bunch of college guys doing it. You open to hearing more?`,
-  `Hey, are you looking for a summer opportunity? We're hiring door-to-door solar sales reps in SoCal. Top guys making $5k-$15k/mo. Takes drive not experience. Interested?`,
+  `Hey [name], hope you're doing well. What are you doing for work right now, and would you be open to hearing about a sales opportunity?`,
+  `Hey [name], hope all is well. Just curious, what are you currently doing for work, and are you at all open to a sales opportunity?`,
+  `What's up [name], hope you're doing good. What are you doing for work right now, and would you be open to exploring a sales opportunity?`,
+  `Hey [name], wanted to reach out and ask what you're currently doing for work. Also, are you closed off to sales, or would you be open to hearing about an opportunity?`,
+  `Yo [name], hope you're doing well. What are you currently doing for work, and are you open to a sales opportunity if it made sense?`,
+  `Hey [name], quick question, what are you doing for work right now, and would you be open to hearing about a sales position?`,
+  `What's going on [name], hope everything's been good. Are you working right now, and would you be open to a sales opportunity?`,
+  `Hey [name], hope your week's going well. What are you currently doing for work, and are you open to hearing about a possible sales opportunity?`,
+  `Hey [name], random question, what are you doing for work right now, and are you completely closed off to sales or open to hearing more?`,
+  `Hey [name], hope all is well with you. I wanted to ask what you're currently doing for work, and whether you'd be open to a sales opportunity.`,
 ];
 
 function timeAgo(ts: string) {
@@ -155,7 +164,7 @@ export default function PipelinePage() {
           </a>
           <div style={{ display: "flex", gap: 4 }}>
             <a href="/admin" style={{ fontSize: 12.5, color: "var(--fg-muted)", padding: "6px 12px", borderRadius: 9999, textDecoration: "none", border: "1px solid var(--border)" }}>Applicants</a>
-            <span style={{ fontSize: 12.5, padding: "6px 12px", borderRadius: 9999, background: "var(--accent)", color: "#0d0b08", fontWeight: 600 }}>Pipeline</span>
+            <span style={{ fontSize: 12.5, padding: "6px 12px", borderRadius: 9999, background: "var(--accent)", color: "#0d0b08", fontWeight: 600 }}>DM</span>
             <a href="/hq" style={{ fontSize: 12.5, color: "var(--fg-muted)", padding: "6px 12px", borderRadius: 9999, textDecoration: "none", border: "1px solid var(--border)" }}>Team HQ</a>
           </div>
         </div>
@@ -176,6 +185,39 @@ export default function PipelinePage() {
           </div>
         ))}
       </div>
+
+      <section style={{ padding: "20px 28px 0", borderBottom: "1px solid var(--border)", background: "linear-gradient(180deg, rgba(201,169,110,0.05), rgba(8,8,10,0))" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 14, flexWrap: "wrap" }}>
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--accent)" }}>DM Library</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 28, lineHeight: 1, letterSpacing: "-0.03em", marginTop: 6 }}>10 rotating opener scripts</div>
+          </div>
+          <div style={{ padding: "10px 14px", borderRadius: 9999, border: "1px solid rgba(201,169,110,0.25)", background: "rgba(201,169,110,0.08)", color: "var(--accent-soft)", fontSize: 12.5, fontWeight: 600 }}>
+            Daily cap: {DAILY_DM_LIMIT} DMs
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, paddingBottom: 20 }}>
+          {DM_TEMPLATES.map((template, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setTemplateIdx(i);
+                navigator.clipboard.writeText(template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")).catch(() => {});
+              }}
+              style={{ textAlign: "left", padding: "16px 18px", borderRadius: 20, border: `1px solid ${templateIdx === i ? "rgba(201,169,110,0.4)" : "var(--border)"}`, background: templateIdx === i ? "rgba(201,169,110,0.08)" : "rgba(255,255,255,0.03)", color: "var(--fg)", cursor: "pointer", transition: "all 0.18s ease" }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: templateIdx === i ? "var(--accent-soft)" : "var(--fg-dim)", fontWeight: 700 }}>Version {i + 1}</span>
+                <span style={{ fontSize: 11.5, color: "var(--fg-muted)" }}>Copy</span>
+              </div>
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--fg-muted)" }}>
+                {template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")}
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {/* Kanban board */}
@@ -309,9 +351,9 @@ export default function PipelinePage() {
             <div style={{ marginTop: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--fg-dim)" }}>DM Script</div>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {[0, 1, 2].map(i => (
-                    <button key={i} onClick={() => setTemplateIdx(i)} style={{ width: 22, height: 22, borderRadius: "50%", fontSize: 10, fontWeight: 600, cursor: "pointer", border: `1px solid ${templateIdx === i ? "var(--accent)" : "var(--border)"}`, background: templateIdx === i ? "var(--accent)" : "var(--bg-panel)", color: templateIdx === i ? "#0d0b08" : "var(--fg-muted)", fontFamily: "var(--font-body)" }}>{i + 1}</button>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {DM_TEMPLATES.map((_, i) => (
+                    <button key={i} onClick={() => setTemplateIdx(i)} style={{ minWidth: 22, height: 22, padding: "0 6px", borderRadius: 9999, fontSize: 10, fontWeight: 600, cursor: "pointer", border: `1px solid ${templateIdx === i ? "var(--accent)" : "var(--border)"}`, background: templateIdx === i ? "var(--accent)" : "var(--bg-panel)", color: templateIdx === i ? "#0d0b08" : "var(--fg-muted)", fontFamily: "var(--font-body)" }}>{i + 1}</button>
                   ))}
                 </div>
               </div>
@@ -319,7 +361,7 @@ export default function PipelinePage() {
                 {dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "[name]")}
               </div>
               <button onClick={() => { navigator.clipboard.writeText(dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "[name]")); }} style={{ marginTop: 8, width: "100%", padding: "9px 0", borderRadius: 9999, fontSize: 12.5, fontWeight: 500, cursor: "pointer", border: "1px solid var(--border-strong)", background: "var(--bg-panel)", color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>
-                Copy DM
+                Copy DM v{templateIdx + 1}
               </button>
             </div>
 
