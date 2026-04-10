@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -80,6 +80,7 @@ export default function PipelinePage() {
   const [dmTemplates, setDmTemplates] = useState<string[]>(DEFAULT_DM_TEMPLATES);
   const [editingTemplateIdx, setEditingTemplateIdx] = useState<number | null>(null);
   const [editingTemplateText, setEditingTemplateText] = useState("");
+  const stageRefs = useRef<Partial<Record<Stage, HTMLDivElement | null>>>({});
 
   useEffect(() => {
     const ok = typeof window !== "undefined" && window.localStorage.getItem("admin-auth") === "ok";
@@ -179,6 +180,10 @@ export default function PipelinePage() {
     setEditingTemplateText("");
   }
 
+  function jumpToStage(stage: Stage) {
+    stageRefs.current[stage]?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+  }
+
   function resetTemplates() {
     setDmTemplates(DEFAULT_DM_TEMPLATES);
     if (typeof window !== "undefined") {
@@ -215,13 +220,17 @@ export default function PipelinePage() {
       </header>
 
       {/* Stats bar */}
-      <div style={{ borderBottom: "1px solid var(--border)", padding: "12px 28px", background: "rgba(8,8,10,0.5)", display: "flex", gap: 24, overflowX: "auto" }}>
+      <div style={{ borderBottom: "1px solid var(--border)", padding: "12px 28px", background: "rgba(8,8,10,0.5)", display: "flex", gap: 12, overflowX: "auto" }}>
         {STAGES.map(s => (
-          <div key={s.id} style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+          <button
+            key={s.id}
+            onClick={() => jumpToStage(s.id)}
+            style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, padding: "8px 12px", borderRadius: 9999, border: "1px solid var(--border)", background: "rgba(255,255,255,0.03)", cursor: "pointer", fontFamily: "var(--font-body)" }}
+          >
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.accent, display: "inline-block" }} />
             <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>{s.label}</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: s.accent, fontFamily: "var(--font-display)" }}>{counts[s.id] || 0}</span>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -277,6 +286,7 @@ export default function PipelinePage() {
           {STAGES.filter(s => s.id !== "rejected").map(stage => (
             <div
               key={stage.id}
+              ref={el => { stageRefs.current[stage.id] = el; }}
               onDragOver={handleDragOver}
               onDrop={e => handleDrop(e, stage.id)}
               style={{ width: 240, flexShrink: 0, background: stage.color, border: `1px solid ${stage.accent}22`, borderRadius: 20, padding: "14px 12px", minHeight: 300 }}
@@ -339,6 +349,7 @@ export default function PipelinePage() {
 
           {/* Rejected column compact */}
           <div
+            ref={el => { stageRefs.current.rejected = el; }}
             onDragOver={handleDragOver}
             onDrop={e => handleDrop(e, "rejected")}
             style={{ width: 160, flexShrink: 0, background: "rgba(248,113,113,0.04)", border: "1px solid rgba(248,113,113,0.1)", borderRadius: 20, padding: "14px 12px", minHeight: 300, opacity: 0.7 }}
