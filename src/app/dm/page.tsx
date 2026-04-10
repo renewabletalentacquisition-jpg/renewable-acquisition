@@ -103,6 +103,7 @@ export default function PipelinePage() {
   const [editingTemplateIdx, setEditingTemplateIdx] = useState<number | null>(null);
   const [editingTemplateText, setEditingTemplateText] = useState("");
   const [qualificationChecks, setQualificationChecks] = useState<QualificationChecks>({});
+  const [sendingDm, setSendingDm] = useState(false);
   const stageRefs = useRef<Partial<Record<Stage, HTMLDivElement | null>>>({});
 
   useEffect(() => {
@@ -243,6 +244,27 @@ export default function PipelinePage() {
       setProspects(prev => prev.map(p => p.id === selected.id ? { ...p, ...updates, qualification_checks: qualificationChecks } : p));
       setSelected({ ...selected, ...updates, qualification_checks: qualificationChecks });
     }
+  }
+
+  async function sendFirstDm() {
+    if (!selected) return;
+    setSendingDm(true);
+    const finalMessage = dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "there");
+    const updates = {
+      stage: "messaged" as Stage,
+      message_sent: finalMessage,
+      message_sent_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("prospects").update(updates).eq("id", selected.id);
+    if (!error) {
+      try {
+        await navigator.clipboard.writeText(finalMessage);
+      } catch {}
+      setProspects(prev => prev.map(p => p.id === selected.id ? { ...p, ...updates } : p));
+      setSelected({ ...selected, ...updates });
+      window.open(selected.profile_url || `https://instagram.com/${selected.username}`, "_blank", "noopener,noreferrer");
+    }
+    setSendingDm(false);
   }
 
   const byStage = (stage: Stage) => prospects.filter(p => p.stage === stage);
@@ -529,6 +551,12 @@ export default function PipelinePage() {
               <button onClick={() => { navigator.clipboard.writeText(dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "[name]")); }} style={{ marginTop: 8, width: "100%", padding: "9px 0", borderRadius: 9999, fontSize: 12.5, fontWeight: 500, cursor: "pointer", border: "1px solid var(--border-strong)", background: "var(--bg-panel)", color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>
                 Copy DM v{templateIdx + 1}
               </button>
+              <button onClick={() => void sendFirstDm()} disabled={sendingDm || selected.stage === "messaged"} className="btn-gold" style={{ marginTop: 10, width: "100%", justifyContent: "center", opacity: sendingDm || selected.stage === "messaged" ? 0.7 : 1 }}>
+                {selected.stage === "messaged" ? "Already in Message Sent" : sendingDm ? "Logging DM…" : "Send First DM"}
+              </button>
+              <div style={{ marginTop: 8, fontSize: 11.5, color: "var(--fg-dim)", lineHeight: 1.6 }}>
+                This logs the opener used, copies it, opens the profile, and moves the lead to <strong style={{ color: "var(--fg-muted)" }}>Message Sent</strong>.
+              </div>
             </div>
 
             <button onClick={() => void deleteProspect(selected.id)} style={{ marginTop: 12, width: "100%", padding: "10px 0", borderRadius: 9999, fontSize: 12.5, fontWeight: 600, cursor: "pointer", border: "1px solid rgba(248,113,113,0.28)", background: "rgba(248,113,113,0.08)", color: "#f87171", fontFamily: "var(--font-body)" }}>
