@@ -282,14 +282,14 @@ export default function PipelinePage() {
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {/* Kanban board */}
-        <div style={{ flex: 1, overflowX: "auto", padding: "20px 28px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{ flex: 1, overflowX: "auto", overflowY: "hidden", padding: "20px 28px", display: "flex", gap: 16, alignItems: "flex-start", scrollSnapType: "x proximity", WebkitOverflowScrolling: "touch" }}>
           {STAGES.filter(s => s.id !== "rejected").map(stage => (
             <div
               key={stage.id}
               ref={el => { stageRefs.current[stage.id] = el; }}
               onDragOver={handleDragOver}
               onDrop={e => handleDrop(e, stage.id)}
-              style={{ width: 240, flexShrink: 0, background: stage.color, border: `1px solid ${stage.accent}22`, borderRadius: 20, padding: "14px 12px", minHeight: 300 }}
+              style={{ width: 320, maxWidth: "78vw", flexShrink: 0, scrollSnapAlign: "start", background: stage.color, border: `1px solid ${stage.accent}22`, borderRadius: 20, padding: "14px 12px", minHeight: 300 }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 4px" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stage.accent }}>{stage.label}</div>
@@ -352,7 +352,7 @@ export default function PipelinePage() {
             ref={el => { stageRefs.current.rejected = el; }}
             onDragOver={handleDragOver}
             onDrop={e => handleDrop(e, "rejected")}
-            style={{ width: 160, flexShrink: 0, background: "rgba(248,113,113,0.04)", border: "1px solid rgba(248,113,113,0.1)", borderRadius: 20, padding: "14px 12px", minHeight: 300, opacity: 0.7 }}
+            style={{ width: 220, maxWidth: "72vw", flexShrink: 0, scrollSnapAlign: "start", background: "rgba(248,113,113,0.04)", border: "1px solid rgba(248,113,113,0.1)", borderRadius: 20, padding: "14px 12px", minHeight: 300, opacity: 0.7 }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#f87171", marginBottom: 14, padding: "0 4px" }}>Rejected <span style={{ marginLeft: 6, fontFamily: "var(--font-display)", fontSize: 12 }}>{counts["rejected"] || 0}</span></div>
             {byStage("rejected").map(p => (
