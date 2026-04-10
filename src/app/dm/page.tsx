@@ -6,6 +6,16 @@ import { supabase } from "@/lib/supabase";
 
 type Stage = "scraped" | "qualified" | "messaged" | "replied" | "interview_scheduled" | "hired" | "rejected";
 
+type QualificationChecks = {
+  ageFit?: boolean;
+  maleFit?: boolean;
+  socalFit?: boolean;
+  publicProfile?: boolean;
+  realProfile?: boolean;
+  athleteOrFrat?: boolean;
+  salesVibe?: boolean;
+};
+
 type Prospect = {
   id: string;
   created_at: string;
@@ -26,6 +36,9 @@ type Prospect = {
   message_sent: string;
   message_sent_at: string;
   interview_date: string;
+  qualification_checks?: QualificationChecks | null;
+  qualified_at?: string | null;
+  rejected_at?: string | null;
 };
 
 const STAGES: { id: Stage; label: string; color: string; accent: string }[] = [
@@ -40,6 +53,15 @@ const STAGES: { id: Stage; label: string; color: string; accent: string }[] = [
 
 const DAILY_DM_LIMIT = 30;
 const DM_STORAGE_KEY = "dm-templates-v1";
+const CHECK_OPTIONS: { key: keyof QualificationChecks; label: string }[] = [
+  { key: "ageFit", label: "18 to 25-ish" },
+  { key: "maleFit", label: "Male fit" },
+  { key: "socalFit", label: "SoCal / good market" },
+  { key: "publicProfile", label: "Public profile" },
+  { key: "realProfile", label: "Real personal account" },
+  { key: "athleteOrFrat", label: "Athlete / frat / competitive" },
+  { key: "salesVibe", label: "Sales / hustle vibe" },
+];
 
 const DEFAULT_DM_TEMPLATES = [
   `Hey [name], hope you're doing well. What are you doing for work right now, and would you be open to hearing about a sales opportunity?`,
@@ -80,6 +102,7 @@ export default function PipelinePage() {
   const [dmTemplates, setDmTemplates] = useState<string[]>(DEFAULT_DM_TEMPLATES);
   const [editingTemplateIdx, setEditingTemplateIdx] = useState<number | null>(null);
   const [editingTemplateText, setEditingTemplateText] = useState("");
+  const [qualificationChecks, setQualificationChecks] = useState<QualificationChecks>({});
   const stageRefs = useRef<Partial<Record<Stage, HTMLDivElement | null>>>({});
 
   useEffect(() => {
@@ -123,7 +146,10 @@ export default function PipelinePage() {
   async function saveSelected() {
     if (!selected) return;
     setSaving(true);
-    const updates: Record<string, string> = { notes: editNotes };
+    const updates: Record<string, string | QualificationChecks> = {
+      notes: editNotes,
+      qualification_checks: qualificationChecks,
+    };
     if (editPhone) updates.phone = editPhone;
     if (editInterview) updates.interview_date = editInterview;
     const { error } = await supabase.from("prospects").update(updates).eq("id", selected.id);
@@ -156,6 +182,7 @@ export default function PipelinePage() {
     setEditNotes(p.notes || "");
     setEditPhone(p.phone || "");
     setEditInterview(p.interview_date || "");
+    setQualificationChecks(p.qualification_checks || {});
   }
 
   function handleDragStart(id: string) { setDragId(id); }
@@ -194,10 +221,35 @@ export default function PipelinePage() {
     setTemplateIdx(0);
   }
 
+  async function updateQualificationCheck(key: keyof QualificationChecks, value: boolean) {
+    if (!selected) return;
+    const nextChecks = { ...qualificationChecks, [key]: value };
+    setQualificationChecks(nextChecks);
+    const nextScore = Object.values(nextChecks).filter(Boolean).length;
+    const { error } = await supabase.from("prospects").update({ qualification_checks: nextChecks, score: nextScore }).eq("id", selected.id);
+    if (!error) {
+      setProspects(prev => prev.map(p => p.id === selected.id ? { ...p, qualification_checks: nextChecks, score: nextScore } : p));
+      setSelected({ ...selected, qualification_checks: nextChecks, score: nextScore });
+    }
+  }
+
+  async function setQualificationOutcome(outcome: "qualified" | "rejected") {
+    if (!selected) return;
+    const updates = outcome === "qualified"
+      ? { stage: "qualified" as Stage, qualified_at: new Date().toISOString(), score: Object.values(qualificationChecks).filter(Boolean).length }
+      : { stage: "rejected" as Stage, rejected_at: new Date().toISOString(), score: Object.values(qualificationChecks).filter(Boolean).length };
+    const { error } = await supabase.from("prospects").update({ ...updates, qualification_checks: qualificationChecks }).eq("id", selected.id);
+    if (!error) {
+      setProspects(prev => prev.map(p => p.id === selected.id ? { ...p, ...updates, qualification_checks: qualificationChecks } : p));
+      setSelected({ ...selected, ...updates, qualification_checks: qualificationChecks });
+    }
+  }
+
   const byStage = (stage: Stage) => prospects.filter(p => p.stage === stage);
   const counts = Object.fromEntries(STAGES.map(s => [s.id, byStage(s.id).length]));
   const total = prospects.length;
   const dm = dmTemplates[templateIdx] || DEFAULT_DM_TEMPLATES[0];
+  const qualificationScore = Object.values(qualificationChecks).filter(Boolean).length;
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)", display: "flex", flexDirection: "column" }}>
@@ -327,7 +379,7 @@ export default function PipelinePage() {
                     {p.username && <div style={{ fontSize: 11.5, color: "var(--fg-dim)", marginBottom: 6 }}>@{p.username}</div>}
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {p.location && <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 9999, background: "rgba(255,255,255,0.06)", color: "var(--fg-muted)" }}>{p.location}</span>}
-                      {p.score > 0 && <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 9999, background: `${stage.accent}22`, color: stage.accent }}>score {p.score}</span>}
+                      {p.score > 0 && <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 9999, background: `${stage.accent}22`, color: stage.accent }}>score {p.score}/7</span>}
                     </div>
                     {(p.profile_url || p.username) && (
                       <a
@@ -410,6 +462,34 @@ export default function PipelinePage() {
                 {selected.bio}
               </div>
             )}
+
+            {/* Qualification */}
+            <div style={{ marginBottom: 18, padding: "14px", borderRadius: 16, border: "1px solid rgba(201,169,110,0.18)", background: "rgba(201,169,110,0.05)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>Qualification audit</div>
+                  <div style={{ fontSize: 13, color: "var(--fg-muted)", marginTop: 4 }}>Check the boxes, then pass or reject.</div>
+                </div>
+                <div style={{ padding: "6px 10px", borderRadius: 9999, border: "1px solid rgba(201,169,110,0.24)", background: "rgba(201,169,110,0.1)", color: "var(--accent-soft)", fontSize: 12.5, fontWeight: 700 }}>
+                  {qualificationScore}/7
+                </div>
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                {CHECK_OPTIONS.map(option => {
+                  const checked = Boolean(qualificationChecks[option.key]);
+                  return (
+                    <label key={option.key} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", padding: "8px 10px", borderRadius: 12, background: checked ? "rgba(201,169,110,0.08)" : "rgba(255,255,255,0.03)", border: `1px solid ${checked ? "rgba(201,169,110,0.22)" : "var(--border)"}` }}>
+                      <input type="checkbox" checked={checked} onChange={e => void updateQualificationCheck(option.key, e.target.checked)} />
+                      <span style={{ fontSize: 12.5, color: checked ? "var(--fg)" : "var(--fg-muted)" }}>{option.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                <button onClick={() => void setQualificationOutcome("qualified")} className="btn-gold" style={{ flex: 1, padding: "10px 12px" }}>Pass to Qualified</button>
+                <button onClick={() => void setQualificationOutcome("rejected")} style={{ flex: 1, padding: "10px 12px", borderRadius: 9999, border: "1px solid rgba(248,113,113,0.28)", background: "rgba(248,113,113,0.08)", color: "#f87171", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)" }}>Reject</button>
+              </div>
+            </div>
 
             {/* Phone */}
             <div style={{ marginBottom: 14 }}>
