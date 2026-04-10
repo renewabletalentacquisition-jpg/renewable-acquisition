@@ -307,6 +307,17 @@ export default function PipelinePage() {
                       {p.location && <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 9999, background: "rgba(255,255,255,0.06)", color: "var(--fg-muted)" }}>{p.location}</span>}
                       {p.score > 0 && <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 9999, background: `${stage.accent}22`, color: stage.accent }}>score {p.score}</span>}
                     </div>
+                    {(p.profile_url || p.username) && (
+                      <a
+                        href={p.profile_url || `https://instagram.com/${p.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 8, fontSize: 10.5, color: stage.accent, textDecoration: "none" }}
+                      >
+                        Open profile ↗
+                      </a>
+                    )}
                     <div style={{ fontSize: 10.5, color: "var(--fg-dim)", marginTop: 6 }}>{timeAgo(p.created_at)}</div>
                   </div>
                 ))
