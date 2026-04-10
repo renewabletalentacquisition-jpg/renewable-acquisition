@@ -86,6 +86,13 @@ function timeAgo(ts: string) {
   return "just now";
 }
 
+function getDmName(prospect?: Pick<Prospect, "full_name" | "username"> | null) {
+  const first = (prospect?.full_name || prospect?.username || "").trim().split(/\s+/)[0] || "";
+  const cleaned = first.replace(/[^a-zA-Z]/g, "");
+  const looksLegit = cleaned.length >= 3 && cleaned.length <= 14 && /^[A-Z][a-z]+$/.test(cleaned);
+  return looksLegit ? cleaned : "Bro";
+}
+
 export default function PipelinePage() {
   const router = useRouter();
   const [prospects, setProspects] = useState<Prospect[]>([]);
@@ -249,7 +256,7 @@ export default function PipelinePage() {
   async function sendFirstDm() {
     if (!selected) return;
     setSendingDm(true);
-    const finalMessage = dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "there");
+    const finalMessage = dm.replace("[name]", getDmName(selected));
     const updates = {
       stage: "messaged" as Stage,
       message_sent: finalMessage,
@@ -335,7 +342,7 @@ export default function PipelinePage() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   <button onClick={() => {
                     setTemplateIdx(i);
-                    navigator.clipboard.writeText(template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")).catch(() => {});
+                    navigator.clipboard.writeText(template.replace("[name]", getDmName(selected))).catch(() => {});
                   }} style={{ fontSize: 11.5, color: "var(--fg-muted)", background: "transparent", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-body)" }}>Copy</button>
                   <button onClick={() => {
                     setEditingTemplateIdx(i);
@@ -347,7 +354,7 @@ export default function PipelinePage() {
                 onClick={() => setTemplateIdx(i)}
                 style={{ display: "block", width: "100%", textAlign: "left", fontSize: 13, lineHeight: 1.7, color: "var(--fg-muted)", background: "transparent", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-body)" }}
               >
-                {template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")}
+                {template.replace("[name]", getDmName(selected))}
               </button>
             </div>
           ))}
@@ -546,9 +553,9 @@ export default function PipelinePage() {
                 </div>
               </div>
               <div style={{ padding: "12px 14px", borderRadius: 14, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", fontSize: 12.5, color: "var(--fg-muted)", lineHeight: 1.75 }}>
-                {dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "[name]")}
+                {dm.replace("[name]", getDmName(selected))}
               </div>
-              <button onClick={() => { navigator.clipboard.writeText(dm.replace("[name]", selected.full_name?.split(" ")[0] || selected.username || "[name]")); }} style={{ marginTop: 8, width: "100%", padding: "9px 0", borderRadius: 9999, fontSize: 12.5, fontWeight: 500, cursor: "pointer", border: "1px solid var(--border-strong)", background: "var(--bg-panel)", color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>
+              <button onClick={() => { navigator.clipboard.writeText(dm.replace("[name]", getDmName(selected))); }} style={{ marginTop: 8, width: "100%", padding: "9px 0", borderRadius: 9999, fontSize: 12.5, fontWeight: 500, cursor: "pointer", border: "1px solid var(--border-strong)", background: "var(--bg-panel)", color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>
                 Copy DM v{templateIdx + 1}
               </button>
               <button onClick={() => void sendFirstDm()} disabled={sendingDm || selected.stage === "messaged"} className="btn-gold" style={{ marginTop: 10, width: "100%", justifyContent: "center", opacity: sendingDm || selected.stage === "messaged" ? 0.7 : 1 }}>
