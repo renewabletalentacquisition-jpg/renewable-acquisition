@@ -39,8 +39,9 @@ const STAGES: { id: Stage; label: string; color: string; accent: string }[] = [
 ];
 
 const DAILY_DM_LIMIT = 30;
+const DM_STORAGE_KEY = "dm-templates-v1";
 
-const DM_TEMPLATES = [
+const DEFAULT_DM_TEMPLATES = [
   `Hey [name], hope you're doing well. What are you doing for work right now, and would you be open to hearing about a sales opportunity?`,
   `Hey [name], hope all is well. Just curious, what are you currently doing for work, and are you at all open to a sales opportunity?`,
   `What's up [name], hope you're doing good. What are you doing for work right now, and would you be open to exploring a sales opportunity?`,
@@ -76,6 +77,9 @@ export default function PipelinePage() {
   const [newProspect, setNewProspect] = useState({ username: "", full_name: "", profile_url: "", location: "", bio: "", scraped_from: "instagram" });
   const [dragId, setDragId] = useState<string | null>(null);
   const [templateIdx, setTemplateIdx] = useState(0);
+  const [dmTemplates, setDmTemplates] = useState<string[]>(DEFAULT_DM_TEMPLATES);
+  const [editingTemplateIdx, setEditingTemplateIdx] = useState<number | null>(null);
+  const [editingTemplateText, setEditingTemplateText] = useState("");
 
   useEffect(() => {
     const ok = typeof window !== "undefined" && window.localStorage.getItem("admin-auth") === "ok";
@@ -84,6 +88,19 @@ export default function PipelinePage() {
         if (!data.user) router.push("/admin/login");
       });
     }
+
+    if (typeof window !== "undefined") {
+      const savedTemplates = window.localStorage.getItem(DM_STORAGE_KEY);
+      if (savedTemplates) {
+        try {
+          const parsed = JSON.parse(savedTemplates);
+          if (Array.isArray(parsed) && parsed.length) {
+            setDmTemplates(parsed);
+          }
+        } catch {}
+      }
+    }
+
     void fetchProspects();
   }, [router]);
 
@@ -150,10 +167,32 @@ export default function PipelinePage() {
     setDragId(null);
   }
 
+  function saveTemplateEdit() {
+    if (editingTemplateIdx === null) return;
+    const next = [...dmTemplates];
+    next[editingTemplateIdx] = editingTemplateText.trim() || DEFAULT_DM_TEMPLATES[editingTemplateIdx];
+    setDmTemplates(next);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(DM_STORAGE_KEY, JSON.stringify(next));
+    }
+    setEditingTemplateIdx(null);
+    setEditingTemplateText("");
+  }
+
+  function resetTemplates() {
+    setDmTemplates(DEFAULT_DM_TEMPLATES);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(DM_STORAGE_KEY, JSON.stringify(DEFAULT_DM_TEMPLATES));
+    }
+    setEditingTemplateIdx(null);
+    setEditingTemplateText("");
+    setTemplateIdx(0);
+  }
+
   const byStage = (stage: Stage) => prospects.filter(p => p.stage === stage);
   const counts = Object.fromEntries(STAGES.map(s => [s.id, byStage(s.id).length]));
   const total = prospects.length;
-  const dm = DM_TEMPLATES[templateIdx];
+  const dm = dmTemplates[templateIdx] || DEFAULT_DM_TEMPLATES[0];
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)", display: "flex", flexDirection: "column" }}>
@@ -192,29 +231,42 @@ export default function PipelinePage() {
             <div style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--accent)" }}>DM Library</div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 28, lineHeight: 1, letterSpacing: "-0.03em", marginTop: 6 }}>10 rotating opener scripts</div>
           </div>
-          <div style={{ padding: "10px 14px", borderRadius: 9999, border: "1px solid rgba(201,169,110,0.25)", background: "rgba(201,169,110,0.08)", color: "var(--accent-soft)", fontSize: 12.5, fontWeight: 600 }}>
-            Daily cap: {DAILY_DM_LIMIT} DMs
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ padding: "10px 14px", borderRadius: 9999, border: "1px solid rgba(201,169,110,0.25)", background: "rgba(201,169,110,0.08)", color: "var(--accent-soft)", fontSize: 12.5, fontWeight: 600 }}>
+              Daily cap: {DAILY_DM_LIMIT} DMs
+            </div>
+            <button onClick={resetTemplates} style={{ padding: "10px 14px", borderRadius: 9999, border: "1px solid var(--border-strong)", background: "rgba(255,255,255,0.04)", color: "var(--fg-muted)", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+              Reset scripts
+            </button>
           </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, paddingBottom: 20 }}>
-          {DM_TEMPLATES.map((template, i) => (
-            <button
+          {dmTemplates.map((template, i) => (
+            <div
               key={i}
-              onClick={() => {
-                setTemplateIdx(i);
-                navigator.clipboard.writeText(template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")).catch(() => {});
-              }}
-              style={{ textAlign: "left", padding: "16px 18px", borderRadius: 20, border: `1px solid ${templateIdx === i ? "rgba(201,169,110,0.4)" : "var(--border)"}`, background: templateIdx === i ? "rgba(201,169,110,0.08)" : "rgba(255,255,255,0.03)", color: "var(--fg)", cursor: "pointer", transition: "all 0.18s ease" }}
+              style={{ textAlign: "left", padding: "16px 18px", borderRadius: 20, border: `1px solid ${templateIdx === i ? "rgba(201,169,110,0.4)" : "var(--border)"}`, background: templateIdx === i ? "rgba(201,169,110,0.08)" : "rgba(255,255,255,0.03)", color: "var(--fg)", transition: "all 0.18s ease" }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 10 }}>
                 <span style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: templateIdx === i ? "var(--accent-soft)" : "var(--fg-dim)", fontWeight: 700 }}>Version {i + 1}</span>
-                <span style={{ fontSize: 11.5, color: "var(--fg-muted)" }}>Copy</span>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <button onClick={() => {
+                    setTemplateIdx(i);
+                    navigator.clipboard.writeText(template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")).catch(() => {});
+                  }} style={{ fontSize: 11.5, color: "var(--fg-muted)", background: "transparent", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-body)" }}>Copy</button>
+                  <button onClick={() => {
+                    setEditingTemplateIdx(i);
+                    setEditingTemplateText(template);
+                  }} style={{ fontSize: 11.5, color: "var(--accent-soft)", background: "transparent", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-body)" }}>Edit</button>
+                </div>
               </div>
-              <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--fg-muted)" }}>
+              <button
+                onClick={() => setTemplateIdx(i)}
+                style={{ display: "block", width: "100%", textAlign: "left", fontSize: 13, lineHeight: 1.7, color: "var(--fg-muted)", background: "transparent", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-body)" }}
+              >
                 {template.replace("[name]", selected?.full_name?.split(" ")[0] || selected?.username || "First Name")}
-              </div>
-            </button>
+              </button>
+            </div>
           ))}
         </div>
       </section>
@@ -352,7 +404,7 @@ export default function PipelinePage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--fg-dim)" }}>DM Script</div>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  {DM_TEMPLATES.map((_, i) => (
+                  {dmTemplates.map((_, i) => (
                     <button key={i} onClick={() => setTemplateIdx(i)} style={{ minWidth: 22, height: 22, padding: "0 6px", borderRadius: 9999, fontSize: 10, fontWeight: 600, cursor: "pointer", border: `1px solid ${templateIdx === i ? "var(--accent)" : "var(--border)"}`, background: templateIdx === i ? "var(--accent)" : "var(--bg-panel)", color: templateIdx === i ? "#0d0b08" : "var(--fg-muted)", fontFamily: "var(--font-body)" }}>{i + 1}</button>
                   ))}
                 </div>
@@ -371,6 +423,28 @@ export default function PipelinePage() {
           </div>
         )}
       </div>
+
+      {editingTemplateIdx !== null && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 220, background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setEditingTemplateIdx(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-strong)", borderRadius: 28, padding: "28px 24px", width: "100%", maxWidth: 680 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>Edit script</div>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, letterSpacing: "-0.02em", margin: "6px 0 0" }}>Version {editingTemplateIdx + 1}</h2>
+              </div>
+              <button onClick={() => setEditingTemplateIdx(null)} style={{ padding: "6px 12px", borderRadius: 9999, fontSize: 12, cursor: "pointer", border: "1px solid var(--border)", background: "var(--bg-panel)", color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>✕</button>
+            </div>
+            <textarea value={editingTemplateText} onChange={e => setEditingTemplateText(e.target.value)} rows={8} style={{ width: "100%", padding: "14px 16px", borderRadius: 18, border: "1px solid var(--border-strong)", background: "rgba(255,255,255,0.03)", color: "var(--fg)", fontSize: 14, lineHeight: 1.7, fontFamily: "var(--font-body)", resize: "vertical", outline: "none" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 12, color: "var(--fg-dim)" }}>Use [name] where you want the first name inserted.</div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setEditingTemplateText(DEFAULT_DM_TEMPLATES[editingTemplateIdx])} className="btn-ghost" style={{ padding: "10px 16px" }}>Restore default</button>
+                <button onClick={saveTemplateEdit} className="btn-gold" style={{ padding: "10px 16px" }}>Save script</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add prospect modal */}
       {addOpen && (
