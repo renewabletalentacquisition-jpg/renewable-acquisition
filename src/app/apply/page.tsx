@@ -150,7 +150,7 @@ function ApplyForm() {
       const params = new URLSearchParams(searchParams.toString());
       const ops = buildApplicantOps(outcome, params);
 
-      const applicantPayload = {
+      const baseApplicantPayload = {
         first_name: answers.firstName,
         last_name: answers.lastName,
         email: answers.email,
@@ -166,9 +166,13 @@ function ApplyForm() {
         financial_stability: answers.financialStability,
         score,
         outcome,
+        heard_about: answers.heardAbout,
+      };
+
+      const applicantPayload = {
+        ...baseApplicantPayload,
         source: ops.source,
         source_detail: ops.sourceDetail,
-        heard_about: answers.heardAbout,
         utm_source: ops.utmSource,
         utm_medium: ops.utmMedium,
         utm_campaign: ops.utmCampaign,
@@ -180,7 +184,12 @@ function ApplyForm() {
         next_action: ops.nextAction,
       };
 
-      const { error: dbError } = await supabase.from("applicants").insert(applicantPayload);
+      let { error: dbError } = await supabase.from("applicants").insert(applicantPayload);
+
+      if (dbError && /column .*?(applicant_status|booking_status|priority_bucket|next_action|utm_|source_detail|source) .* does not exist|schema cache/i.test(dbError.message)) {
+        const retry = await supabase.from("applicants").insert(baseApplicantPayload);
+        dbError = retry.error;
+      }
 
       if (dbError) throw new Error(dbError.message);
 
