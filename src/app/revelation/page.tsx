@@ -39,15 +39,21 @@ const opportunity = [
 
 const proofSnapshot = [
   { value: "Sunrun", label: "Trusted company backing the opportunity" },
-  { value: "5", label: "Active closers on team snapshot" },
-  { value: "10+", label: "Productive setters currently in the field" },
+  { value: "Live", label: "Real recruiting funnel and interview flow" },
+  { value: "Proof", label: "Public team presence candidates can verify" },
   { value: "Apr 27", label: "Current summer ramp deadline" },
 ];
 
-const whyTrust = [
+const whyTrust: { title: string; body: string; ctaLabel?: string; ctaHref?: string }[] = [
   {
     title: "There is a real funnel behind this",
     body: "This is not a vague Instagram pitch. The application, qualification logic, and interview booking path are already live.",
+  },
+  {
+    title: "There is public proof behind it",
+    body: "Candidates can verify the brand and team presence directly, not just take a landing page at face value.",
+    ctaLabel: "View Empire Sunrun Instagram",
+    ctaHref: "https://www.instagram.com/empire.sunrun/",
   },
   {
     title: "The standards are stated upfront",
@@ -306,6 +312,28 @@ export default function RevelationPage() {
               <div key={item.title} style={{ padding: "28px 24px", background: "rgba(201,169,110,0.05)", border: "1px solid rgba(201,169,110,0.14)", borderRadius: 24 }}>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 600, letterSpacing: "-0.02em", color: "#fff", margin: "0 0 12px" }}>{item.title}</h3>
                 <p style={{ fontSize: 14, color: "rgba(255,255,255,0.52)", lineHeight: 1.75, margin: 0 }}>{item.body}</p>
+                {item.ctaHref && item.ctaLabel && (
+                  <a
+                    href={item.ctaHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      marginTop: 16,
+                      fontSize: 12,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "#0d0b08",
+                      background: "#c9a96e",
+                      textDecoration: "none",
+                      padding: "10px 16px",
+                      borderRadius: 9999,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {item.ctaLabel} ↗
+                  </a>
+                )}
               </div>
             ))}
           </div>
