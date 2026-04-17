@@ -161,6 +161,7 @@ export default function WarRoomPage() {
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             {[
               { label: "Team HQ", href: "/hq" },
+              { label: "Leads", href: "/leads" },
               { label: "Applicants", href: "/admin" },
               { label: "DM", href: "/dm" },
             ].map(link => (
