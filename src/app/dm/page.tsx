@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseConfigError } from "@/lib/supabase";
 
 type Stage = "scraped" | "qualified" | "messaged" | "replied" | "interview_scheduled" | "hired" | "rejected";
 
@@ -64,16 +64,26 @@ const CHECK_OPTIONS: { key: keyof QualificationChecks; label: string }[] = [
 ];
 
 const DEFAULT_DM_TEMPLATES = [
-  `Hey [name], hope you're doing well. What are you doing for work right now, and would you be open to hearing about a sales opportunity?`,
-  `Hey [name], hope all is well. Just curious, what are you currently doing for work, and are you at all open to a sales opportunity?`,
-  `What's up [name], hope you're doing good. What are you doing for work right now, and would you be open to exploring a sales opportunity?`,
-  `Hey [name], wanted to reach out and ask what you're currently doing for work. Also, are you closed off to sales, or would you be open to hearing about an opportunity?`,
-  `Yo [name], hope you're doing well. What are you currently doing for work, and are you open to a sales opportunity if it made sense?`,
-  `Hey [name], quick question, what are you doing for work right now, and would you be open to hearing about a sales position?`,
-  `What's going on [name], hope everything's been good. Are you working right now, and would you be open to a sales opportunity?`,
-  `Hey [name], hope your week's going well. What are you currently doing for work, and are you open to hearing about a possible sales opportunity?`,
-  `Hey [name], random question, what are you doing for work right now, and are you completely closed off to sales or open to hearing more?`,
-  `Hey [name], hope all is well with you. I wanted to ask what you're currently doing for work, and whether you'd be open to a sales opportunity.`,
+  `Hey [name], quick question, what are you doing for work right now?`,
+  `Yo [name], what lane of work are you in right now?`,
+  `Hey [name], are you pretty locked in with work right now or open to hearing about something else?`,
+  `What's up [name], what are you doing for work these days?`,
+  `Hey [name], random question, are you happy with what you're doing for work right now?`,
+  `Yo [name], are you open to hearing about a work opportunity if it made sense?`,
+  `Hey [name], I recruit for a sales team and wanted to see if you'd be open to hearing about it.`,
+  `What's going on [name], are you open to a serious opportunity right now if the fit was right?`,
+  `Hey [name], your profile stood out to me, are you open to hearing about a sales opportunity?`,
+  `Yo [name], not sure what you're doing for work right now, but are you open to hearing about something performance-based?`,
+  `Hey [name], quick one, would you be open to a position with real income upside if it made sense?`,
+  `What's up [name], are you open to a commission opportunity if the team and money were right?`,
+  `Hey [name], figured I'd ask directly, are you open to hearing about a new opportunity right now?`,
+  `Yo [name], you seem like someone who'd do well in a competitive environment, are you open to hearing about one?`,
+  `Hey [name], I think you could fit a role I'm hiring for, are you open to hearing the details?`,
+  `What's good [name], are you doing anything performance-based for work right now?`,
+  `Hey [name], if a stronger opportunity crossed your path right now, would you be open to looking at it?`,
+  `Yo [name], do you keep the door open to better work opportunities or are you pretty set where you're at?`,
+  `Hey [name], I wanted to reach out because I think you might fit what we're building, are you open to hearing about it?`,
+  `What's up [name], are you open to hearing about a role with upside, competition, and a serious team behind it?`,
 ];
 
 function timeAgo(ts: string) {
@@ -111,14 +121,19 @@ export default function PipelinePage() {
   const [editingTemplateText, setEditingTemplateText] = useState("");
   const [qualificationChecks, setQualificationChecks] = useState<QualificationChecks>({});
   const [sendingDm, setSendingDm] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const stageRefs = useRef<Partial<Record<Stage, HTMLDivElement | null>>>({});
 
   useEffect(() => {
     const ok = typeof window !== "undefined" && window.localStorage.getItem("admin-auth") === "ok";
+    if (!supabase) {
+      setLoadError(supabaseConfigError || "DM database is not configured.");
+      setLoading(false);
+      return;
+    }
     if (!ok) {
-      supabase.auth.getUser().then(({ data }) => {
-        if (!data.user) router.push("/admin/login");
-      });
+      router.push("/admin/login");
+      return;
     }
 
     if (typeof window !== "undefined") {
@@ -137,13 +152,27 @@ export default function PipelinePage() {
   }, [router]);
 
   async function fetchProspects() {
+    if (!supabase) {
+      setLoadError(supabaseConfigError || "DM database is not configured.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const { data } = await supabase.from("prospects").select("*").order("created_at", { ascending: false });
+    setLoadError("");
+    const { data, error } = await supabase.from("prospects").select("*").order("created_at", { ascending: false });
+    if (error) {
+      setProspects([]);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
+    }
     setProspects((data as Prospect[]) || []);
     setLoading(false);
   }
 
   async function moveStage(prospect: Prospect, newStage: Stage) {
+    if (!supabase) return;
     const { error } = await supabase.from("prospects").update({ stage: newStage, stage_updated_at: new Date().toISOString() }).eq("id", prospect.id);
     if (!error) {
       setProspects(prev => prev.map(p => p.id === prospect.id ? { ...p, stage: newStage } : p));
@@ -152,7 +181,7 @@ export default function PipelinePage() {
   }
 
   async function saveSelected() {
-    if (!selected) return;
+    if (!supabase || !selected) return;
     setSaving(true);
     const updates: Record<string, string | QualificationChecks> = {
       notes: editNotes,
@@ -169,7 +198,7 @@ export default function PipelinePage() {
   }
 
   async function addProspect() {
-    if (!newProspect.username) return;
+    if (!supabase || !newProspect.username) return;
     const { data, error } = await supabase.from("prospects").insert({ ...newProspect, stage: "scraped", score: 0 }).select().single();
     if (!error && data) {
       setProspects(prev => [data as Prospect, ...prev]);
@@ -179,7 +208,7 @@ export default function PipelinePage() {
   }
 
   async function deleteProspect(id: string) {
-    if (!window.confirm("Delete this prospect?")) return;
+    if (!supabase || !window.confirm("Delete this prospect?")) return;
     await supabase.from("prospects").delete().eq("id", id);
     setProspects(prev => prev.filter(p => p.id !== id));
     if (selected?.id === id) setSelected(null);
@@ -230,7 +259,7 @@ export default function PipelinePage() {
   }
 
   async function updateQualificationCheck(key: keyof QualificationChecks, value: boolean) {
-    if (!selected) return;
+    if (!supabase || !selected) return;
     const nextChecks = { ...qualificationChecks, [key]: value };
     setQualificationChecks(nextChecks);
     const nextScore = Object.values(nextChecks).filter(Boolean).length;
@@ -242,7 +271,7 @@ export default function PipelinePage() {
   }
 
   async function setQualificationOutcome(outcome: "qualified" | "rejected") {
-    if (!selected) return;
+    if (!supabase || !selected) return;
     const updates = outcome === "qualified"
       ? { stage: "qualified" as Stage, qualified_at: new Date().toISOString(), score: Object.values(qualificationChecks).filter(Boolean).length }
       : { stage: "rejected" as Stage, rejected_at: new Date().toISOString(), score: Object.values(qualificationChecks).filter(Boolean).length };
@@ -254,7 +283,7 @@ export default function PipelinePage() {
   }
 
   async function sendFirstDm() {
-    if (!selected) return;
+    if (!supabase || !selected) return;
     setSendingDm(true);
     const finalMessage = dm.replace("[name]", getDmName(selected));
     const updates = {
