@@ -5,44 +5,108 @@ import { useEffect, useMemo, useState } from "react";
 
 const chapters = [
   {
-    id: "bill",
+    id: "why-sunrun",
     number: "01",
-    label: "Current Bill",
-    headline: "Start with the bill they already have.",
-    copy: "Open with the bill on the table. The first decision point is not solar. It is whether the current utility path is still worth staying on.",
-    proof: ["Monthly cost", "Usage pattern", "Future exposure"],
+    label: "Why Sunrun",
+    headline: "Start with the company behind the system.",
+    copy: "Before the homeowner looks at numbers, they need confidence in who is installing, monitoring, and backing the project long term.",
+    proof: ["National scale", "Local install teams", "Long-term support"],
   },
   {
-    id: "pressure",
+    id: "utility-rates",
     number: "02",
-    label: "Rate Pressure",
-    headline: "The utility path is variable by design.",
-    copy: "Show the homeowner that doing nothing is still a choice. Staying with the utility means accepting future rate movement without control.",
-    proof: ["Rate increases", "Seasonal swings", "No ownership"],
+    label: "Utility Rates",
+    headline: "The current path keeps moving.",
+    copy: "Frame the utility as the comparison point. The bill is not fixed, and the homeowner does not control what the power company charges next.",
+    proof: ["Rate history", "Future exposure", "No control"],
   },
   {
-    id: "plan",
+    id: "delivery-charges",
     number: "03",
-    label: "Solar Plan",
-    headline: "The home becomes the source.",
-    copy: "Now move from problem to plan. Produce power at the home, reduce utility dependence, and create a cleaner long-term path.",
-    proof: ["System size", "Offset", "Battery option"],
+    label: "Delivery Charges",
+    headline: "They are not just paying for power.",
+    copy: "Separate energy usage from delivery and utility fees so the customer sees where the bill is really coming from.",
+    proof: ["Energy", "Delivery", "Fees"],
   },
   {
-    id: "compare",
+    id: "batteries",
     number: "04",
-    label: "Comparison",
-    headline: "The math decides the recommendation.",
-    copy: "Bring the numbers into one simple frame. When the payment beats the utility path, the close becomes a clear comparison.",
-    proof: ["Payment", "Savings", "Long-term value"],
+    label: "Batteries",
+    headline: "Backup power changes the conversation.",
+    copy: "Show the battery as protection, control, and future-proofing, especially when the home needs stability during outages or peak-rate windows.",
+    proof: ["Backup", "Peak control", "Resilience"],
   },
   {
-    id: "decision",
+    id: "incentives",
     number: "05",
-    label: "Decision",
+    label: "Incentives",
+    headline: "Use the available programs while they exist.",
+    copy: "Make incentives feel concrete and time-sensitive without overpromising. The homeowner should understand what helps the project pencil.",
+    proof: ["Federal credit", "Local programs", "Timing"],
+  },
+  {
+    id: "design",
+    number: "06",
+    label: "Design",
+    headline: "The system is built around this home.",
+    copy: "Move from concept to custom design. Roof planes, usage, sunlight, and the homeowner's goals all shape the recommendation.",
+    proof: ["Roof fit", "Production", "Offset"],
+  },
+  {
+    id: "bill-analysis",
+    number: "07",
+    label: "Bill Analysis",
+    headline: "Turn the current bill into the baseline.",
+    copy: "Walk through usage, seasonal spikes, and current monthly cost so the homeowner sees the real before-and-after comparison.",
+    proof: ["Usage", "Average cost", "Seasonality"],
+  },
+  {
+    id: "proposal",
+    number: "08",
+    label: "Proposal",
+    headline: "Bring the recommendation into one clear view.",
+    copy: "Present the plan cleanly: system, payment, savings, and what changes after install. The customer should not feel buried in details.",
+    proof: ["System", "Payment", "Savings"],
+  },
+  {
+    id: "rate-protection",
+    number: "09",
+    label: "Rate Protection",
+    headline: "The value is control over time.",
+    copy: "Tie the proposal back to the utility path. Solar is not only about today's bill; it is about reducing exposure to future increases.",
+    proof: ["Predictability", "Control", "Long-term spread"],
+  },
+  {
+    id: "warranties",
+    number: "10",
+    label: "Warranties",
+    headline: "The protection needs to be simple.",
+    copy: "Cover what is backed, who handles it, and how the homeowner gets help after the project is installed.",
+    proof: ["Panels", "Roof work", "Service"],
+  },
+  {
+    id: "installation-process",
+    number: "11",
+    label: "Installation Process",
+    headline: "Make the next few weeks feel predictable.",
+    copy: "Show the path from agreement to permission to operate so the customer knows what happens after saying yes.",
+    proof: ["Survey", "Permits", "Install"],
+  },
+  {
+    id: "qualifications",
+    number: "12",
+    label: "Qualifications",
+    headline: "Confirm the home and customer qualify.",
+    copy: "Use this as the calm checkpoint: roof, utility, credit, ownership, and any final details that determine whether the plan can move forward.",
+    proof: ["Home fit", "Utility fit", "Approval"],
+  },
+  {
+    id: "next-steps",
+    number: "13",
+    label: "Next Steps",
     headline: "If it qualifies and saves, move forward.",
-    copy: "Finish calm. Confirm they see the advantage, answer the final concern, then move the project into the next step.",
-    proof: ["Approval", "Site survey", "Install path"],
+    copy: "Finish with a clean decision frame. Confirm the advantage, answer the final concern, and move the project into the next step.",
+    proof: ["Approve plan", "Site survey", "Install path"],
   },
 ];
 
@@ -97,7 +161,7 @@ export default function PresentationPage() {
         </Link>
 
         <div className="pitch-actions">
-          <a href="#decision" className="pitch-start">
+          <a href="#next-steps" className="pitch-start">
             <span />
             Next Step
           </a>
@@ -107,6 +171,22 @@ export default function PresentationPage() {
           </a>
         </div>
       </header>
+
+      <aside className="pitch-side-nav" aria-label="Close presentation menu">
+        <div className="pitch-side-nav-inner">
+          <p>Close Menu</p>
+          {chapters.map((chapter) => (
+            <a
+              href={`#${chapter.id}`}
+              key={chapter.id}
+              className={chapter.id === activeChapter ? "active" : ""}
+            >
+              <span>{chapter.number}</span>
+              <strong>{chapter.label}</strong>
+            </a>
+          ))}
+        </div>
+      </aside>
 
       <section className="pitch-hero">
         <div className="pitch-sky" aria-hidden="true">
@@ -121,7 +201,7 @@ export default function PresentationPage() {
           <p>A live iPad presentation for walking the customer from bill pressure to a clear solar decision.</p>
         </div>
         <p className="pitch-hero-note reveal visible">
-          Flow through the close in order: bill, pressure, plan, comparison, and next step.
+          Flow through the close in order: trust, utility pressure, design, proposal, protection, and next step.
           No clutter on screen.
         </p>
       </section>
@@ -244,6 +324,82 @@ export default function PresentationPage() {
           -webkit-backdrop-filter: blur(18px);
         }
 
+        .pitch-side-nav {
+          position: fixed;
+          left: clamp(14px, 2vw, 28px);
+          top: 116px;
+          z-index: 150;
+          width: 224px;
+          max-height: calc(100svh - 142px);
+          padding: 10px;
+          border: 1px solid rgba(21, 51, 66, 0.16);
+          border-radius: 6px;
+          background: rgba(248, 236, 212, 0.86);
+          box-shadow: 0 28px 80px rgba(21, 51, 66, 0.14);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+        }
+
+        .pitch-side-nav-inner {
+          max-height: calc(100svh - 164px);
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(21, 51, 66, 0.32) transparent;
+        }
+
+        .pitch-side-nav p {
+          margin: 2px 8px 10px;
+          color: rgba(21, 51, 66, 0.58);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .pitch-side-nav a {
+          min-height: 40px;
+          display: grid;
+          grid-template-columns: 32px minmax(0, 1fr);
+          align-items: center;
+          gap: 8px;
+          padding: 7px 8px;
+          border-radius: 4px;
+          color: rgba(21, 51, 66, 0.7);
+          transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .pitch-side-nav a + a {
+          margin-top: 2px;
+        }
+
+        .pitch-side-nav a.active,
+        .pitch-side-nav a:hover {
+          background: rgba(255, 217, 115, 0.58);
+          color: var(--ink);
+          transform: translateX(2px);
+        }
+
+        .pitch-side-nav span {
+          width: 28px;
+          aspect-ratio: 1;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(21, 51, 66, 0.16);
+          border-radius: 50%;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .pitch-side-nav strong {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0;
+        }
+
         .pitch-brand {
           display: inline-flex;
           align-items: center;
@@ -318,7 +474,7 @@ export default function PresentationPage() {
         .pitch-hero {
           position: relative;
           min-height: 520px;
-          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px);
+          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px) clamp(270px, 24vw, 340px);
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
           gap: clamp(30px, 8vw, 110px);
@@ -412,13 +568,17 @@ export default function PresentationPage() {
           position: sticky;
           top: 90px;
           z-index: 120;
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          display: flex;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
           background: var(--solar-bright);
           border-bottom: 1px solid rgba(21, 51, 66, 0.16);
+          padding-left: clamp(260px, 23vw, 330px);
+          scrollbar-width: thin;
         }
 
         .pitch-chapters a {
+          flex: 0 0 clamp(170px, 18vw, 240px);
           min-height: 76px;
           display: grid;
           align-content: center;
@@ -426,6 +586,7 @@ export default function PresentationPage() {
           padding: 16px clamp(18px, 3vw, 48px);
           color: var(--ink);
           border-right: 1px solid rgba(21, 51, 66, 0.14);
+          scroll-snap-align: start;
           transition: background 0.2s ease;
         }
 
@@ -451,6 +612,7 @@ export default function PresentationPage() {
         .pitch-visual {
           position: relative;
           min-height: min(660px, 60vw);
+          margin-left: clamp(236px, 21vw, 300px);
           overflow: hidden;
           background:
             radial-gradient(circle at 20% 18%, rgba(255, 226, 132, 0.96) 0 10%, rgba(255, 226, 132, 0.24) 11% 21%, transparent 22%),
@@ -566,6 +728,7 @@ export default function PresentationPage() {
         .pitch-sections {
           position: relative;
           display: grid;
+          margin-left: clamp(236px, 21vw, 300px);
           background:
             linear-gradient(90deg, transparent calc(50% - 1px), rgba(21, 51, 66, 0.16) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
             linear-gradient(180deg, var(--cream), #f3dfbc);
@@ -593,7 +756,7 @@ export default function PresentationPage() {
           grid-template-columns: minmax(0, 1fr) minmax(290px, 0.56fr);
           gap: clamp(26px, 6vw, 80px);
           align-items: center;
-          padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
+          padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 72px);
           border-bottom: 1px solid rgba(21, 51, 66, 0.1);
           background:
             radial-gradient(circle at 8% 18%, rgba(255, 217, 115, 0.17), transparent 28%),
@@ -682,6 +845,7 @@ export default function PresentationPage() {
         }
 
         .pitch-close {
+          margin-left: clamp(236px, 21vw, 300px);
           padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
           background:
             radial-gradient(circle at 18% 0%, rgba(255, 217, 115, 0.18), transparent 30%),
@@ -742,7 +906,28 @@ export default function PresentationPage() {
           transform: translateY(0);
         }
 
+        @media (max-width: 1100px) {
+          .pitch-side-nav {
+            display: none;
+          }
+
+          .pitch-hero {
+            padding-left: clamp(22px, 4vw, 80px);
+          }
+
+          .pitch-chapters {
+            padding-left: 0;
+          }
+
+          .pitch-visual,
+          .pitch-sections,
+          .pitch-close {
+            margin-left: 0;
+          }
+        }
+
         @media (max-width: 900px) {
+
           .pitch-header {
             height: 78px;
           }
@@ -757,9 +942,6 @@ export default function PresentationPage() {
 
           .pitch-chapters {
             top: 82px;
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
           }
 
           .pitch-chapters a {
