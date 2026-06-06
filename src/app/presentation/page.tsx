@@ -203,6 +203,7 @@ const chapters = [
 
 export default function PresentationPage() {
   const [activeChapter, setActiveChapter] = useState(chapters[0].id);
+  const [navOpen, setNavOpen] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const activeIndex = useMemo(
@@ -214,6 +215,20 @@ export default function PresentationPage() {
     const handleScroll = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(maxScroll > 0 ? Math.min(100, (window.scrollY / maxScroll) * 100) : 0);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      if (window.innerWidth <= 1100) {
+        return;
+      }
+
+      const distanceFromRight = window.innerWidth - event.clientX;
+
+      if (distanceFromRight < 88) {
+        setNavOpen(true);
+      } else if (distanceFromRight > 380) {
+        setNavOpen(false);
+      }
     };
 
     const observer = new IntersectionObserver(
@@ -233,11 +248,13 @@ export default function PresentationPage() {
     });
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     handleScroll();
 
     return () => {
       observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
@@ -247,7 +264,6 @@ export default function PresentationPage() {
 
       <header className="pitch-header">
         <Link href="/" className="pitch-brand" aria-label="Renewable Acquisition home">
-          <span className="pitch-mark" />
           <span>Renewable Acquisition</span>
         </Link>
 
@@ -256,14 +272,27 @@ export default function PresentationPage() {
             <span />
             Next Step
           </a>
-          <a href="#chapters" className="pitch-menu" aria-label="Presentation menu">
+          <button
+            className="pitch-menu"
+            type="button"
+            aria-label="Presentation menu"
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen(true)}
+          >
             <span />
             <span />
-          </a>
+          </button>
         </div>
       </header>
 
-      <aside className="pitch-side-nav" aria-label="Close presentation menu">
+      <div className="pitch-side-hotzone" aria-hidden="true" onMouseEnter={() => setNavOpen(true)} />
+
+      <aside
+        className={`pitch-side-nav${navOpen ? " open" : ""}`}
+        aria-label="Close presentation menu"
+        onMouseEnter={() => setNavOpen(true)}
+        onMouseLeave={() => setNavOpen(false)}
+      >
         <div className="pitch-side-nav-inner">
           <p>Close Menu</p>
           {chapters.map((chapter) => (
@@ -271,6 +300,7 @@ export default function PresentationPage() {
               href={`#${chapter.id}`}
               key={chapter.id}
               className={chapter.id === activeChapter ? "active" : ""}
+              onClick={() => setNavOpen(false)}
             >
               <span>{chapter.number}</span>
               <strong>{chapter.label}</strong>
@@ -431,7 +461,7 @@ export default function PresentationPage() {
 
         .pitch-side-nav {
           position: fixed;
-          left: clamp(14px, 2vw, 28px);
+          right: clamp(12px, 1.8vw, 24px);
           top: 116px;
           z-index: 150;
           width: 224px;
@@ -443,6 +473,26 @@ export default function PresentationPage() {
           box-shadow: 0 28px 80px rgba(21, 51, 66, 0.14);
           backdrop-filter: blur(18px);
           -webkit-backdrop-filter: blur(18px);
+          opacity: 0;
+          pointer-events: none;
+          transform: translateX(calc(100% + 28px));
+          transition: opacity 0.2s ease, transform 0.28s ease;
+        }
+
+        .pitch-side-nav.open {
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateX(0);
+        }
+
+        .pitch-side-hotzone {
+          position: fixed;
+          top: 92px;
+          right: 0;
+          bottom: 0;
+          z-index: 140;
+          width: 42px;
+          pointer-events: auto;
         }
 
         .pitch-side-nav-inner {
@@ -481,7 +531,7 @@ export default function PresentationPage() {
         .pitch-side-nav a:hover {
           background: rgba(255, 217, 115, 0.58);
           color: var(--ink);
-          transform: translateX(2px);
+          transform: translateX(-2px);
         }
 
         .pitch-side-nav span {
@@ -508,25 +558,13 @@ export default function PresentationPage() {
         .pitch-brand {
           display: inline-flex;
           align-items: center;
-          gap: 12px;
+          gap: 0;
           color: var(--ink);
           font-family: var(--font-body);
           font-size: clamp(15px, 2.4vw, 24px);
           font-weight: 800;
           letter-spacing: 0;
           text-transform: uppercase;
-        }
-
-        .pitch-mark {
-          width: clamp(25px, 3vw, 34px);
-          aspect-ratio: 1;
-          display: inline-block;
-          border-radius: 50%;
-          background:
-            linear-gradient(90deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
-            linear-gradient(0deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
-            radial-gradient(circle at center, var(--solar) 0 23%, transparent 24%);
-          transform: rotate(45deg);
         }
 
         .pitch-actions {
@@ -566,7 +604,9 @@ export default function PresentationPage() {
           display: grid;
           place-items: center;
           border-radius: 999px;
+          border: 0;
           background: var(--ink);
+          cursor: pointer;
         }
 
         .pitch-menu span {
@@ -579,7 +619,7 @@ export default function PresentationPage() {
         .pitch-hero {
           position: relative;
           min-height: 520px;
-          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px) clamp(270px, 24vw, 340px);
+          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px);
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
           gap: clamp(30px, 8vw, 110px);
@@ -678,7 +718,6 @@ export default function PresentationPage() {
           scroll-snap-type: x mandatory;
           background: var(--solar-bright);
           border-bottom: 1px solid rgba(21, 51, 66, 0.16);
-          padding-left: clamp(260px, 23vw, 330px);
           scrollbar-width: thin;
         }
 
@@ -717,7 +756,6 @@ export default function PresentationPage() {
         .pitch-visual {
           position: relative;
           min-height: min(660px, 60vw);
-          margin-left: clamp(236px, 21vw, 300px);
           overflow: hidden;
           background:
             radial-gradient(circle at 20% 18%, rgba(255, 226, 132, 0.96) 0 10%, rgba(255, 226, 132, 0.24) 11% 21%, transparent 22%),
@@ -833,7 +871,6 @@ export default function PresentationPage() {
         .pitch-sections {
           position: relative;
           display: grid;
-          margin-left: clamp(236px, 21vw, 300px);
           background:
             linear-gradient(90deg, transparent calc(50% - 1px), rgba(21, 51, 66, 0.16) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
             linear-gradient(180deg, var(--cream), #f3dfbc);
@@ -1014,7 +1051,6 @@ export default function PresentationPage() {
         }
 
         .pitch-close {
-          margin-left: clamp(236px, 21vw, 300px);
           padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
           background:
             radial-gradient(circle at 18% 0%, rgba(255, 217, 115, 0.18), transparent 30%),
@@ -1076,16 +1112,9 @@ export default function PresentationPage() {
         }
 
         @media (max-width: 1100px) {
-          .pitch-side-nav {
+          .pitch-side-nav,
+          .pitch-side-hotzone {
             display: none;
-          }
-
-          .pitch-hero {
-            padding-left: clamp(22px, 4vw, 80px);
-          }
-
-          .pitch-chapters {
-            padding-left: 0;
           }
 
           .pitch-visual,
