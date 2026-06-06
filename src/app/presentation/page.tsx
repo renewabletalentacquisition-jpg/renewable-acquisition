@@ -1,73 +1,64 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
-const sections = [
+const chapters = [
   {
-    id: "opening",
-    eyebrow: "01 · Opening",
-    title: "A clearer path for your home energy.",
-    body: "Today is simple: understand what you pay now, compare it against a cleaner long-term option, and decide whether the numbers make sense for your home.",
-    visualTitle: "Current bill review",
-    visualMeta: "Utility baseline · homeowner profile · usage pattern",
+    id: "bill",
+    number: "01",
+    label: "Current Bill",
+    headline: "Start with the bill they already have.",
+    copy: "The first decision point is not solar. It is whether the current utility path is still worth staying on.",
+    proof: ["Monthly cost", "Usage pattern", "Future exposure"],
   },
   {
-    id: "problem",
-    eyebrow: "02 · The Problem",
-    title: "Utility costs are designed to keep moving.",
-    body: "Most homeowners are not looking for another bill. They are looking for control. The question is whether staying fully dependent on the utility is still the best financial decision.",
-    visualTitle: "Rate pressure",
-    visualMeta: "Historical increases · seasonal usage · future exposure",
+    id: "pressure",
+    number: "02",
+    label: "Rate Pressure",
+    headline: "The utility path is variable by design.",
+    copy: "A homeowner can ignore solar and still be making a decision. Staying with the utility means accepting future rate movement without control.",
+    proof: ["Rate increases", "Seasonal swings", "No ownership"],
   },
   {
-    id: "solution",
-    eyebrow: "03 · The Solution",
-    title: "Solar shifts the power conversation.",
-    body: "Instead of renting power month after month, the home can produce energy on-site and reduce dependence on rising utility rates.",
-    visualTitle: "System design",
-    visualMeta: "Panels · production · offset · battery options",
+    id: "plan",
+    number: "03",
+    label: "Solar Plan",
+    headline: "The home becomes the source.",
+    copy: "The proposal should make the shift obvious: produce power at the home, reduce utility dependence, and create a cleaner long-term path.",
+    proof: ["System size", "Offset", "Battery option"],
   },
   {
-    id: "numbers",
-    eyebrow: "04 · The Numbers",
-    title: "The close is in the comparison.",
-    body: "We look at what the utility path costs, what the solar path costs, and whether the monthly and long-term math creates a clear advantage.",
-    visualTitle: "Payment comparison",
-    visualMeta: "Monthly payment · avoided utility cost · long-term savings",
+    id: "compare",
+    number: "04",
+    label: "Comparison",
+    headline: "The math decides the recommendation.",
+    copy: "When the solar payment beats the utility path and the customer understands the difference, the close becomes a clear comparison.",
+    proof: ["Payment", "Savings", "Long-term value"],
   },
   {
-    id: "trust",
-    eyebrow: "05 · Trust",
-    title: "Backed by a real installation standard.",
-    body: "The decision should feel clear, documented, and supported. The homeowner should know who is involved, what happens next, and how the project moves from approval to install.",
-    visualTitle: "Company proof",
-    visualMeta: "Sunrun backing · project timeline · installation support",
-  },
-  {
-    id: "close",
-    eyebrow: "06 · Recommendation",
-    title: "If the numbers are better, the next step is simple.",
-    body: "When the home qualifies and the proposal creates a better path than the utility, the recommendation is to lock in the plan and move the project forward.",
-    visualTitle: "Next step",
-    visualMeta: "Approval · site survey · install path · homeowner decision",
+    id: "decision",
+    number: "05",
+    label: "Decision",
+    headline: "If it qualifies and saves, move forward.",
+    copy: "The close is calm: confirm the homeowner sees the advantage, answer the final concern, then move the project into the next step.",
+    proof: ["Approval", "Site survey", "Install path"],
   },
 ];
 
 export default function PresentationPage() {
-  const [activeSection, setActiveSection] = useState(sections[0].id);
+  const [activeChapter, setActiveChapter] = useState(chapters[0].id);
   const [progress, setProgress] = useState(0);
 
   const activeIndex = useMemo(
-    () => sections.findIndex((section) => section.id === activeSection),
-    [activeSection]
+    () => Math.max(0, chapters.findIndex((chapter) => chapter.id === activeChapter)),
+    [activeChapter]
   );
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(maxScroll > 0 ? Math.min(100, (scrollTop / maxScroll) * 100) : 0);
+      setProgress(maxScroll > 0 ? Math.min(100, (window.scrollY / maxScroll) * 100) : 0);
     };
 
     const observer = new IntersectionObserver(
@@ -75,14 +66,17 @@ export default function PresentationPage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible");
-            setActiveSection(entry.target.id);
+            setActiveChapter(entry.target.id);
           }
         });
       },
-      { rootMargin: "-35% 0px -45% 0px", threshold: 0.08 }
+      { rootMargin: "-34% 0px -44% 0px", threshold: 0.1 }
     );
 
-    document.querySelectorAll("[data-close-section]").forEach((section) => observer.observe(section));
+    document.querySelectorAll("[data-presentation-section]").forEach((section) => {
+      observer.observe(section);
+    });
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
@@ -93,443 +87,585 @@ export default function PresentationPage() {
   }, []);
 
   return (
-    <main className="presentation-shell">
-      <div className="presentation-progress" style={{ transform: `scaleX(${progress / 100})` }} />
+    <main className="pitch">
+      <div className="pitch-progress" style={{ transform: `scaleX(${progress / 100})` }} />
 
-      <nav className="presentation-nav" aria-label="Presentation sections">
-        <Link className="presentation-brand" href="/">
-          Renewable <span>Acquisition</span>
+      <header className="pitch-header">
+        <Link href="/" className="pitch-brand" aria-label="Renewable Acquisition home">
+          <span className="pitch-mark" />
+          <span>Renewable Acquisition</span>
         </Link>
-        <div className="presentation-steps">
-          {sections.map((section, index) => (
-            <a
-              key={section.id}
-              className={section.id === activeSection ? "active" : ""}
-              href={`#${section.id}`}
-              aria-label={section.title}
-            >
-              {String(index + 1).padStart(2, "0")}
-            </a>
-          ))}
+
+        <div className="pitch-actions">
+          <a href="#decision" className="pitch-start">
+            <span />
+            Next Step
+          </a>
+          <a href="#chapters" className="pitch-menu" aria-label="Presentation menu">
+            <span />
+            <span />
+          </a>
         </div>
+      </header>
+
+      <section className="pitch-hero">
+        <div className="pitch-hero-main reveal visible">
+          <h1>
+            Reduce Bills Restore <span>Control</span>
+          </h1>
+          <p>Solar presentation dashboard for a clean homeowner close.</p>
+        </div>
+        <p className="pitch-hero-note reveal visible">
+          Walk the customer through what they pay now, what keeps changing, and
+          the cleaner path available if the home qualifies.
+        </p>
+      </section>
+
+      <nav id="chapters" className="pitch-chapters" aria-label="Presentation chapters">
+        {chapters.map((chapter) => (
+          <a
+            href={`#${chapter.id}`}
+            key={chapter.id}
+            className={chapter.id === activeChapter ? "active" : ""}
+          >
+            <span>{chapter.number}</span>
+            <strong>{chapter.label}</strong>
+          </a>
+        ))}
       </nav>
 
-      <section className="presentation-hero" id="top">
-        <div className="presentation-hero-copy reveal visible">
-          <p className="presentation-kicker">Home Energy Presentation</p>
-          <h1>Control the bill before the bill controls the home.</h1>
-          <p>
-            A clean, numbers-first walkthrough for comparing the current utility path
-            against a solar-backed energy plan.
-          </p>
-        </div>
-        <div className="presentation-status reveal visible">
-          <p>Current Step</p>
-          <strong>{String(Math.max(activeIndex + 1, 1)).padStart(2, "0")}</strong>
-          <span>{sections[Math.max(activeIndex, 0)].title}</span>
+      <section className="pitch-visual" aria-label="Solar energy landscape">
+        <div className="pitch-sun" />
+        <div className="pitch-panel-grid" />
+        <div className="pitch-home-card">
+          <span>Home Energy Plan</span>
+          <strong>{chapters[activeIndex].label}</strong>
         </div>
       </section>
 
-      <div className="presentation-sections">
-        {sections.map((section, index) => (
+      <div className="pitch-sections">
+        {chapters.map((chapter) => (
           <section
-            key={section.id}
-            id={section.id}
-            className="presentation-section reveal"
-            data-close-section
+            id={chapter.id}
+            key={chapter.id}
+            className="pitch-section reveal"
+            data-presentation-section
           >
-            <div className="presentation-copy">
-              <p className="presentation-kicker">{section.eyebrow}</p>
-              <h2>{section.title}</h2>
-              <p>{section.body}</p>
-              <div className="presentation-talk-track">
-                <span>Talk Track</span>
-                <p>
-                  This space is reserved for the exact words Sir uses in the home,
-                  tightened into a clean closing sequence.
-                </p>
-              </div>
+            <div className="pitch-section-copy">
+              <p>{chapter.number} · {chapter.label}</p>
+              <h2>{chapter.headline}</h2>
+              <span>{chapter.copy}</span>
             </div>
 
-            <div className="presentation-visual" aria-label={section.visualTitle}>
-              <div className="presentation-visual-index">{String(index + 1).padStart(2, "0")}</div>
-              <div>
-                <p>{section.visualTitle}</p>
-                <span>{section.visualMeta}</span>
-              </div>
+            <div className="pitch-proof">
+              {chapter.proof.map((item, index) => (
+                <div key={item}>
+                  <small>{String(index + 1).padStart(2, "0")}</small>
+                  <strong>{item}</strong>
+                </div>
+              ))}
             </div>
           </section>
         ))}
       </div>
 
-      <section className="presentation-final reveal">
-        <p className="presentation-kicker">Decision Point</p>
-        <h2>The right move is the one the numbers support.</h2>
-        <div className="presentation-final-grid">
+      <section className="pitch-close reveal">
+        <p>Final Frame</p>
+        <h2>The best option should feel obvious before the signature.</h2>
+        <div className="pitch-close-grid">
           <div>
-            <span>Utility path</span>
-            <strong>Variable</strong>
+            <span>Current path</span>
+            <strong>Utility decides</strong>
           </div>
           <div>
             <span>Solar path</span>
-            <strong>Controlled</strong>
+            <strong>Home controls</strong>
           </div>
           <div>
-            <span>Next step</span>
-            <strong>Approve</strong>
+            <span>Move forward</span>
+            <strong>Approve plan</strong>
           </div>
         </div>
       </section>
 
       <style jsx>{`
-        .presentation-shell {
+        .pitch {
           min-height: 100vh;
           overflow-x: hidden;
-          background:
-            radial-gradient(ellipse 75% 45% at 50% -10%, rgba(201, 169, 110, 0.14), transparent),
-            linear-gradient(180deg, #08080a 0%, #0d0d10 42%, #08080a 100%);
-          color: var(--fg);
+          background: #f4e4cc;
+          color: #183444;
+          --cream: #f4e4cc;
+          --cream-deep: #ecd4af;
+          --ink: #183444;
+          --ink-soft: rgba(24, 52, 68, 0.72);
+          --yellow: #f2c54f;
+          --lime: #74ff58;
+          --line: rgba(24, 52, 68, 0.18);
         }
 
-        .presentation-progress {
+        .pitch-progress {
           position: fixed;
-          top: 0;
-          left: 0;
-          z-index: 250;
+          inset: 0 auto auto 0;
+          z-index: 300;
           width: 100%;
-          height: 3px;
-          background: var(--accent);
+          height: 4px;
+          background: var(--lime);
           transform-origin: left center;
-          box-shadow: 0 0 18px rgba(201, 169, 110, 0.42);
         }
 
-        .presentation-nav {
+        .pitch-header {
           position: fixed;
-          top: 3px;
+          top: 4px;
           left: 0;
           right: 0;
           z-index: 200;
-          min-height: 68px;
-          padding: 0 clamp(18px, 4vw, 42px);
+          height: 86px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 18px;
-          border-bottom: 1px solid var(--border);
-          background: rgba(8, 8, 10, 0.78);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          padding: 0 clamp(22px, 4vw, 48px);
+          border-bottom: 1px solid var(--line);
+          background: rgba(244, 228, 204, 0.86);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
         }
 
-        .presentation-brand {
-          font-family: var(--font-display);
-          font-size: clamp(19px, 2.6vw, 25px);
-          font-weight: 600;
-          letter-spacing: -0.01em;
-          color: var(--fg);
-          white-space: nowrap;
-        }
-
-        .presentation-brand span {
-          color: var(--accent);
-        }
-
-        .presentation-steps {
-          display: flex;
+        .pitch-brand {
+          display: inline-flex;
           align-items: center;
-          gap: 8px;
-        }
-
-        .presentation-steps a {
-          width: clamp(38px, 5vw, 48px);
-          height: clamp(38px, 5vw, 48px);
-          display: grid;
-          place-items: center;
-          border: 1px solid var(--border);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.035);
-          color: var(--fg-muted);
-          font-size: 12px;
-          font-weight: 600;
-          transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-        }
-
-        .presentation-steps a.active,
-        .presentation-steps a:hover {
-          background: var(--accent);
-          border-color: var(--accent);
-          color: #0d0b08;
-        }
-
-        .presentation-hero {
-          min-height: 94svh;
-          padding: clamp(120px, 16vw, 180px) clamp(20px, 5vw, 56px) clamp(64px, 10vw, 110px);
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-          gap: clamp(30px, 6vw, 72px);
-          align-items: end;
-          max-width: 1380px;
-          margin: 0 auto;
-        }
-
-        .presentation-hero-copy {
-          max-width: 820px;
-        }
-
-        .presentation-kicker {
-          margin: 0 0 18px;
-          color: var(--accent-soft);
-          font-size: clamp(10px, 1.5vw, 12px);
-          font-weight: 600;
-          letter-spacing: 0.2em;
+          gap: 12px;
+          color: var(--ink);
+          font-family: var(--font-body);
+          font-size: clamp(15px, 2.4vw, 24px);
+          font-weight: 800;
+          letter-spacing: -0.03em;
           text-transform: uppercase;
         }
 
-        .presentation-hero h1,
-        .presentation-section h2,
-        .presentation-final h2 {
-          margin: 0;
-          font-family: var(--font-display);
-          font-weight: 600;
-          letter-spacing: -0.02em;
-          line-height: 0.96;
-          color: var(--fg);
+        .pitch-mark {
+          width: clamp(25px, 3vw, 34px);
+          aspect-ratio: 1;
+          display: inline-block;
+          border-radius: 50%;
+          background:
+            linear-gradient(90deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
+            linear-gradient(0deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
+            radial-gradient(circle at center, var(--yellow) 0 23%, transparent 24%);
+          transform: rotate(45deg);
         }
 
-        .presentation-hero h1 {
-          max-width: 860px;
-          font-size: clamp(58px, 9vw, 126px);
+        .pitch-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
         }
 
-        .presentation-hero-copy > p:last-child {
-          max-width: 670px;
-          margin: 28px 0 0;
-          color: var(--fg-muted);
-          font-size: clamp(17px, 2.3vw, 22px);
-          line-height: 1.62;
-        }
-
-        .presentation-status {
-          border: 1px solid var(--border);
-          border-radius: 28px;
-          background: rgba(255, 255, 255, 0.048);
-          padding: 28px;
-        }
-
-        .presentation-status p,
-        .presentation-status span {
-          margin: 0;
-          color: var(--fg-muted);
+        .pitch-start {
+          min-height: 48px;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 18px 8px 8px;
+          border-radius: 999px;
+          border: 1px solid rgba(24, 52, 68, 0.1);
+          background: var(--yellow);
+          color: var(--ink);
           font-size: 13px;
-          line-height: 1.55;
+          font-weight: 800;
+          box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.32);
         }
 
-        .presentation-status strong {
+        .pitch-start span {
+          width: 34px;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background:
+            radial-gradient(circle at 45% 42%, #fff 0 9%, transparent 10%),
+            radial-gradient(circle at 58% 58%, #fff 0 7%, transparent 8%),
+            #70481c;
+        }
+
+        .pitch-menu {
+          width: 56px;
+          height: 56px;
+          display: grid;
+          place-items: center;
+          gap: 0;
+          border-radius: 999px;
+          background: var(--ink);
+        }
+
+        .pitch-menu span {
+          width: 22px;
+          height: 2px;
           display: block;
-          margin: 8px 0 10px;
-          color: var(--accent);
+          background: #f7ead5;
+        }
+
+        .pitch-hero {
+          min-height: 440px;
+          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(70px, 9vw, 108px);
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
+          gap: clamp(30px, 8vw, 110px);
+          align-items: start;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .pitch-hero-main h1 {
+          max-width: 1000px;
+          margin: 0;
+          color: var(--ink);
           font-family: var(--font-display);
-          font-size: 72px;
+          font-size: clamp(58px, 7.8vw, 118px);
+          font-weight: 700;
+          letter-spacing: -0.05em;
           line-height: 0.9;
         }
 
-        .presentation-sections {
-          display: grid;
-          gap: clamp(26px, 4vw, 44px);
-          max-width: 1380px;
-          margin: 0 auto;
-          padding: 0 clamp(20px, 5vw, 56px) clamp(42px, 8vw, 90px);
+        .pitch-hero-main h1 span {
+          display: inline-block;
+          padding: 0 10px 6px;
+          background: rgba(116, 255, 88, 0.22);
+          outline: 5px solid var(--lime);
+          outline-offset: -4px;
+          color: #163244;
         }
 
-        .presentation-section {
-          min-height: min(780px, calc(100svh - 92px));
-          scroll-margin-top: 92px;
+        .pitch-hero-main p,
+        .pitch-hero-note {
+          margin: 20px 0 0;
+          color: var(--ink-soft);
+          font-family: var(--font-body);
+          font-size: clamp(17px, 2.1vw, 23px);
+          line-height: 1.36;
+          letter-spacing: -0.02em;
+        }
+
+        .pitch-hero-note {
+          margin-top: 8px;
+          max-width: 380px;
+          font-size: clamp(15px, 1.6vw, 18px);
+          line-height: 1.45;
+        }
+
+        .pitch-chapters {
           display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
-          gap: clamp(24px, 5vw, 60px);
-          align-items: stretch;
-          padding: clamp(24px, 4vw, 46px);
-          border: 1px solid var(--border);
-          border-radius: 34px;
+          grid-template-columns: repeat(5, 1fr);
+          background: var(--yellow);
+          border-bottom: 1px solid rgba(24, 52, 68, 0.16);
+        }
+
+        .pitch-chapters a {
+          min-height: 76px;
+          display: grid;
+          align-content: center;
+          gap: 14px;
+          padding: 16px clamp(18px, 3vw, 48px);
+          color: var(--ink);
+          border-right: 1px solid rgba(24, 52, 68, 0.14);
+          transition: background 0.2s ease;
+        }
+
+        .pitch-chapters a.active,
+        .pitch-chapters a:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pitch-chapters span {
+          font-size: 15px;
+          color: rgba(24, 52, 68, 0.8);
+        }
+
+        .pitch-chapters strong {
+          font-size: clamp(14px, 1.5vw, 18px);
+          font-weight: 500;
+        }
+
+        .pitch-chapters strong::before {
+          content: "• ";
+        }
+
+        .pitch-visual {
+          position: relative;
+          min-height: min(620px, 58vw);
+          overflow: hidden;
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)),
-            rgba(255, 255, 255, 0.02);
+            radial-gradient(circle at 74% 24%, rgba(255, 255, 255, 0.72) 0 8%, transparent 9%),
+            radial-gradient(circle at 82% 32%, rgba(255, 255, 255, 0.58) 0 11%, transparent 12%),
+            radial-gradient(circle at 18% 70%, rgba(38, 119, 92, 0.95) 0 13%, transparent 14%),
+            radial-gradient(circle at 28% 58%, rgba(102, 149, 77, 0.9) 0 14%, transparent 15%),
+            radial-gradient(circle at 62% 48%, rgba(194, 145, 77, 0.65) 0 12%, transparent 13%),
+            linear-gradient(135deg, #d3b070 0%, #ead29c 38%, #9d9f57 62%, #276d65 100%);
         }
 
-        .presentation-copy {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          min-width: 0;
+        .pitch-sun {
+          position: absolute;
+          left: 8%;
+          bottom: 10%;
+          width: 34vw;
+          aspect-ratio: 1.4;
+          border-radius: 48%;
+          background:
+            repeating-linear-gradient(90deg, rgba(17, 52, 68, 0.62) 0 18px, rgba(17, 52, 68, 0.9) 18px 21px, rgba(255,255,255,0.18) 21px 23px);
+          transform: rotate(-10deg);
+          opacity: 0.92;
+          box-shadow: 0 28px 80px rgba(24, 52, 68, 0.24);
         }
 
-        .presentation-section h2 {
-          max-width: 580px;
-          font-size: clamp(42px, 6vw, 82px);
+        .pitch-panel-grid {
+          position: absolute;
+          right: 11%;
+          top: 20%;
+          width: 30vw;
+          aspect-ratio: 1.2;
+          border-radius: 12px;
+          background:
+            repeating-linear-gradient(0deg, rgba(244, 228, 204, 0.16) 0 2px, transparent 2px 36px),
+            repeating-linear-gradient(90deg, rgba(244, 228, 204, 0.2) 0 2px, transparent 2px 52px),
+            #143342;
+          transform: rotate(8deg);
+          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
         }
 
-        .presentation-section .presentation-copy > p:not(.presentation-kicker) {
-          max-width: 590px;
-          margin: 24px 0 0;
-          color: var(--fg-muted);
-          font-size: clamp(17px, 2vw, 20px);
-          line-height: 1.7;
+        .pitch-home-card {
+          position: absolute;
+          left: clamp(22px, 4vw, 80px);
+          bottom: clamp(22px, 4vw, 52px);
+          min-width: min(420px, calc(100% - 44px));
+          padding: 26px;
+          border: 1px solid rgba(255, 255, 255, 0.38);
+          border-radius: 28px;
+          background: rgba(244, 228, 204, 0.76);
+          backdrop-filter: blur(12px);
+          color: var(--ink);
         }
 
-        .presentation-talk-track {
-          margin-top: clamp(28px, 5vw, 56px);
-          max-width: 560px;
-          padding-top: 22px;
-          border-top: 1px solid var(--border);
-        }
-
-        .presentation-talk-track span {
-          color: var(--accent-soft);
+        .pitch-home-card span {
+          display: block;
+          margin-bottom: 10px;
           font-size: 12px;
-          font-weight: 700;
+          font-weight: 800;
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
 
-        .presentation-talk-track p {
-          margin: 10px 0 0;
-          color: rgba(244, 243, 240, 0.78);
-          font-size: clamp(15px, 1.8vw, 18px);
-          line-height: 1.68;
-        }
-
-        .presentation-visual {
-          position: relative;
-          min-height: 460px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 28px;
-          padding: clamp(24px, 4vw, 36px);
-          background:
-            linear-gradient(180deg, transparent 0%, rgba(8, 8, 10, 0.2) 42%, rgba(8, 8, 10, 0.92) 100%),
-            radial-gradient(ellipse 60% 60% at 50% 22%, rgba(201, 169, 110, 0.18), transparent),
-            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 64px),
-            repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 64px),
-            #111114;
-        }
-
-        .presentation-visual-index {
-          position: absolute;
-          top: clamp(18px, 3vw, 30px);
-          right: clamp(18px, 3vw, 30px);
-          color: rgba(244, 243, 240, 0.08);
-          font-family: var(--font-display);
-          font-size: clamp(90px, 13vw, 160px);
-          font-weight: 600;
-          line-height: 0.8;
-        }
-
-        .presentation-visual p {
-          position: relative;
-          margin: 0 0 10px;
-          font-family: var(--font-display);
-          color: var(--fg);
-          font-size: clamp(34px, 5vw, 58px);
-          line-height: 1;
-        }
-
-        .presentation-visual span {
-          position: relative;
+        .pitch-home-card strong {
           display: block;
-          max-width: 460px;
-          color: var(--fg-muted);
-          font-size: clamp(14px, 1.7vw, 17px);
-          line-height: 1.6;
+          font-family: var(--font-display);
+          font-size: clamp(42px, 5vw, 70px);
+          line-height: 0.92;
+          letter-spacing: -0.04em;
         }
 
-        .presentation-final {
-          max-width: 1380px;
-          margin: 0 auto;
-          padding: clamp(52px, 8vw, 96px) clamp(20px, 5vw, 56px) clamp(80px, 10vw, 130px);
-        }
-
-        .presentation-final h2 {
-          max-width: 920px;
-          font-size: clamp(46px, 7vw, 94px);
-        }
-
-        .presentation-final-grid {
+        .pitch-sections {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          margin-top: clamp(28px, 5vw, 56px);
         }
 
-        .presentation-final-grid div {
-          min-height: 150px;
-          padding: 24px;
-          border: 1px solid var(--border);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.045);
+        .pitch-section {
+          min-height: min(820px, 92svh);
+          scroll-margin-top: 98px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(290px, 0.56fr);
+          gap: clamp(26px, 6vw, 80px);
+          align-items: center;
+          padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
+          border-bottom: 1px solid var(--line);
+          background: var(--cream);
         }
 
-        .presentation-final-grid span {
-          display: block;
-          color: var(--fg-muted);
+        .pitch-section:nth-child(even) {
+          background: #efd9b9;
+        }
+
+        .pitch-section-copy p,
+        .pitch-close p {
+          margin: 0 0 24px;
+          color: rgba(24, 52, 68, 0.74);
           font-size: 13px;
-          letter-spacing: 0.12em;
+          font-weight: 800;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
         }
 
-        .presentation-final-grid strong {
-          display: block;
-          margin-top: 20px;
-          color: var(--fg);
+        .pitch-section-copy h2,
+        .pitch-close h2 {
+          max-width: 880px;
+          margin: 0;
+          color: var(--ink);
           font-family: var(--font-display);
-          font-size: clamp(38px, 5vw, 64px);
-          line-height: 1;
+          font-size: clamp(48px, 7vw, 104px);
+          font-weight: 700;
+          letter-spacing: -0.05em;
+          line-height: 0.92;
+        }
+
+        .pitch-section-copy span {
+          display: block;
+          max-width: 620px;
+          margin-top: 28px;
+          color: var(--ink-soft);
+          font-size: clamp(17px, 2vw, 22px);
+          line-height: 1.48;
+          letter-spacing: -0.02em;
+        }
+
+        .pitch-proof {
+          display: grid;
+          gap: 14px;
+        }
+
+        .pitch-proof div {
+          min-height: 118px;
+          display: grid;
+          align-content: space-between;
+          padding: 22px;
+          border: 1px solid rgba(24, 52, 68, 0.18);
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.22);
+        }
+
+        .pitch-proof small {
+          color: rgba(24, 52, 68, 0.55);
+          font-size: 13px;
+        }
+
+        .pitch-proof strong {
+          font-family: var(--font-display);
+          color: var(--ink);
+          font-size: clamp(30px, 3.7vw, 48px);
+          line-height: 0.96;
+          letter-spacing: -0.04em;
+        }
+
+        .pitch-close {
+          padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
+          background: var(--ink);
+          color: var(--cream);
+        }
+
+        .pitch-close p,
+        .pitch-close h2 {
+          color: var(--cream);
+        }
+
+        .pitch-close h2 {
+          max-width: 980px;
+        }
+
+        .pitch-close-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+          margin-top: clamp(38px, 6vw, 74px);
+        }
+
+        .pitch-close-grid div {
+          min-height: 160px;
+          display: grid;
+          align-content: space-between;
+          padding: 24px;
+          border: 1px solid rgba(244, 228, 204, 0.18);
+          border-radius: 28px;
+          background: rgba(244, 228, 204, 0.06);
+        }
+
+        .pitch-close-grid span {
+          color: rgba(244, 228, 204, 0.66);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .pitch-close-grid strong {
+          color: var(--cream);
+          font-family: var(--font-display);
+          font-size: clamp(32px, 4vw, 58px);
+          line-height: 0.95;
+          letter-spacing: -0.04em;
+        }
+
+        .reveal {
+          opacity: 0;
+          transform: translateY(26px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+          opacity: 1;
+          transform: translateY(0);
         }
 
         @media (max-width: 900px) {
-          .presentation-nav {
-            align-items: flex-start;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 104px;
-            padding-top: 14px;
-            padding-bottom: 14px;
+          .pitch-header {
+            height: 78px;
           }
 
-          .presentation-steps {
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 2px;
+          .pitch-brand {
+            max-width: 58vw;
           }
 
-          .presentation-hero,
-          .presentation-section {
+          .pitch-hero {
             grid-template-columns: 1fr;
           }
 
-          .presentation-hero {
+          .pitch-chapters {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+          }
+
+          .pitch-chapters a {
+            min-width: 42vw;
+            scroll-snap-align: start;
+          }
+
+          .pitch-visual {
+            min-height: 520px;
+          }
+
+          .pitch-sun {
+            width: 56vw;
+          }
+
+          .pitch-panel-grid {
+            width: 48vw;
+          }
+
+          .pitch-section {
             min-height: auto;
-            padding-top: 150px;
+            grid-template-columns: 1fr;
           }
 
-          .presentation-status {
-            max-width: 420px;
+          .pitch-proof {
+            grid-template-columns: repeat(3, 1fr);
           }
 
-          .presentation-section {
-            min-height: auto;
-            border-radius: 28px;
-          }
-
-          .presentation-visual {
-            min-height: 360px;
+          .pitch-close-grid {
+            grid-template-columns: 1fr;
           }
         }
 
-        @media (max-width: 640px) {
-          .presentation-final-grid {
+        @media (max-width: 620px) {
+          .pitch-start {
+            display: none;
+          }
+
+          .pitch-hero {
+            padding-top: 124px;
+          }
+
+          .pitch-hero-main h1 {
+            font-size: clamp(50px, 16vw, 72px);
+          }
+
+          .pitch-chapters a {
+            min-width: 74vw;
+          }
+
+          .pitch-proof {
             grid-template-columns: 1fr;
           }
         }
