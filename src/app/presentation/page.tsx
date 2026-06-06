@@ -8,16 +8,16 @@ const chapters = [
     id: "why-sunrun",
     number: "01",
     label: "Why Sunrun",
-    headline: "Start with a company they can trust.",
-    caption: "National provider. Local project. One clear path after install.",
-    visual: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1400&q=82",
+    headline: "Start with the company behind the home.",
+    caption: "Sunrun reports $1.3B+ in customer savings and 659,000+ outage events powered through.",
+    visual: "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?auto=format&fit=crop&w=1400&q=82",
     frame: "Trust first.",
-    talk: "Sunrun stands behind the system, the monitoring, and the service path.",
+    talk: "This is not just panels. It is the company, service path, monitoring, and long-term energy plan.",
     bridge: "Then compare that against the utility path they already pay.",
     proof: [
-      { label: "Known Name", detail: "Less risk." },
-      { label: "One Partner", detail: "Design to service." },
-      { label: "After Install", detail: "Clear support." },
+      { label: "$1.3B", detail: "Customer savings." },
+      { label: "659K+", detail: "Outages backed up." },
+      { label: "32.4B kWh", detail: "Solar generated." },
     ],
   },
   {
@@ -25,15 +25,15 @@ const chapters = [
     number: "02",
     label: "Utility Rates",
     headline: "The utility bill is the competitor.",
-    caption: "Doing nothing still means buying power every month.",
+    caption: "FERC shows residential electricity costs can vary widely by state and utility territory.",
     visual: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1400&q=82",
     frame: "The bill moves.",
-    talk: "Rates, seasons, usage, and utility decisions decide what they pay.",
+    talk: "Rates, peak hours, seasons, fuel costs, and infrastructure spending show up on the homeowner's bill.",
     bridge: "Now break the bill into energy, delivery, and fees.",
     proof: [
-      { label: "Rate Changes", detail: "No permission." },
-      { label: "Hot Months", detail: "Highest pain." },
-      { label: "No Control", detail: "Renting power." },
+      { label: "11c-42.69c", detail: "FERC cost range." },
+      { label: "Peak Hours", detail: "Higher pain." },
+      { label: "No Vote", detail: "Rates change." },
     ],
   },
   {
@@ -41,7 +41,7 @@ const chapters = [
     number: "03",
     label: "Delivery Charges",
     headline: "They pay for power and the pipeline.",
-    caption: "The bill is more than usage. Delivery and fees stack up.",
+    caption: "Grid upkeep, transmission, distribution, taxes, and riders can stack beyond usage.",
     visual: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=1400&q=82",
     frame: "Show the layers.",
     talk: "Point at supply, delivery, taxes, riders, and extra bill lines.",
@@ -57,10 +57,10 @@ const chapters = [
     number: "04",
     label: "Batteries",
     headline: "Batteries make solar feel like control.",
-    caption: "Stored power turns solar from savings into protection.",
+    caption: "Sunrun: use more of your own energy and less of the utility's.",
     visual: "https://images.unsplash.com/photo-1593941707882-a5bba53b0998?auto=format&fit=crop&w=1400&q=82",
     frame: "Control the home.",
-    talk: "Keep essentials on, store solar, and reduce grid dependence.",
+    talk: "Battery storage changes the close from bill savings to comfort, backup, and independence.",
     bridge: "Now show the timing window created by incentives.",
     proof: [
       { label: "Backup", detail: "Essentials on." },
@@ -90,7 +90,7 @@ const chapters = [
     label: "Design",
     headline: "Now it becomes their home.",
     caption: "The roof, shade, usage, and battery fit make the plan personal.",
-    visual: "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?auto=format&fit=crop&w=1400&q=82",
+    visual: "https://images.unsplash.com/photo-1655300283246-1ef0317a565d?auto=format&fit=crop&w=1400&q=82",
     frame: "Custom design.",
     talk: "Show why panels go where they go and what the system is built to offset.",
     bridge: "Then use their actual bill as the baseline.",
@@ -137,7 +137,7 @@ const chapters = [
     number: "09",
     label: "Rate Protection",
     headline: "Control over time beats guessing.",
-    caption: "Solar is the hedge against a utility path they do not control.",
+    caption: "Grid costs, outages, and peak demand are the pain. Home energy is the alternative.",
     visual: "https://images.unsplash.com/photo-1509390144018-eeaf65052242?auto=format&fit=crop&w=1400&q=82",
     frame: "Reduce exposure.",
     talk: "The more rates move, the more control matters.",
@@ -214,6 +214,29 @@ const chapters = [
   },
 ];
 
+const researchCards = [
+  {
+    source: "Sunrun Impact",
+    quote: "Power through more than 659,000 outages",
+    detail: "Sunrun says solar-plus-storage systems helped customers power through more than 659,000 outages.",
+  },
+  {
+    source: "Sunrun Battery",
+    quote: "Use more of your own energy",
+    detail: "Battery storage lets homeowners use more stored solar before pulling from the grid.",
+  },
+  {
+    source: "DOE Grid",
+    quote: "Generated right where it is used",
+    detail: "DOE describes distributed energy as power generated where it is used, with batteries helping when solar is not producing.",
+  },
+  {
+    source: "EIA / FERC",
+    quote: "The system is constantly challenged",
+    detail: "2024 brought major outage hours, while retail electricity costs vary heavily by state and utility territory.",
+  },
+];
+
 export default function PresentationPage() {
   const [activeChapter, setActiveChapter] = useState(chapters[0].id);
   const [navOpen, setNavOpen] = useState(false);
@@ -249,14 +272,16 @@ export default function PresentationPage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("visible");
-            setActiveChapter(entry.target.id);
+            if (entry.target.hasAttribute("data-presentation-section")) {
+              setActiveChapter(entry.target.id);
+            }
           }
         });
       },
       { rootMargin: "-34% 0px -44% 0px", threshold: 0.1 }
     );
 
-    document.querySelectorAll("[data-presentation-section]").forEach((section) => {
+    document.querySelectorAll(".reveal").forEach((section) => {
       observer.observe(section);
     });
 
@@ -323,6 +348,7 @@ export default function PresentationPage() {
       </aside>
 
       <section className="pitch-hero">
+        <div className="pitch-hero-photo" aria-hidden="true" />
         <div className="pitch-sky" aria-hidden="true">
           <span />
           <span />
@@ -330,12 +356,12 @@ export default function PresentationPage() {
         </div>
         <div className="pitch-hero-main reveal visible">
           <h1>
-            Visual Solar Close <span>Built To Flow</span>
+            Home Solar Close <span>Built On Proof</span>
           </h1>
-          <p>A live iPad presentation with big solar visuals, quick captions, and a clean path from trust to next step.</p>
+          <p>A live iPad close that shows the homeowner the roof, the bill, the grid problem, and why Sunrun solar plus storage is the alternative.</p>
         </div>
         <p className="pitch-hero-note reveal visible">
-          Fewer words. Stronger pictures. Faster customer understanding.
+          Real research. Real pain points. Quick captions.
         </p>
       </section>
 
@@ -361,6 +387,22 @@ export default function PresentationPage() {
         <div className="pitch-home-card">
           <span>Home Energy Plan</span>
           <strong>{chapters[activeIndex].label}</strong>
+        </div>
+      </section>
+
+      <section className="pitch-research reveal" aria-label="Solar and grid research">
+        <div className="pitch-research-copy">
+          <p>Research Frame</p>
+          <h2>The grid is the pain. The home is the opportunity.</h2>
+        </div>
+        <div className="pitch-research-grid">
+          {researchCards.map((card) => (
+            <div key={card.source}>
+              <small>{card.source}</small>
+              <strong>{card.quote}</strong>
+              <span>{card.detail}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -643,7 +685,7 @@ export default function PresentationPage() {
 
         .pitch-hero {
           position: relative;
-          min-height: 520px;
+          min-height: 640px;
           padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px);
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
@@ -652,8 +694,8 @@ export default function PresentationPage() {
           overflow: hidden;
           border-bottom: 1px solid var(--line);
           background:
-            radial-gradient(circle at 18% 18%, rgba(255, 217, 115, 0.72) 0 9%, transparent 10%),
-            linear-gradient(180deg, rgba(143, 197, 212, 0.56), rgba(248, 236, 212, 0.78) 56%, rgba(245, 226, 191, 0.98));
+            linear-gradient(90deg, rgba(245, 226, 191, 0.98) 0 42%, rgba(245, 226, 191, 0.78) 58%, rgba(21, 51, 66, 0.18) 100%),
+            linear-gradient(180deg, rgba(143, 197, 212, 0.36), rgba(248, 236, 212, 0.62) 56%, rgba(245, 226, 191, 0.98));
         }
 
         .pitch-hero::after {
@@ -668,6 +710,27 @@ export default function PresentationPage() {
             #173e51;
           transform: rotate(-3deg);
           box-shadow: 0 -28px 80px rgba(21, 51, 66, 0.13);
+        }
+
+        .pitch-hero-photo {
+          position: absolute;
+          inset: 90px 0 0 auto;
+          width: min(58vw, 920px);
+          background:
+            linear-gradient(90deg, rgba(245, 226, 191, 0.42), rgba(21, 51, 66, 0.12) 35%, rgba(21, 51, 66, 0.38)),
+            url("https://images.unsplash.com/photo-1655300283246-1ef0317a565d?auto=format&fit=crop&w=1800&q=84");
+          background-position: center;
+          background-size: cover;
+          filter: saturate(1.04) contrast(1.02);
+        }
+
+        .pitch-hero-photo::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, transparent 0 64%, rgba(21, 51, 66, 0.62)),
+            repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 64px);
         }
 
         .pitch-sky {
@@ -698,7 +761,7 @@ export default function PresentationPage() {
         }
 
         .pitch-hero-main h1 {
-          max-width: 1040px;
+          max-width: 980px;
           margin: 0;
           color: var(--ink);
           font-family: var(--font-display);
@@ -732,6 +795,11 @@ export default function PresentationPage() {
           max-width: 380px;
           font-size: clamp(15px, 1.6vw, 18px);
           line-height: 1.45;
+          padding: 18px;
+          border: 1px solid rgba(21, 51, 66, 0.14);
+          border-radius: 6px;
+          background: rgba(248, 236, 212, 0.72);
+          backdrop-filter: blur(10px);
         }
 
         .pitch-chapters {
@@ -890,6 +958,78 @@ export default function PresentationPage() {
           font-family: var(--font-display);
           font-size: clamp(42px, 5vw, 70px);
           line-height: 0.92;
+          letter-spacing: 0;
+        }
+
+        .pitch-research {
+          display: grid;
+          grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
+          gap: clamp(24px, 5vw, 72px);
+          padding: clamp(62px, 8vw, 104px) clamp(22px, 4vw, 72px);
+          background:
+            linear-gradient(135deg, rgba(21, 51, 66, 0.96), rgba(18, 71, 74, 0.92)),
+            #153342;
+          color: var(--cream);
+        }
+
+        .pitch-research-copy p {
+          margin: 0 0 20px;
+          color: rgba(255, 217, 115, 0.82);
+          font-size: 13px;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .pitch-research-copy h2 {
+          max-width: 560px;
+          margin: 0;
+          font-family: var(--font-display);
+          font-size: clamp(44px, 5.4vw, 86px);
+          line-height: 0.92;
+          letter-spacing: 0;
+        }
+
+        .pitch-research-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .pitch-research-grid div {
+          min-height: 190px;
+          display: grid;
+          align-content: space-between;
+          gap: 16px;
+          padding: 22px;
+          border: 1px solid rgba(245, 226, 191, 0.18);
+          border-radius: 6px;
+          background:
+            linear-gradient(135deg, rgba(255, 217, 115, 0.12), rgba(245, 226, 191, 0.04)),
+            rgba(245, 226, 191, 0.06);
+        }
+
+        .pitch-research-grid small {
+          color: rgba(245, 226, 191, 0.62);
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .pitch-research-grid strong {
+          color: var(--solar-bright);
+          font-family: var(--font-display);
+          font-size: clamp(34px, 4vw, 58px);
+          line-height: 0.95;
+          letter-spacing: 0;
+        }
+
+        .pitch-research-grid span {
+          color: rgba(245, 226, 191, 0.76);
+          font-size: clamp(14px, 1.4vw, 17px);
+          font-weight: 650;
+          line-height: 1.34;
           letter-spacing: 0;
         }
 
@@ -1196,6 +1336,7 @@ export default function PresentationPage() {
           }
 
           .pitch-visual,
+          .pitch-research,
           .pitch-sections,
           .pitch-close {
             margin-left: 0;
@@ -1214,6 +1355,13 @@ export default function PresentationPage() {
 
           .pitch-hero {
             grid-template-columns: 1fr;
+          }
+
+          .pitch-hero-photo {
+            inset: 78px 0 auto;
+            width: 100%;
+            height: 44%;
+            opacity: 0.42;
           }
 
           .pitch-chapters {
@@ -1254,6 +1402,10 @@ export default function PresentationPage() {
             grid-template-columns: 1fr;
           }
 
+          .pitch-research {
+            grid-template-columns: 1fr;
+          }
+
           .pitch-section::before,
           .pitch-section::after,
           .pitch-sections::before {
@@ -1284,14 +1436,19 @@ export default function PresentationPage() {
 
           .pitch-hero {
             padding-top: 124px;
+            min-height: 610px;
           }
 
           .pitch-hero-main h1 {
-            font-size: clamp(50px, 16vw, 72px);
+            font-size: clamp(48px, 15vw, 70px);
           }
 
           .pitch-chapters a {
             min-width: 74vw;
+          }
+
+          .pitch-research-grid {
+            grid-template-columns: 1fr;
           }
 
           .pitch-proof {
