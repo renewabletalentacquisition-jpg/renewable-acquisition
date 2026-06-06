@@ -9,7 +9,7 @@ const chapters = [
     number: "01",
     label: "Current Bill",
     headline: "Start with the bill they already have.",
-    copy: "The first decision point is not solar. It is whether the current utility path is still worth staying on.",
+    copy: "Open with the bill on the table. The first decision point is not solar. It is whether the current utility path is still worth staying on.",
     proof: ["Monthly cost", "Usage pattern", "Future exposure"],
   },
   {
@@ -17,7 +17,7 @@ const chapters = [
     number: "02",
     label: "Rate Pressure",
     headline: "The utility path is variable by design.",
-    copy: "A homeowner can ignore solar and still be making a decision. Staying with the utility means accepting future rate movement without control.",
+    copy: "Show the homeowner that doing nothing is still a choice. Staying with the utility means accepting future rate movement without control.",
     proof: ["Rate increases", "Seasonal swings", "No ownership"],
   },
   {
@@ -25,7 +25,7 @@ const chapters = [
     number: "03",
     label: "Solar Plan",
     headline: "The home becomes the source.",
-    copy: "The proposal should make the shift obvious: produce power at the home, reduce utility dependence, and create a cleaner long-term path.",
+    copy: "Now move from problem to plan. Produce power at the home, reduce utility dependence, and create a cleaner long-term path.",
     proof: ["System size", "Offset", "Battery option"],
   },
   {
@@ -33,7 +33,7 @@ const chapters = [
     number: "04",
     label: "Comparison",
     headline: "The math decides the recommendation.",
-    copy: "When the solar payment beats the utility path and the customer understands the difference, the close becomes a clear comparison.",
+    copy: "Bring the numbers into one simple frame. When the payment beats the utility path, the close becomes a clear comparison.",
     proof: ["Payment", "Savings", "Long-term value"],
   },
   {
@@ -41,7 +41,7 @@ const chapters = [
     number: "05",
     label: "Decision",
     headline: "If it qualifies and saves, move forward.",
-    copy: "The close is calm: confirm the homeowner sees the advantage, answer the final concern, then move the project into the next step.",
+    copy: "Finish calm. Confirm they see the advantage, answer the final concern, then move the project into the next step.",
     proof: ["Approval", "Site survey", "Install path"],
   },
 ];
@@ -109,15 +109,20 @@ export default function PresentationPage() {
       </header>
 
       <section className="pitch-hero">
+        <div className="pitch-sky" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
         <div className="pitch-hero-main reveal visible">
           <h1>
-            Reduce Bills Restore <span>Control</span>
+            Solar Close Built For <span>Homeowners</span>
           </h1>
-          <p>Solar presentation dashboard for a clean homeowner close.</p>
+          <p>A live iPad presentation for walking the customer from bill pressure to a clear solar decision.</p>
         </div>
         <p className="pitch-hero-note reveal visible">
-          Walk the customer through what they pay now, what keeps changing, and
-          the cleaner path available if the home qualifies.
+          Flow through the close in order: bill, pressure, plan, comparison, and next step.
+          No clutter on screen.
         </p>
       </section>
 
@@ -134,9 +139,12 @@ export default function PresentationPage() {
         ))}
       </nav>
 
-      <section className="pitch-visual" aria-label="Solar energy landscape">
+      <section className="pitch-visual" aria-label="Solar home energy landscape">
+        <div className="pitch-orbit" />
         <div className="pitch-sun" />
-        <div className="pitch-panel-grid" />
+        <div className="pitch-panel-grid pitch-panel-grid-a" />
+        <div className="pitch-panel-grid pitch-panel-grid-b" />
+        <div className="pitch-house" />
         <div className="pitch-home-card">
           <span>Home Energy Plan</span>
           <strong>{chapters[activeIndex].label}</strong>
@@ -192,15 +200,20 @@ export default function PresentationPage() {
         .pitch {
           min-height: 100vh;
           overflow-x: hidden;
-          background: #f4e4cc;
-          color: #183444;
-          --cream: #f4e4cc;
-          --cream-deep: #ecd4af;
-          --ink: #183444;
-          --ink-soft: rgba(24, 52, 68, 0.72);
-          --yellow: #f2c54f;
-          --lime: #74ff58;
-          --line: rgba(24, 52, 68, 0.18);
+          background:
+            linear-gradient(180deg, rgba(255, 247, 224, 0.84), rgba(239, 214, 174, 0.78) 34%, rgba(197, 221, 205, 0.66) 70%, rgba(19, 56, 68, 0.96) 100%),
+            repeating-linear-gradient(112deg, rgba(23, 72, 87, 0.07) 0 2px, transparent 2px 54px),
+            #f3dfbc;
+          color: #153342;
+          --cream: #f5e2bf;
+          --sand: #f8ecd4;
+          --ink: #153342;
+          --ink-soft: rgba(21, 51, 66, 0.72);
+          --solar: #f3b338;
+          --solar-bright: #ffd973;
+          --leaf: #2d8a78;
+          --panel: #173e51;
+          --line: rgba(21, 51, 66, 0.17);
         }
 
         .pitch-progress {
@@ -209,7 +222,7 @@ export default function PresentationPage() {
           z-index: 300;
           width: 100%;
           height: 4px;
-          background: var(--lime);
+          background: linear-gradient(90deg, var(--solar), var(--leaf), var(--panel));
           transform-origin: left center;
         }
 
@@ -226,7 +239,7 @@ export default function PresentationPage() {
           gap: 18px;
           padding: 0 clamp(22px, 4vw, 48px);
           border-bottom: 1px solid var(--line);
-          background: rgba(244, 228, 204, 0.86);
+          background: rgba(248, 236, 212, 0.84);
           backdrop-filter: blur(18px);
           -webkit-backdrop-filter: blur(18px);
         }
@@ -239,7 +252,7 @@ export default function PresentationPage() {
           font-family: var(--font-body);
           font-size: clamp(15px, 2.4vw, 24px);
           font-weight: 800;
-          letter-spacing: -0.03em;
+          letter-spacing: 0;
           text-transform: uppercase;
         }
 
@@ -251,7 +264,7 @@ export default function PresentationPage() {
           background:
             linear-gradient(90deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
             linear-gradient(0deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
-            radial-gradient(circle at center, var(--yellow) 0 23%, transparent 24%);
+            radial-gradient(circle at center, var(--solar) 0 23%, transparent 24%);
           transform: rotate(45deg);
         }
 
@@ -268,8 +281,8 @@ export default function PresentationPage() {
           gap: 10px;
           padding: 8px 18px 8px 8px;
           border-radius: 999px;
-          border: 1px solid rgba(24, 52, 68, 0.1);
-          background: var(--yellow);
+          border: 1px solid rgba(21, 51, 66, 0.1);
+          background: var(--solar-bright);
           color: var(--ink);
           font-size: 13px;
           font-weight: 800;
@@ -291,7 +304,6 @@ export default function PresentationPage() {
           height: 56px;
           display: grid;
           place-items: center;
-          gap: 0;
           border-radius: 999px;
           background: var(--ink);
         }
@@ -300,35 +312,81 @@ export default function PresentationPage() {
           width: 22px;
           height: 2px;
           display: block;
-          background: #f7ead5;
+          background: var(--sand);
         }
 
         .pitch-hero {
-          min-height: 440px;
-          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(70px, 9vw, 108px);
+          position: relative;
+          min-height: 520px;
+          padding: clamp(136px, 16vw, 174px) clamp(22px, 4vw, 80px) clamp(104px, 12vw, 156px);
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
           gap: clamp(30px, 8vw, 110px);
           align-items: start;
+          overflow: hidden;
           border-bottom: 1px solid var(--line);
+          background:
+            radial-gradient(circle at 18% 18%, rgba(255, 217, 115, 0.72) 0 9%, transparent 10%),
+            linear-gradient(180deg, rgba(143, 197, 212, 0.56), rgba(248, 236, 212, 0.78) 56%, rgba(245, 226, 191, 0.98));
+        }
+
+        .pitch-hero::after {
+          content: "";
+          position: absolute;
+          left: -8%;
+          right: -8%;
+          bottom: -86px;
+          height: 190px;
+          background:
+            repeating-linear-gradient(101deg, rgba(21, 51, 66, 0.82) 0 18px, rgba(31, 83, 99, 0.94) 18px 24px, rgba(255,255,255,0.18) 24px 27px, rgba(21,51,66,0.76) 27px 58px),
+            #173e51;
+          transform: rotate(-3deg);
+          box-shadow: 0 -28px 80px rgba(21, 51, 66, 0.13);
+        }
+
+        .pitch-sky {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          overflow: hidden;
+        }
+
+        .pitch-sky span {
+          position: absolute;
+          left: 15%;
+          top: 20%;
+          width: 72vw;
+          height: 2px;
+          background: rgba(21, 51, 66, 0.16);
+          transform-origin: left center;
+        }
+
+        .pitch-sky span:nth-child(1) { transform: rotate(13deg); }
+        .pitch-sky span:nth-child(2) { transform: rotate(22deg); top: 25%; opacity: 0.6; }
+        .pitch-sky span:nth-child(3) { transform: rotate(31deg); top: 30%; opacity: 0.38; }
+
+        .pitch-hero-main,
+        .pitch-hero-note {
+          position: relative;
+          z-index: 2;
         }
 
         .pitch-hero-main h1 {
-          max-width: 1000px;
+          max-width: 1040px;
           margin: 0;
           color: var(--ink);
           font-family: var(--font-display);
           font-size: clamp(58px, 7.8vw, 118px);
           font-weight: 700;
-          letter-spacing: -0.05em;
+          letter-spacing: 0;
           line-height: 0.9;
         }
 
         .pitch-hero-main h1 span {
           display: inline-block;
           padding: 0 10px 6px;
-          background: rgba(116, 255, 88, 0.22);
-          outline: 5px solid var(--lime);
+          background: rgba(255, 217, 115, 0.42);
+          outline: 5px solid var(--solar);
           outline-offset: -4px;
           color: #163244;
         }
@@ -340,7 +398,7 @@ export default function PresentationPage() {
           font-family: var(--font-body);
           font-size: clamp(17px, 2.1vw, 23px);
           line-height: 1.36;
-          letter-spacing: -0.02em;
+          letter-spacing: 0;
         }
 
         .pitch-hero-note {
@@ -351,10 +409,13 @@ export default function PresentationPage() {
         }
 
         .pitch-chapters {
+          position: sticky;
+          top: 90px;
+          z-index: 120;
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          background: var(--yellow);
-          border-bottom: 1px solid rgba(24, 52, 68, 0.16);
+          background: var(--solar-bright);
+          border-bottom: 1px solid rgba(21, 51, 66, 0.16);
         }
 
         .pitch-chapters a {
@@ -364,18 +425,18 @@ export default function PresentationPage() {
           gap: 14px;
           padding: 16px clamp(18px, 3vw, 48px);
           color: var(--ink);
-          border-right: 1px solid rgba(24, 52, 68, 0.14);
+          border-right: 1px solid rgba(21, 51, 66, 0.14);
           transition: background 0.2s ease;
         }
 
         .pitch-chapters a.active,
         .pitch-chapters a:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.26);
         }
 
         .pitch-chapters span {
           font-size: 15px;
-          color: rgba(24, 52, 68, 0.8);
+          color: rgba(21, 51, 66, 0.8);
         }
 
         .pitch-chapters strong {
@@ -384,49 +445,92 @@ export default function PresentationPage() {
         }
 
         .pitch-chapters strong::before {
-          content: "• ";
+          content: ". ";
         }
 
         .pitch-visual {
           position: relative;
-          min-height: min(620px, 58vw);
+          min-height: min(660px, 60vw);
           overflow: hidden;
           background:
-            radial-gradient(circle at 74% 24%, rgba(255, 255, 255, 0.72) 0 8%, transparent 9%),
-            radial-gradient(circle at 82% 32%, rgba(255, 255, 255, 0.58) 0 11%, transparent 12%),
-            radial-gradient(circle at 18% 70%, rgba(38, 119, 92, 0.95) 0 13%, transparent 14%),
-            radial-gradient(circle at 28% 58%, rgba(102, 149, 77, 0.9) 0 14%, transparent 15%),
-            radial-gradient(circle at 62% 48%, rgba(194, 145, 77, 0.65) 0 12%, transparent 13%),
-            linear-gradient(135deg, #d3b070 0%, #ead29c 38%, #9d9f57 62%, #276d65 100%);
+            radial-gradient(circle at 20% 18%, rgba(255, 226, 132, 0.96) 0 10%, rgba(255, 226, 132, 0.24) 11% 21%, transparent 22%),
+            linear-gradient(180deg, #89bfd0 0%, #f4d49a 42%, #d5c47a 61%, #337f72 100%);
+        }
+
+        .pitch-visual::before {
+          content: "";
+          position: absolute;
+          inset: 44% -8% auto;
+          height: 36%;
+          background:
+            repeating-linear-gradient(94deg, rgba(21, 51, 66, 0.86) 0 24px, rgba(30, 77, 94, 0.96) 24px 31px, rgba(255,255,255,0.16) 31px 34px, rgba(21,51,66,0.88) 34px 76px),
+            var(--panel);
+          transform: rotate(-4deg);
+          box-shadow: 0 -24px 70px rgba(21, 51, 66, 0.18);
+        }
+
+        .pitch-orbit {
+          position: absolute;
+          left: 11%;
+          top: 12%;
+          width: 25vw;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 247, 224, 0.72);
+          box-shadow: 0 0 0 28px rgba(255, 217, 115, 0.16), 0 0 120px rgba(255, 217, 115, 0.42);
         }
 
         .pitch-sun {
           position: absolute;
-          left: 8%;
-          bottom: 10%;
-          width: 34vw;
-          aspect-ratio: 1.4;
-          border-radius: 48%;
+          left: 6%;
+          top: 8%;
+          width: 20vw;
+          aspect-ratio: 1;
+          border-radius: 50%;
           background:
-            repeating-linear-gradient(90deg, rgba(17, 52, 68, 0.62) 0 18px, rgba(17, 52, 68, 0.9) 18px 21px, rgba(255,255,255,0.18) 21px 23px);
-          transform: rotate(-10deg);
-          opacity: 0.92;
-          box-shadow: 0 28px 80px rgba(24, 52, 68, 0.24);
+            radial-gradient(circle at 38% 36%, #fff7d9 0 13%, transparent 14%),
+            radial-gradient(circle at center, #ffd973 0 50%, #f3b338 51% 100%);
+          opacity: 0.96;
+          box-shadow: 0 26px 90px rgba(242, 181, 61, 0.42);
         }
 
         .pitch-panel-grid {
           position: absolute;
-          right: 11%;
-          top: 20%;
-          width: 30vw;
+          width: 31vw;
           aspect-ratio: 1.2;
-          border-radius: 12px;
+          border-radius: 6px;
           background:
             repeating-linear-gradient(0deg, rgba(244, 228, 204, 0.16) 0 2px, transparent 2px 36px),
             repeating-linear-gradient(90deg, rgba(244, 228, 204, 0.2) 0 2px, transparent 2px 52px),
             #143342;
-          transform: rotate(8deg);
           box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+        }
+
+        .pitch-panel-grid-a {
+          right: 10%;
+          top: 20%;
+          transform: rotate(8deg);
+        }
+
+        .pitch-panel-grid-b {
+          right: 38%;
+          bottom: 10%;
+          width: 26vw;
+          transform: rotate(-8deg);
+        }
+
+        .pitch-house {
+          position: absolute;
+          right: 9%;
+          bottom: 7%;
+          width: 22vw;
+          aspect-ratio: 1.35;
+          background:
+            linear-gradient(135deg, transparent 0 34%, #f7ead5 35% 48%, transparent 49%),
+            linear-gradient(225deg, transparent 0 34%, #f7ead5 35% 48%, transparent 49%),
+            linear-gradient(#f7ead5, #e2c083);
+          clip-path: polygon(10% 47%, 50% 10%, 90% 47%, 84% 47%, 84% 92%, 16% 92%, 16% 47%);
+          filter: drop-shadow(0 28px 48px rgba(21, 51, 66, 0.28));
         }
 
         .pitch-home-card {
@@ -435,9 +539,9 @@ export default function PresentationPage() {
           bottom: clamp(22px, 4vw, 52px);
           min-width: min(420px, calc(100% - 44px));
           padding: 26px;
-          border: 1px solid rgba(255, 255, 255, 0.38);
-          border-radius: 28px;
-          background: rgba(244, 228, 204, 0.76);
+          border: 1px solid rgba(255, 255, 255, 0.46);
+          border-radius: 6px;
+          background: rgba(248, 236, 212, 0.8);
           backdrop-filter: blur(12px);
           color: var(--ink);
         }
@@ -456,33 +560,69 @@ export default function PresentationPage() {
           font-family: var(--font-display);
           font-size: clamp(42px, 5vw, 70px);
           line-height: 0.92;
-          letter-spacing: -0.04em;
+          letter-spacing: 0;
         }
 
         .pitch-sections {
+          position: relative;
           display: grid;
+          background:
+            linear-gradient(90deg, transparent calc(50% - 1px), rgba(21, 51, 66, 0.16) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+            linear-gradient(180deg, var(--cream), #f3dfbc);
+        }
+
+        .pitch-sections::before {
+          content: "";
+          position: sticky;
+          top: 174px;
+          z-index: 4;
+          width: 13px;
+          height: 13px;
+          margin-left: calc(50% - 6px);
+          border-radius: 50%;
+          background: var(--solar);
+          box-shadow: 0 0 0 9px rgba(243, 179, 56, 0.18);
         }
 
         .pitch-section {
+          position: relative;
+          z-index: 2;
           min-height: min(820px, 92svh);
-          scroll-margin-top: 98px;
+          scroll-margin-top: 184px;
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(290px, 0.56fr);
           gap: clamp(26px, 6vw, 80px);
           align-items: center;
           padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
-          border-bottom: 1px solid var(--line);
-          background: var(--cream);
+          border-bottom: 1px solid rgba(21, 51, 66, 0.1);
+          background:
+            radial-gradient(circle at 8% 18%, rgba(255, 217, 115, 0.17), transparent 28%),
+            linear-gradient(180deg, rgba(245, 226, 191, 0.84), rgba(248, 236, 212, 0.9));
         }
 
         .pitch-section:nth-child(even) {
-          background: #efd9b9;
+          background:
+            radial-gradient(circle at 90% 20%, rgba(45, 138, 120, 0.17), transparent 28%),
+            linear-gradient(180deg, rgba(236, 209, 159, 0.92), rgba(245, 226, 191, 0.9));
+        }
+
+        .pitch-section::before {
+          content: "";
+          position: absolute;
+          left: calc(50% - 12px);
+          top: 50%;
+          width: 24px;
+          height: 24px;
+          border: 3px solid var(--solar);
+          border-radius: 50%;
+          background: var(--sand);
+          box-shadow: 0 0 0 10px rgba(243, 179, 56, 0.16);
         }
 
         .pitch-section-copy p,
         .pitch-close p {
           margin: 0 0 24px;
-          color: rgba(24, 52, 68, 0.74);
+          color: rgba(21, 51, 66, 0.74);
           font-size: 13px;
           font-weight: 800;
           letter-spacing: 0.16em;
@@ -497,7 +637,7 @@ export default function PresentationPage() {
           font-family: var(--font-display);
           font-size: clamp(48px, 7vw, 104px);
           font-weight: 700;
-          letter-spacing: -0.05em;
+          letter-spacing: 0;
           line-height: 0.92;
         }
 
@@ -508,7 +648,7 @@ export default function PresentationPage() {
           color: var(--ink-soft);
           font-size: clamp(17px, 2vw, 22px);
           line-height: 1.48;
-          letter-spacing: -0.02em;
+          letter-spacing: 0;
         }
 
         .pitch-proof {
@@ -521,13 +661,15 @@ export default function PresentationPage() {
           display: grid;
           align-content: space-between;
           padding: 22px;
-          border: 1px solid rgba(24, 52, 68, 0.18);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.22);
+          border: 1px solid rgba(21, 51, 66, 0.18);
+          border-radius: 6px;
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12)),
+            repeating-linear-gradient(90deg, transparent 0 26px, rgba(21, 51, 66, 0.05) 26px 28px);
         }
 
         .pitch-proof small {
-          color: rgba(24, 52, 68, 0.55);
+          color: rgba(21, 51, 66, 0.55);
           font-size: 13px;
         }
 
@@ -536,12 +678,14 @@ export default function PresentationPage() {
           color: var(--ink);
           font-size: clamp(30px, 3.7vw, 48px);
           line-height: 0.96;
-          letter-spacing: -0.04em;
+          letter-spacing: 0;
         }
 
         .pitch-close {
           padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
-          background: var(--ink);
+          background:
+            radial-gradient(circle at 18% 0%, rgba(255, 217, 115, 0.18), transparent 30%),
+            linear-gradient(180deg, #153342, #0c222c);
           color: var(--cream);
         }
 
@@ -566,13 +710,13 @@ export default function PresentationPage() {
           display: grid;
           align-content: space-between;
           padding: 24px;
-          border: 1px solid rgba(244, 228, 204, 0.18);
-          border-radius: 28px;
-          background: rgba(244, 228, 204, 0.06);
+          border: 1px solid rgba(245, 226, 191, 0.18);
+          border-radius: 6px;
+          background: rgba(245, 226, 191, 0.06);
         }
 
         .pitch-close-grid span {
-          color: rgba(244, 228, 204, 0.66);
+          color: rgba(245, 226, 191, 0.66);
           font-size: 13px;
           font-weight: 800;
           letter-spacing: 0.14em;
@@ -584,7 +728,7 @@ export default function PresentationPage() {
           font-family: var(--font-display);
           font-size: clamp(32px, 4vw, 58px);
           line-height: 0.95;
-          letter-spacing: -0.04em;
+          letter-spacing: 0;
         }
 
         .reveal {
@@ -612,6 +756,7 @@ export default function PresentationPage() {
           }
 
           .pitch-chapters {
+            top: 82px;
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
@@ -626,17 +771,34 @@ export default function PresentationPage() {
             min-height: 520px;
           }
 
+          .pitch-orbit {
+            width: 48vw;
+          }
+
           .pitch-sun {
-            width: 56vw;
+            width: 34vw;
           }
 
           .pitch-panel-grid {
             width: 48vw;
           }
 
+          .pitch-panel-grid-b {
+            width: 42vw;
+          }
+
+          .pitch-house {
+            width: 32vw;
+          }
+
           .pitch-section {
             min-height: auto;
             grid-template-columns: 1fr;
+          }
+
+          .pitch-section::before,
+          .pitch-sections::before {
+            display: none;
           }
 
           .pitch-proof {
