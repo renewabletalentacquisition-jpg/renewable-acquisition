@@ -8,105 +8,196 @@ const chapters = [
     id: "why-sunrun",
     number: "01",
     label: "Why Sunrun",
-    headline: "Start with the company behind the system.",
-    copy: "Before the homeowner looks at numbers, they need confidence in who is installing, monitoring, and backing the project long term.",
-    proof: ["National scale", "Local install teams", "Long-term support"],
+    headline: "Start with trust before numbers.",
+    copy: "The homeowner is not just choosing panels. They are choosing who will design, install, monitor, service, and stand behind the system for years.",
+    frame: "Before we compare bills, make the company decision feel safe. Sunrun gives the customer a national name, a service infrastructure, and a simple point of accountability after install.",
+    talk: "Position this as the foundation: if the company is not strong enough to trust, the savings do not matter yet. Once trust is established, the customer can listen to the utility and proposal conversation without feeling exposed.",
+    bridge: "Once the company feels safe, shift to the reason they are even looking at solar: the utility path they are already on.",
+    proof: [
+      { label: "Company Confidence", detail: "A known national solar provider makes the decision feel less like a gamble." },
+      { label: "One System Partner", detail: "Design, installation, monitoring, and support should feel connected." },
+      { label: "Long-Term Help", detail: "Homeowners need to know who answers after the sale." },
+    ],
   },
   {
     id: "utility-rates",
     number: "02",
     label: "Utility Rates",
-    headline: "The current path keeps moving.",
-    copy: "Frame the utility as the comparison point. The bill is not fixed, and the homeowner does not control what the power company charges next.",
-    proof: ["Rate history", "Future exposure", "No control"],
+    headline: "The utility bill is the real competitor.",
+    copy: "Solar should be compared against the path they are already paying for: a monthly utility bill that can move without the homeowner's permission.",
+    frame: "This section makes doing nothing visible. The customer is already committed to buying power every month. The question is whether they want that cost controlled by the utility forever.",
+    talk: "Walk them through how rates, seasons, usage, and utility decisions affect the bill. Keep the tone calm: they do not need to hate the utility, they just need to see that the utility is not a stable plan.",
+    bridge: "After they understand rates, separate the bill into what they use and what they are charged to receive it.",
+    proof: [
+      { label: "Moving Price", detail: "The rate can change even if the home does not." },
+      { label: "Seasonal Exposure", detail: "Hot months create the highest emotional pain and the strongest contrast." },
+      { label: "No Ownership", detail: "Every payment disappears into the utility path without building control." },
+    ],
   },
   {
     id: "delivery-charges",
     number: "03",
     label: "Delivery Charges",
-    headline: "They are not just paying for power.",
-    copy: "Separate energy usage from delivery and utility fees so the customer sees where the bill is really coming from.",
-    proof: ["Energy", "Delivery", "Fees"],
+    headline: "They are paying for power and the pipeline.",
+    copy: "Most homeowners look at the total bill. This section slows it down and shows that energy, delivery, fees, and rate structure all stack together.",
+    frame: "Delivery charges help the homeowner understand why the bill can feel unfair. They are not only paying for electricity; they are paying the utility to move and manage it.",
+    talk: "Use their bill as the visual. Point to supply, delivery, riders, taxes, and fees if present. The goal is not to over-explain the utility bill; the goal is to show that the current system is layered and hard to control.",
+    bridge: "Once the customer sees the utility layers, introduce batteries as another layer of control, not just an add-on.",
+    proof: [
+      { label: "Usage Charge", detail: "What the home consumes." },
+      { label: "Delivery Charge", detail: "What the utility charges to deliver and maintain the grid path." },
+      { label: "Utility Fees", detail: "Extra bill lines make the total harder for homeowners to predict." },
+    ],
   },
   {
     id: "batteries",
     number: "04",
     label: "Batteries",
-    headline: "Backup power changes the conversation.",
-    copy: "Show the battery as protection, control, and future-proofing, especially when the home needs stability during outages or peak-rate windows.",
-    proof: ["Backup", "Peak control", "Resilience"],
+    headline: "Batteries make solar feel like control.",
+    copy: "Panels reduce dependence. Batteries add protection, flexibility, and a clearer sense that the home has its own energy plan.",
+    frame: "A battery is not only a technical product. It is emotional: keeping essentials on, using stored power strategically, and feeling prepared when the grid is unreliable.",
+    talk: "Match the battery conversation to the homeowner. For families, talk comfort and essentials. For high-bill homes, talk control. For outage-sensitive homes, talk security and predictability.",
+    bridge: "Once the customer sees the control side, show how incentives can help make the project easier to justify.",
+    proof: [
+      { label: "Backup Power", detail: "Keeps important loads protected when the grid goes down." },
+      { label: "Stored Solar", detail: "Lets the home use more of what the system produces." },
+      { label: "Future Ready", detail: "Prepares the home for changing rates, outages, and usage needs." },
+    ],
   },
   {
     id: "incentives",
     number: "05",
     label: "Incentives",
-    headline: "Use the available programs while they exist.",
-    copy: "Make incentives feel concrete and time-sensitive without overpromising. The homeowner should understand what helps the project pencil.",
-    proof: ["Federal credit", "Local programs", "Timing"],
+    headline: "Incentives create the timing window.",
+    copy: "The project should stand on its own, but available incentives can improve the economics and make waiting less attractive.",
+    frame: "This section should feel responsible. Explain incentives as something to verify and apply where eligible, not as a vague promise.",
+    talk: "Keep the wording clean: if the home and customer qualify, available programs can reduce the effective cost or improve the value of moving now. Make clear that eligibility and tax specifics must be confirmed.",
+    bridge: "After incentives, move from market-level opportunity into the specific design for their home.",
+    proof: [
+      { label: "Federal Credit", detail: "A major value lever when the customer is eligible." },
+      { label: "Local Programs", detail: "Some markets add extra reasons to act while programs are open." },
+      { label: "Timing Risk", detail: "Programs and rules can change, so delay can carry opportunity cost." },
+    ],
   },
   {
     id: "design",
     number: "06",
     label: "Design",
-    headline: "The system is built around this home.",
-    copy: "Move from concept to custom design. Roof planes, usage, sunlight, and the homeowner's goals all shape the recommendation.",
-    proof: ["Roof fit", "Production", "Offset"],
+    headline: "Now the conversation becomes personal.",
+    copy: "The design section turns solar from an idea into a plan for this exact roof, this bill, and this household's usage.",
+    frame: "Customers need to feel that the recommendation is engineered, not guessed. Roof planes, shade, production, panel count, battery fit, and usage all matter.",
+    talk: "Show the layout visually. Explain why panels are placed where they are, how the system production relates to their usage, and where the design is conservative or optimized.",
+    bridge: "Once the design is credible, use their actual bill to show what the system is designed to solve.",
+    proof: [
+      { label: "Roof Fit", detail: "Panel placement should make sense when they see the home." },
+      { label: "Production Target", detail: "The design should connect to annual usage and offset." },
+      { label: "Home Goals", detail: "Savings, backup, and aesthetics all shape the final recommendation." },
+    ],
   },
   {
     id: "bill-analysis",
     number: "07",
     label: "Bill Analysis",
-    headline: "Turn the current bill into the baseline.",
-    copy: "Walk through usage, seasonal spikes, and current monthly cost so the homeowner sees the real before-and-after comparison.",
-    proof: ["Usage", "Average cost", "Seasonality"],
+    headline: "The bill becomes the baseline.",
+    copy: "The homeowner should see their current cost clearly before they compare it to the proposal. This prevents the close from feeling like a random payment pitch.",
+    frame: "Bill analysis turns emotion into math. It captures what they pay now, when the bill spikes, and what happens if they stay on the same utility path.",
+    talk: "Use simple language: current monthly average, high months, yearly spend, and future exposure. The point is to make their current bill feel like the option they are already buying.",
+    bridge: "After the baseline is clear, the proposal can be shown as the alternative path, not a separate expense.",
+    proof: [
+      { label: "Monthly Average", detail: "Gives the customer one simple number to compare against." },
+      { label: "Annual Spend", detail: "Shows the size of the problem over a full year." },
+      { label: "High-Bill Months", detail: "Connects the proposal to the moments they feel the most pain." },
+    ],
   },
   {
     id: "proposal",
     number: "08",
     label: "Proposal",
-    headline: "Bring the recommendation into one clear view.",
-    copy: "Present the plan cleanly: system, payment, savings, and what changes after install. The customer should not feel buried in details.",
-    proof: ["System", "Payment", "Savings"],
+    headline: "The proposal is the decision frame.",
+    copy: "This is where the full recommendation comes together: system, payment, savings, protection, and what changes after installation.",
+    frame: "A strong proposal does not overwhelm the homeowner. It makes the comparison obvious: current utility path versus solar path.",
+    talk: "Lead with the simplest comparison first, then support it with system size, production, battery option, payment, savings, and process. Do not bury the customer in every technical detail at once.",
+    bridge: "Once they understand the proposal, return to the long-term reason it matters: protection from utility rate movement.",
+    proof: [
+      { label: "System Recommendation", detail: "What is being installed and why it fits the home." },
+      { label: "Monthly Comparison", detail: "How the solar path compares against the current bill." },
+      { label: "Projected Value", detail: "Where savings, control, and protection show up over time." },
+    ],
   },
   {
     id: "rate-protection",
     number: "09",
     label: "Rate Protection",
-    headline: "The value is control over time.",
-    copy: "Tie the proposal back to the utility path. Solar is not only about today's bill; it is about reducing exposure to future increases.",
-    proof: ["Predictability", "Control", "Long-term spread"],
+    headline: "Savings today is good. Control over time is better.",
+    copy: "Rate protection is the long-term logic of the close. It shows why the decision matters beyond the first monthly comparison.",
+    frame: "This section helps the customer understand that solar is a hedge against the utility path. The more rates move over time, the more valuable control can become.",
+    talk: "Bring it back to choice. They can keep renting power from a price path they do not control, or they can move more of that power decision onto the home.",
+    bridge: "After the long-term value is clear, remove fear by showing what is protected and who stands behind it.",
+    proof: [
+      { label: "Predictability", detail: "A clearer energy plan makes future bills easier to understand." },
+      { label: "Reduced Exposure", detail: "Less dependence on the utility can reduce rate increase risk." },
+      { label: "Long-Term Spread", detail: "The difference between paths can matter more each year." },
+    ],
   },
   {
     id: "warranties",
     number: "10",
     label: "Warranties",
-    headline: "The protection needs to be simple.",
-    copy: "Cover what is backed, who handles it, and how the homeowner gets help after the project is installed.",
-    proof: ["Panels", "Roof work", "Service"],
+    headline: "Protection removes the final fear.",
+    copy: "Warranties and service explain what happens if something goes wrong. This keeps the decision from feeling risky.",
+    frame: "The homeowner's silent concern is simple: what if this becomes my problem later? This section answers that directly.",
+    talk: "Explain coverage in plain English. What is covered, who handles service, what happens after install, and how the customer gets help. Keep it simple and confidence-building.",
+    bridge: "Once protection is clear, show the process so the homeowner can picture what happens after today.",
+    proof: [
+      { label: "Equipment Coverage", detail: "Panels, inverter, battery, and related equipment should be explained clearly." },
+      { label: "Workmanship", detail: "The install and roof work need a simple protection story." },
+      { label: "Service Path", detail: "The customer should know exactly who to contact." },
+    ],
   },
   {
     id: "installation-process",
     number: "11",
     label: "Installation Process",
-    headline: "Make the next few weeks feel predictable.",
-    copy: "Show the path from agreement to permission to operate so the customer knows what happens after saying yes.",
-    proof: ["Survey", "Permits", "Install"],
+    headline: "Predictability makes yes easier.",
+    copy: "The process section turns a big home project into a sequence of normal steps the customer can understand.",
+    frame: "Customers hesitate when the next step feels vague. A clean timeline lowers anxiety and makes moving forward feel organized.",
+    talk: "Walk through site survey, design finalization, permitting, installation, inspection, utility approval, and activation. Keep it calm: the homeowner does not need to manage every detail.",
+    bridge: "After the process feels manageable, confirm the home and customer qualify so the plan can actually move.",
+    proof: [
+      { label: "Site Survey", detail: "Confirms roof, electrical, and final design details." },
+      { label: "Permits & Utility", detail: "The project moves through required approvals." },
+      { label: "Install & Activation", detail: "The home moves from equipment install to permission to operate." },
+    ],
   },
   {
     id: "qualifications",
     number: "12",
     label: "Qualifications",
-    headline: "Confirm the home and customer qualify.",
-    copy: "Use this as the calm checkpoint: roof, utility, credit, ownership, and any final details that determine whether the plan can move forward.",
-    proof: ["Home fit", "Utility fit", "Approval"],
+    headline: "Now confirm this can actually work.",
+    copy: "Qualifications create a natural close checkpoint. The question becomes: if the home qualifies and the numbers work, are we moving forward?",
+    frame: "This section should feel like due diligence, not pressure. The homeowner sees that approval depends on real criteria.",
+    talk: "Review the practical checks: homeowner status, roof condition, utility territory, credit/financing approval, usage, and final design approval. This makes the close conditional and professional.",
+    bridge: "If the customer qualifies and the recommendation makes sense, the only thing left is choosing the next step.",
+    proof: [
+      { label: "Home Fit", detail: "Roof, shade, electrical, and design feasibility." },
+      { label: "Customer Fit", detail: "Ownership, usage, and approval requirements." },
+      { label: "Project Fit", detail: "The plan must save, protect, or solve a clear problem." },
+    ],
   },
   {
     id: "next-steps",
     number: "13",
     label: "Next Steps",
-    headline: "If it qualifies and saves, move forward.",
-    copy: "Finish with a clean decision frame. Confirm the advantage, answer the final concern, and move the project into the next step.",
-    proof: ["Approve plan", "Site survey", "Install path"],
+    headline: "End with a clear, calm decision.",
+    copy: "The close should feel like the natural result of the presentation: if the plan qualifies, saves, and protects the home, the next step is to start.",
+    frame: "Do not make the ending feel like a new pitch. Bring back the full story: trusted company, rising utility path, custom design, better comparison, protection, and simple process.",
+    talk: "Ask for agreement in pieces: Does the utility path make sense to keep? Does the design solve the bill? Does the payment make sense? If yes, move into approval and site survey.",
+    bridge: "This is where the presentation ends and the project begins.",
+    proof: [
+      { label: "Approve Plan", detail: "Lock in the recommendation and begin the project file." },
+      { label: "Site Survey", detail: "Confirm the home details and final design." },
+      { label: "Install Path", detail: "Move through approvals, installation, and activation." },
+    ],
   },
 ];
 
@@ -196,13 +287,12 @@ export default function PresentationPage() {
         </div>
         <div className="pitch-hero-main reveal visible">
           <h1>
-            Solar Close Built For <span>Homeowners</span>
+            Homeowner Solar Close <span>Built To Flow</span>
           </h1>
-          <p>A live iPad presentation for walking the customer from bill pressure to a clear solar decision.</p>
+          <p>A live iPad presentation that moves from trust to utility pressure, then into design, proposal, protection, and the next step.</p>
         </div>
         <p className="pitch-hero-note reveal visible">
-          Flow through the close in order: trust, utility pressure, design, proposal, protection, and next step.
-          No clutter on screen.
+          Each chapter gives you the homeowner frame, the talk track, the proof, and the bridge into the next decision.
         </p>
       </section>
 
@@ -243,13 +333,28 @@ export default function PresentationPage() {
               <p>{chapter.number} · {chapter.label}</p>
               <h2>{chapter.headline}</h2>
               <span>{chapter.copy}</span>
+              <div className="pitch-section-body">
+                <div>
+                  <small>Homeowner Frame</small>
+                  <strong>{chapter.frame}</strong>
+                </div>
+                <div>
+                  <small>Talk Track</small>
+                  <strong>{chapter.talk}</strong>
+                </div>
+                <div className="pitch-bridge">
+                  <small>Bridge</small>
+                  <strong>{chapter.bridge}</strong>
+                </div>
+              </div>
             </div>
 
             <div className="pitch-proof">
               {chapter.proof.map((item, index) => (
-                <div key={item}>
+                <div key={item.label}>
                   <small>{String(index + 1).padStart(2, "0")}</small>
-                  <strong>{item}</strong>
+                  <strong>{item.label}</strong>
+                  <span>{item.detail}</span>
                 </div>
               ))}
             </div>
@@ -750,13 +855,13 @@ export default function PresentationPage() {
         .pitch-section {
           position: relative;
           z-index: 2;
-          min-height: min(820px, 92svh);
+          min-height: min(920px, 98svh);
           scroll-margin-top: 184px;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(290px, 0.56fr);
-          gap: clamp(26px, 6vw, 80px);
+          grid-template-columns: minmax(0, 1fr) minmax(300px, 0.46fr);
+          gap: clamp(24px, 4.8vw, 66px);
           align-items: center;
-          padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 72px);
+          padding: clamp(64px, 8vw, 104px) clamp(22px, 4vw, 72px);
           border-bottom: 1px solid rgba(21, 51, 66, 0.1);
           background:
             radial-gradient(circle at 8% 18%, rgba(255, 217, 115, 0.17), transparent 28%),
@@ -782,6 +887,16 @@ export default function PresentationPage() {
           box-shadow: 0 0 0 10px rgba(243, 179, 56, 0.16);
         }
 
+        .pitch-section::after {
+          content: "";
+          position: absolute;
+          left: calc(50% - 1px);
+          top: calc(50% + 28px);
+          bottom: -1px;
+          width: 2px;
+          background: linear-gradient(180deg, rgba(243, 179, 56, 0.52), rgba(21, 51, 66, 0));
+        }
+
         .pitch-section-copy p,
         .pitch-close p {
           margin: 0 0 24px;
@@ -798,7 +913,7 @@ export default function PresentationPage() {
           margin: 0;
           color: var(--ink);
           font-family: var(--font-display);
-          font-size: clamp(48px, 7vw, 104px);
+          font-size: clamp(44px, 5.9vw, 88px);
           font-weight: 700;
           letter-spacing: 0;
           line-height: 0.92;
@@ -814,15 +929,59 @@ export default function PresentationPage() {
           letter-spacing: 0;
         }
 
+        .pitch-section-body {
+          max-width: 780px;
+          margin-top: clamp(26px, 4vw, 42px);
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .pitch-section-body div {
+          min-height: 158px;
+          display: grid;
+          align-content: start;
+          gap: 12px;
+          padding: 18px;
+          border: 1px solid rgba(21, 51, 66, 0.15);
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pitch-section-body .pitch-bridge {
+          grid-column: 1 / -1;
+          min-height: auto;
+          background:
+            linear-gradient(90deg, rgba(255, 217, 115, 0.42), rgba(45, 138, 120, 0.12)),
+            rgba(255, 255, 255, 0.14);
+        }
+
+        .pitch-section-body small {
+          color: rgba(21, 51, 66, 0.62);
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .pitch-section-body strong {
+          color: rgba(21, 51, 66, 0.82);
+          font-size: clamp(14px, 1.4vw, 17px);
+          font-weight: 600;
+          line-height: 1.48;
+          letter-spacing: 0;
+        }
+
         .pitch-proof {
           display: grid;
           gap: 14px;
         }
 
         .pitch-proof div {
-          min-height: 118px;
+          min-height: 150px;
           display: grid;
-          align-content: space-between;
+          align-content: start;
+          gap: 10px;
           padding: 22px;
           border: 1px solid rgba(21, 51, 66, 0.18);
           border-radius: 6px;
@@ -839,8 +998,18 @@ export default function PresentationPage() {
         .pitch-proof strong {
           font-family: var(--font-display);
           color: var(--ink);
-          font-size: clamp(30px, 3.7vw, 48px);
+          font-size: clamp(28px, 3vw, 42px);
           line-height: 0.96;
+          letter-spacing: 0;
+        }
+
+        .pitch-proof span {
+          display: block;
+          max-width: 320px;
+          color: rgba(21, 51, 66, 0.66);
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 1.42;
           letter-spacing: 0;
         }
 
@@ -979,12 +1148,21 @@ export default function PresentationPage() {
           }
 
           .pitch-section::before,
+          .pitch-section::after,
           .pitch-sections::before {
             display: none;
           }
 
           .pitch-proof {
             grid-template-columns: repeat(3, 1fr);
+          }
+
+          .pitch-section-body {
+            grid-template-columns: 1fr;
+          }
+
+          .pitch-section-body .pitch-bridge {
+            grid-column: auto;
           }
 
           .pitch-close-grid {
@@ -1011,6 +1189,11 @@ export default function PresentationPage() {
 
           .pitch-proof {
             grid-template-columns: 1fr;
+          }
+
+          .pitch-section-body div,
+          .pitch-proof div {
+            min-height: auto;
           }
         }
       `}</style>
