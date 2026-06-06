@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseConfigError } from "@/lib/supabase";
 import { getHoursSince, getPriorityColor, getPriorityLabel, rankApplicant } from "@/lib/applicant-ops";
 
 type SortMode = "score" | "recent";
@@ -68,22 +68,43 @@ export default function AdminDashboard() {
   const [sortMode, setSortMode] = useState<SortMode>("score");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     const hasLocalAccess = typeof window !== "undefined" && window.localStorage.getItem("admin-auth") === "ok";
 
+    if (!supabase) {
+      setLoadError(supabaseConfigError || "Admin database is not configured.");
+      setLoading(false);
+      return;
+    }
+
     if (!hasLocalAccess) {
-      supabase.auth.getUser().then(({ data }) => {
-        if (!data.user) router.push("/admin/login");
-      });
+      router.push("/admin/login");
+      return;
     }
 
     void fetchApplicants();
   }, [router]);
 
   async function fetchApplicants() {
+    if (!supabase) {
+      setLoadError(supabaseConfigError || "Admin database is not configured.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const { data } = await supabase.from("applicants").select("*").order("created_at", { ascending: false });
+    setLoadError("");
+    const { data, error } = await supabase.from("applicants").select("*").order("created_at", { ascending: false });
+
+    if (error) {
+      setApplicants([]);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
+    }
+
     setApplicants((data as Applicant[]) || []);
     setLoading(false);
   }
@@ -99,7 +120,7 @@ export default function AdminDashboard() {
   }
 
   async function handleBulkDelete() {
-    if (selectedIds.length === 0) return;
+    if (!supabase || selectedIds.length === 0) return;
     const confirmed = window.confirm(`Delete ${selectedIds.length} selected applicants?`);
     if (!confirmed) return;
 
@@ -119,6 +140,7 @@ export default function AdminDashboard() {
   }
 
   async function handleDeleteApplicant(applicant: Applicant) {
+    if (!supabase) return;
     const confirmed = window.confirm(`Delete ${applicant.first_name} ${applicant.last_name} from the applicant list?`);
     if (!confirmed) return;
 
@@ -139,7 +161,9 @@ export default function AdminDashboard() {
 
   async function handleSignOut() {
     if (typeof window !== "undefined") window.localStorage.removeItem("admin-auth");
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
     router.push("/admin/login");
   }
 
@@ -217,6 +241,8 @@ export default function AdminDashboard() {
             <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
               {loading ? (
                 <div style={{ color: "var(--fg-muted)", padding: "12px 0" }}>Loading priority queue…</div>
+              ) : loadError ? (
+                <div style={{ color: "#f87171", padding: "12px 0" }}>Admin load failed: {loadError}</div>
               ) : hotList.length === 0 ? (
                 <div style={{ color: "var(--fg-muted)", padding: "12px 0" }}>No live applicants yet.</div>
               ) : (
@@ -295,6 +321,8 @@ export default function AdminDashboard() {
               <tbody>
                 {loading ? (
                   <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: "var(--fg-muted)" }}>Loading…</td></tr>
+                ) : loadError ? (
+                  <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: "#f87171" }}>Admin load failed: {loadError}</td></tr>
                 ) : filtered.length === 0 ? (
                   <tr><td colSpan={9} style={{ padding: 40, textAlign: "center", color: "var(--fg-muted)" }}>No applicants yet.</td></tr>
                 ) : (

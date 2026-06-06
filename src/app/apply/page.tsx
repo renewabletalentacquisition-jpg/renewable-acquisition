@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseConfigError } from "@/lib/supabase";
 import { buildApplicantOps } from "@/lib/applicant-ops";
 
 type Answers = Record<string, string | string[]>;
@@ -109,6 +109,7 @@ function getOutcome(answers: Answers): "qualified" | "review" | "disqualified" {
 function ApplyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const shouldRedirectToBooking = searchParams.get("book") === "1";
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [submitting, setSubmitting] = useState(false);
@@ -142,6 +143,11 @@ function ApplyForm() {
   }
 
   async function handleSubmit() {
+    if (!supabase) {
+      setError(supabaseConfigError || "Application system is not configured.");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     try {
@@ -193,9 +199,19 @@ function ApplyForm() {
 
       if (dbError) throw new Error(dbError.message);
 
+      if (shouldRedirectToBooking && outcome === "qualified") {
+        window.location.href = CALENDLY_URL;
+        return;
+      }
+
       router.push(`/result?outcome=${outcome}`);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      const message = e instanceof Error ? e.message : "Something went wrong. Please try again.";
+      setError(
+        /fetch/i.test(message)
+          ? "Connection error talking to the application database. The submit did not go through."
+          : message,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -214,8 +230,16 @@ function ApplyForm() {
             <div>This takes about 2 minutes if you are a serious fit.</div>
           </div>
           <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs leading-6 text-stone-400">
-            Current operator flow: <span className="text-stone-200">{applicantOps.nextAction}</span>
-            {applicantOps.source !== "direct" && <span className="ml-2 text-amber-200/80">Tracked source: {applicantOps.source}</span>}
+            {shouldRedirectToBooking ? (
+              <>
+                Booking gate active: <span className="text-stone-200">we save your number first, then send qualified candidates into interview booking.</span>
+              </>
+            ) : (
+              <>
+                Current operator flow: <span className="text-stone-200">{applicantOps.nextAction}</span>
+                {applicantOps.source !== "direct" && <span className="ml-2 text-amber-200/80">Tracked source: {applicantOps.source}</span>}
+              </>
+            )}
           </div>
         </div>
 
@@ -271,14 +295,16 @@ function ApplyForm() {
           {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-6 text-stone-400">
-            We filter hard on commitment, coachability, commission fit, and willingness to travel with the team.
+            {shouldRedirectToBooking
+              ? "Your phone number is required here so serious candidates can be contacted fast before and after the interview."
+              : "We filter hard on commitment, coachability, commission fit, and willingness to travel with the team."}
           </div>
 
           <div className="mt-10 flex gap-4">
             {step > 0 && <button onClick={() => setStep((s) => s - 1)} className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10">Back</button>}
             {isLast ? (
               <button onClick={handleSubmit} disabled={!canAdvance() || submitting} className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40">
-                {submitting ? "Submitting..." : "Submit Application"}
+                {submitting ? "Submitting..." : shouldRedirectToBooking ? "Continue to Interview Booking" : "Submit Application"}
               </button>
             ) : (
               <button onClick={() => setStep((s) => s + 1)} disabled={!canAdvance()} className="flex-1 rounded-full bg-amber-200 px-6 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-100 disabled:opacity-40">Continue</button>

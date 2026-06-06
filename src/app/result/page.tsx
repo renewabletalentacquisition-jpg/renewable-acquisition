@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 
-const CALENDLY_URL = "https://calendly.com/chasepinedawow/interview";
+const CALENDLY_URL = "/apply?book=1";
 
 function RealisticSun() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -212,12 +212,11 @@ function QualifiedResult() {
         fontSize: 17,
         color: "#9e9893",
         lineHeight: 1.72,
-        maxWidth: 520,
+        maxWidth: 560,
         margin: "0 auto 52px",
         animation: "fadeUp 0.55s ease-out 0.3s both",
       }}>
-        We move fast with serious candidates. Grab a time slot now —
-        same-day may be available. Show up on time. Be ready.
+        We move fast with serious candidates. One quick step first, confirm your contact info so we have your phone number on file, then book your interview.
       </p>
 
       {/* CTA */}

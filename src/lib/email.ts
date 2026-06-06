@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.NEXT_PUBLIC_RESEND_API_KEY!;
-const CALENDLY_URL = "https://calendly.com/chasepinedawow/interview";
+const CALENDLY_URL = "https://renewableacquisition.com/apply?book=1";
 const BRAND_COLOR = "#c9a96e";
 const FROM = "Renewable Acquisition <noreply@renewableacquisition.com>";
 
