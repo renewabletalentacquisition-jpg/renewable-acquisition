@@ -235,11 +235,13 @@ const maxRate = Math.max(...rateHistory.map((item) => item.rate));
 const minRate = Math.min(...rateHistory.map((item) => item.rate));
 const firstRate = rateHistory[0].rate;
 const graphWidth = 1000;
-const graphTop = 34;
-const graphBottom = 252;
+const graphTop = 16;
+const graphBottom = 278;
 const rateGraphPoints = rateHistory.map((item, index) => {
   const x = (index / (rateHistory.length - 1)) * graphWidth;
-  const y = graphBottom - ((item.rate - minRate) / (maxRate - minRate)) * (graphBottom - graphTop);
+  const normalizedRate = (item.rate - minRate) / (maxRate - minRate);
+  const surgeRate = Math.pow(normalizedRate, 1.38);
+  const y = graphBottom - surgeRate * (graphBottom - graphTop);
   return { ...item, x, y };
 });
 const fullRatePath = rateGraphPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
@@ -283,6 +285,11 @@ export default function PresentationPage() {
     () => rateGraphPoints.slice(0, rateIndex + 1).map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" "),
     [rateIndex]
   );
+  const selectedRateAreaPath = useMemo(() => {
+    const visiblePoints = rateGraphPoints.slice(0, rateIndex + 1);
+    const lastPoint = visiblePoints[visiblePoints.length - 1];
+    return `${visiblePoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")} L ${lastPoint.x} ${graphBottom} L ${visiblePoints[0].x} ${graphBottom} Z`;
+  }, [rateIndex]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -511,12 +518,21 @@ export default function PresentationPage() {
                         <stop offset="52%" stopColor="#f3b338" />
                         <stop offset="100%" stopColor="#d8441f" />
                       </linearGradient>
+                      <linearGradient id="rateSurgeFill" x1="0%" x2="100%" y1="0%" y2="0%">
+                        <stop offset="0%" stopColor="#2d8a78" stopOpacity="0.12" />
+                        <stop offset="55%" stopColor="#f3b338" stopOpacity="0.24" />
+                        <stop offset="100%" stopColor="#d8441f" stopOpacity="0.36" />
+                      </linearGradient>
+                      <marker id="rateArrow" markerHeight="12" markerWidth="12" orient="auto" refX="9" refY="5" viewBox="0 0 10 10">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#d8441f" />
+                      </marker>
                     </defs>
-                    <path className="pitch-rate-grid-line" d="M 0 252 L 1000 252" />
-                    <path className="pitch-rate-grid-line" d="M 0 143 L 1000 143" />
-                    <path className="pitch-rate-grid-line" d="M 0 34 L 1000 34" />
+                    <path className="pitch-rate-grid-line" d="M 0 278 L 1000 278" />
+                    <path className="pitch-rate-grid-line" d="M 0 147 L 1000 147" />
+                    <path className="pitch-rate-grid-line" d="M 0 16 L 1000 16" />
+                    <path className="pitch-rate-area" d={selectedRateAreaPath} />
                     <path className="pitch-rate-path-base" d={fullRatePath} />
-                    <path className="pitch-rate-path-live" d={selectedRatePath} />
+                    <path className="pitch-rate-path-live" d={selectedRatePath} markerEnd="url(#rateArrow)" />
                     {rateGraphPoints.map((point, index) => (
                       <g key={point.year}>
                         <circle
@@ -534,6 +550,9 @@ export default function PresentationPage() {
                           <text x={Math.min(point.x + 20, 830)} y={Math.max(point.y - 18, 28)} className="pitch-rate-label">
                             {point.year} - {point.rate.toFixed(1)}c/kWh
                           </text>
+                        ) : null}
+                        {index === rateIndex ? (
+                          <circle className="pitch-rate-peak-ring" cx={point.x} cy={point.y} r="19" />
                         ) : null}
                       </g>
                     ))}
@@ -1418,13 +1437,14 @@ export default function PresentationPage() {
 
         .pitch-rate-graph {
           position: relative;
-          min-height: 290px;
+          min-height: 330px;
           overflow: hidden;
           border: 1px solid rgba(21, 51, 66, 0.13);
           border-radius: 6px;
           background:
+            radial-gradient(circle at 88% 12%, rgba(216, 68, 31, 0.34), transparent 28%),
             linear-gradient(110deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08)),
-            linear-gradient(90deg, rgba(45, 138, 120, 0.1), rgba(243, 179, 56, 0.12) 54%, rgba(216, 68, 31, 0.2)),
+            linear-gradient(90deg, rgba(45, 138, 120, 0.08), rgba(243, 179, 56, 0.15) 48%, rgba(216, 68, 31, 0.26)),
             repeating-linear-gradient(90deg, rgba(21, 51, 66, 0.05) 0 1px, transparent 1px 84px);
         }
 
@@ -1432,7 +1452,7 @@ export default function PresentationPage() {
           display: block;
           width: 100%;
           min-width: 720px;
-          height: 320px;
+          height: 340px;
         }
 
         .pitch-rate-grid-line {
@@ -1448,6 +1468,10 @@ export default function PresentationPage() {
           stroke-linejoin: round;
         }
 
+        .pitch-rate-area {
+          fill: url("#rateSurgeFill");
+        }
+
         .pitch-rate-path-base {
           stroke: rgba(21, 51, 66, 0.18);
           stroke-width: 9;
@@ -1455,8 +1479,8 @@ export default function PresentationPage() {
 
         .pitch-rate-path-live {
           stroke: url("#rateSurgeGradient");
-          stroke-width: 15;
-          filter: drop-shadow(0 10px 14px rgba(119, 52, 13, 0.24));
+          stroke-width: 18;
+          filter: drop-shadow(0 12px 16px rgba(119, 52, 13, 0.32));
         }
 
         .pitch-rate-dot {
@@ -1470,9 +1494,15 @@ export default function PresentationPage() {
           fill: #d8441f;
         }
 
+        .pitch-rate-peak-ring {
+          fill: none;
+          stroke: rgba(216, 68, 31, 0.5);
+          stroke-width: 5;
+        }
+
         .pitch-rate-label {
           fill: #8f2d19;
-          font-size: 34px;
+          font-size: 38px;
           font-weight: 900;
           letter-spacing: 0;
         }
@@ -1766,13 +1796,13 @@ export default function PresentationPage() {
           }
 
           .pitch-rate-graph {
-            min-height: 250px;
+            min-height: 280px;
             overflow-x: auto;
           }
 
           .pitch-rate-graph svg {
             min-width: 660px;
-            height: 280px;
+            height: 300px;
           }
 
           .pitch-rate-callout {
