@@ -233,9 +233,17 @@ const rateHistory = [
 ];
 
 const maxRate = Math.max(...rateHistory.map((item) => item.rate));
+const minRate = Math.min(...rateHistory.map((item) => item.rate));
 const firstRate = rateHistory[0].rate;
-const latestRate = rateHistory[rateHistory.length - 1].rate;
-const rateIncrease = Math.round(((latestRate - firstRate) / firstRate) * 100);
+const graphWidth = 1000;
+const graphTop = 34;
+const graphBottom = 252;
+const rateGraphPoints = rateHistory.map((item, index) => {
+  const x = (index / (rateHistory.length - 1)) * graphWidth;
+  const y = graphBottom - ((item.rate - minRate) / (maxRate - minRate)) * (graphBottom - graphTop);
+  return { ...item, x, y };
+});
+const fullRatePath = rateGraphPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
 
 const researchCards = [
   {
@@ -264,10 +272,17 @@ export default function PresentationPage() {
   const [activeChapter, setActiveChapter] = useState(chapters[0].id);
   const [navOpen, setNavOpen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [rateIndex, setRateIndex] = useState(rateHistory.length - 1);
 
   const activeIndex = useMemo(
     () => Math.max(0, chapters.findIndex((chapter) => chapter.id === activeChapter)),
     [activeChapter]
+  );
+  const selectedRate = rateHistory[rateIndex];
+  const selectedRateIncrease = Math.round(((selectedRate.rate - firstRate) / firstRate) * 100);
+  const selectedRatePath = useMemo(
+    () => rateGraphPoints.slice(0, rateIndex + 1).map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" "),
+    [rateIndex]
   );
 
   useEffect(() => {
@@ -480,25 +495,60 @@ export default function PresentationPage() {
             </div>
 
             {chapter.id === "utility-rates" ? (
-              <div className="pitch-rate-history" aria-label="Average residential electric rate history from 2012 to 2026">
+              <div className="pitch-rate-history" aria-label="Sliding average residential electric rate graph from 2012 to 2026">
                 <div className="pitch-rate-history-head">
                   <div>
                     <small>Approx. Average Residential Rate</small>
-                    <strong>2012-2026 kWh trend</strong>
+                    <strong>Slide the rate curve</strong>
                   </div>
                   <div>
-                    <span>{rateIncrease}%</span>
-                    <small>increase since 2012</small>
+                    <span>{selectedRate.rate.toFixed(1)}c</span>
+                    <small>{selectedRate.year} average</small>
                   </div>
                 </div>
-                <div className="pitch-rate-chart">
-                  {rateHistory.map((item) => (
-                    <div className="pitch-rate-bar" key={item.year}>
-                      <span>{item.rate.toFixed(1)}c</span>
-                      <i style={{ height: `${(item.rate / maxRate) * 100}%` }} />
-                      <small>{item.year}</small>
-                    </div>
-                  ))}
+
+                <div className="pitch-rate-graph">
+                  <svg viewBox="0 0 1000 320" role="img" aria-label={`Residential rate increased from 15.0 cents in 2012 to ${selectedRate.rate.toFixed(1)} cents in ${selectedRate.year}`}>
+                    <path className="pitch-rate-grid-line" d="M 0 252 L 1000 252" />
+                    <path className="pitch-rate-grid-line" d="M 0 143 L 1000 143" />
+                    <path className="pitch-rate-grid-line" d="M 0 34 L 1000 34" />
+                    <path className="pitch-rate-path-base" d={fullRatePath} />
+                    <path className="pitch-rate-path-live" d={selectedRatePath} />
+                    {rateGraphPoints.map((point, index) => (
+                      <g key={point.year}>
+                        <circle
+                          className={index <= rateIndex ? "pitch-rate-dot active" : "pitch-rate-dot"}
+                          cx={point.x}
+                          cy={point.y}
+                          r={index === rateIndex ? 10 : 6}
+                        />
+                        {index === rateIndex ? (
+                          <text x={Math.min(point.x + 20, 900)} y={Math.max(point.y - 18, 28)} className="pitch-rate-label">
+                            {point.year} - {point.rate.toFixed(1)}c/kWh
+                          </text>
+                        ) : null}
+                      </g>
+                    ))}
+                  </svg>
+                  <div className="pitch-rate-callout">
+                    <small>2012 to {selectedRate.year}</small>
+                    <strong>{selectedRateIncrease}%</strong>
+                    <span>increase from the starting rate</span>
+                  </div>
+                </div>
+
+                <div className="pitch-rate-slider">
+                  <span>{rateHistory[0].year}</span>
+                  <input
+                    aria-label="Select electric rate year"
+                    max={rateHistory.length - 1}
+                    min={0}
+                    onChange={(event) => setRateIndex(Number(event.target.value))}
+                    step={1}
+                    type="range"
+                    value={rateIndex}
+                  />
+                  <span>{rateHistory[rateHistory.length - 1].year}</span>
                 </div>
               </div>
             ) : null}
@@ -1357,53 +1407,148 @@ export default function PresentationPage() {
           text-align: right;
         }
 
-        .pitch-rate-chart {
-          min-height: 250px;
-          display: grid;
-          grid-template-columns: repeat(15, minmax(30px, 1fr));
-          align-items: end;
-          gap: 8px;
-          overflow-x: auto;
-          padding: 8px 4px 0;
+        .pitch-rate-graph {
+          position: relative;
+          min-height: 290px;
+          overflow: hidden;
+          border: 1px solid rgba(21, 51, 66, 0.13);
+          border-radius: 6px;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08)),
+            repeating-linear-gradient(90deg, rgba(21, 51, 66, 0.05) 0 1px, transparent 1px 66px);
         }
 
-        .pitch-rate-bar {
-          min-width: 30px;
-          height: 230px;
-          display: grid;
-          grid-template-rows: 30px 1fr 24px;
-          align-items: end;
-          justify-items: center;
-          gap: 6px;
+        .pitch-rate-graph svg {
+          display: block;
+          width: 100%;
+          min-width: 720px;
+          height: 320px;
         }
 
-        .pitch-rate-bar span {
-          color: rgba(21, 51, 66, 0.74);
-          font-size: 12px;
+        .pitch-rate-grid-line {
+          fill: none;
+          stroke: rgba(21, 51, 66, 0.12);
+          stroke-width: 2;
+        }
+
+        .pitch-rate-path-base,
+        .pitch-rate-path-live {
+          fill: none;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .pitch-rate-path-base {
+          stroke: rgba(21, 51, 66, 0.18);
+          stroke-width: 10;
+        }
+
+        .pitch-rate-path-live {
+          stroke: var(--solar);
+          stroke-width: 12;
+          filter: drop-shadow(0 8px 12px rgba(119, 80, 13, 0.18));
+        }
+
+        .pitch-rate-dot {
+          fill: rgba(21, 51, 66, 0.26);
+          stroke: rgba(245, 226, 191, 0.8);
+          stroke-width: 4;
+          transition: r 0.2s ease, fill 0.2s ease;
+        }
+
+        .pitch-rate-dot.active {
+          fill: var(--leaf);
+        }
+
+        .pitch-rate-label {
+          fill: var(--ink);
+          font-size: 34px;
           font-weight: 900;
           letter-spacing: 0;
-          white-space: nowrap;
         }
 
-        .pitch-rate-bar i {
-          width: 100%;
-          min-height: 18px;
-          display: block;
-          border: 1px solid rgba(21, 51, 66, 0.16);
-          border-radius: 4px 4px 2px 2px;
-          background:
-            linear-gradient(180deg, rgba(255, 217, 115, 0.96), rgba(243, 179, 56, 0.82) 46%, rgba(45, 138, 120, 0.74)),
-            var(--solar);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+        .pitch-rate-callout {
+          position: absolute;
+          left: clamp(16px, 3vw, 30px);
+          bottom: clamp(16px, 3vw, 28px);
+          display: grid;
+          gap: 2px;
+          padding: 14px 18px;
+          border: 1px solid rgba(21, 51, 66, 0.15);
+          border-radius: 6px;
+          background: rgba(248, 236, 212, 0.82);
+          backdrop-filter: blur(12px);
         }
 
-        .pitch-rate-bar small {
-          color: rgba(21, 51, 66, 0.58);
+        .pitch-rate-callout small,
+        .pitch-rate-callout span {
+          color: rgba(21, 51, 66, 0.62);
           font-size: 11px;
-          font-weight: 850;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .pitch-rate-callout strong {
+          color: var(--ink);
+          font-family: var(--font-display);
+          font-size: clamp(38px, 5vw, 68px);
+          line-height: 0.9;
           letter-spacing: 0;
-          writing-mode: vertical-rl;
-          transform: rotate(180deg);
+        }
+
+        .pitch-rate-slider {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .pitch-rate-slider span {
+          color: rgba(21, 51, 66, 0.66);
+          font-size: 13px;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+        }
+
+        .pitch-rate-slider input {
+          width: 100%;
+          height: 36px;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .pitch-rate-slider input::-webkit-slider-runnable-track {
+          height: 8px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--leaf), var(--solar), var(--solar-bright));
+        }
+
+        .pitch-rate-slider input::-webkit-slider-thumb {
+          width: 28px;
+          height: 28px;
+          margin-top: -10px;
+          appearance: none;
+          border: 3px solid var(--ink);
+          border-radius: 999px;
+          background: var(--solar-bright);
+          box-shadow: 0 8px 18px rgba(21, 51, 66, 0.2);
+        }
+
+        .pitch-rate-slider input::-moz-range-track {
+          height: 8px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--leaf), var(--solar), var(--solar-bright));
+        }
+
+        .pitch-rate-slider input::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border: 3px solid var(--ink);
+          border-radius: 999px;
+          background: var(--solar-bright);
+          box-shadow: 0 8px 18px rgba(21, 51, 66, 0.2);
         }
 
         .pitch-close {
@@ -1554,8 +1699,8 @@ export default function PresentationPage() {
             grid-template-columns: repeat(3, 1fr);
           }
 
-          .pitch-rate-chart {
-            grid-template-columns: repeat(15, minmax(42px, 1fr));
+          .pitch-rate-graph {
+            overflow-x: auto;
           }
 
           .pitch-section-body {
@@ -1602,8 +1747,21 @@ export default function PresentationPage() {
             text-align: left;
           }
 
-          .pitch-rate-chart {
-            grid-template-columns: repeat(15, minmax(48px, 1fr));
+          .pitch-rate-graph {
+            min-height: 250px;
+            overflow-x: auto;
+          }
+
+          .pitch-rate-graph svg {
+            min-width: 660px;
+            height: 280px;
+          }
+
+          .pitch-rate-callout {
+            position: relative;
+            left: auto;
+            bottom: auto;
+            margin: 0 14px 14px;
           }
 
           .pitch-proof {
