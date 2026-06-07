@@ -25,15 +25,15 @@ const chapters = [
     number: "02",
     label: "Utility Rates",
     headline: "The utility bill is the competitor.",
-    caption: "FERC shows residential electricity costs can vary widely by state and utility territory.",
+    caption: "Average residential rates climbed from 15.0c/kWh in 2012 to 41.5c/kWh in 2026.",
     visual: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1400&q=82",
     frame: "The bill moves.",
-    talk: "Rates, peak hours, seasons, fuel costs, and infrastructure spending show up on the homeowner's bill.",
+    talk: "Even with the recent pullback, the long-term path is still sharply higher than where homeowners started.",
     bridge: "Now break the bill into energy, delivery, and fees.",
     proof: [
-      { label: "11c-42.69c", detail: "FERC cost range." },
-      { label: "Peak Hours", detail: "Higher pain." },
-      { label: "No Vote", detail: "Rates change." },
+      { label: "+177%", detail: "2012 to 2026." },
+      { label: "45.0c", detail: "2024 peak." },
+      { label: "41.5c", detail: "2026 average." },
     ],
   },
   {
@@ -213,6 +213,29 @@ const chapters = [
     ],
   },
 ];
+
+const rateHistory = [
+  { year: 2012, rate: 15.0 },
+  { year: 2013, rate: 15.5 },
+  { year: 2014, rate: 16.0 },
+  { year: 2015, rate: 17.0 },
+  { year: 2016, rate: 18.0 },
+  { year: 2017, rate: 19.0 },
+  { year: 2018, rate: 20.0 },
+  { year: 2019, rate: 22.0 },
+  { year: 2020, rate: 24.0 },
+  { year: 2021, rate: 27.0 },
+  { year: 2022, rate: 31.0 },
+  { year: 2023, rate: 36.0 },
+  { year: 2024, rate: 45.0 },
+  { year: 2025, rate: 43.0 },
+  { year: 2026, rate: 41.5 },
+];
+
+const maxRate = Math.max(...rateHistory.map((item) => item.rate));
+const firstRate = rateHistory[0].rate;
+const latestRate = rateHistory[rateHistory.length - 1].rate;
+const rateIncrease = Math.round(((latestRate - firstRate) / firstRate) * 100);
 
 const researchCards = [
   {
@@ -455,6 +478,30 @@ export default function PresentationPage() {
                 </div>
               ))}
             </div>
+
+            {chapter.id === "utility-rates" ? (
+              <div className="pitch-rate-history" aria-label="Average residential electric rate history from 2012 to 2026">
+                <div className="pitch-rate-history-head">
+                  <div>
+                    <small>Approx. Average Residential Rate</small>
+                    <strong>2012-2026 kWh trend</strong>
+                  </div>
+                  <div>
+                    <span>{rateIncrease}%</span>
+                    <small>increase since 2012</small>
+                  </div>
+                </div>
+                <div className="pitch-rate-chart">
+                  {rateHistory.map((item) => (
+                    <div className="pitch-rate-bar" key={item.year}>
+                      <span>{item.rate.toFixed(1)}c</span>
+                      <i style={{ height: `${(item.rate / maxRate) * 100}%` }} />
+                      <small>{item.year}</small>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
         ))}
       </div>
@@ -1268,6 +1315,97 @@ export default function PresentationPage() {
           letter-spacing: 0;
         }
 
+        .pitch-rate-history {
+          grid-column: 1 / -1;
+          display: grid;
+          gap: 22px;
+          padding: clamp(18px, 3vw, 30px);
+          border: 1px solid rgba(21, 51, 66, 0.18);
+          border-radius: 6px;
+          background:
+            linear-gradient(135deg, rgba(255, 217, 115, 0.46), rgba(45, 138, 120, 0.16)),
+            rgba(255, 255, 255, 0.18);
+        }
+
+        .pitch-rate-history-head {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 18px;
+        }
+
+        .pitch-rate-history-head small {
+          color: rgba(21, 51, 66, 0.58);
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .pitch-rate-history-head strong,
+        .pitch-rate-history-head span {
+          display: block;
+          color: var(--ink);
+          font-family: var(--font-display);
+          font-size: clamp(32px, 4vw, 58px);
+          font-weight: 700;
+          line-height: 0.96;
+          letter-spacing: 0;
+        }
+
+        .pitch-rate-history-head div:last-child {
+          text-align: right;
+        }
+
+        .pitch-rate-chart {
+          min-height: 250px;
+          display: grid;
+          grid-template-columns: repeat(15, minmax(30px, 1fr));
+          align-items: end;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 8px 4px 0;
+        }
+
+        .pitch-rate-bar {
+          min-width: 30px;
+          height: 230px;
+          display: grid;
+          grid-template-rows: 30px 1fr 24px;
+          align-items: end;
+          justify-items: center;
+          gap: 6px;
+        }
+
+        .pitch-rate-bar span {
+          color: rgba(21, 51, 66, 0.74);
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: 0;
+          white-space: nowrap;
+        }
+
+        .pitch-rate-bar i {
+          width: 100%;
+          min-height: 18px;
+          display: block;
+          border: 1px solid rgba(21, 51, 66, 0.16);
+          border-radius: 4px 4px 2px 2px;
+          background:
+            linear-gradient(180deg, rgba(255, 217, 115, 0.96), rgba(243, 179, 56, 0.82) 46%, rgba(45, 138, 120, 0.74)),
+            var(--solar);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+        }
+
+        .pitch-rate-bar small {
+          color: rgba(21, 51, 66, 0.58);
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: 0;
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+        }
+
         .pitch-close {
           padding: clamp(70px, 10vw, 132px) clamp(22px, 4vw, 80px);
           background:
@@ -1416,6 +1554,10 @@ export default function PresentationPage() {
             grid-template-columns: repeat(3, 1fr);
           }
 
+          .pitch-rate-chart {
+            grid-template-columns: repeat(15, minmax(42px, 1fr));
+          }
+
           .pitch-section-body {
             grid-template-columns: 1fr;
           }
@@ -1449,6 +1591,19 @@ export default function PresentationPage() {
 
           .pitch-research-grid {
             grid-template-columns: 1fr;
+          }
+
+          .pitch-rate-history-head {
+            align-items: start;
+            flex-direction: column;
+          }
+
+          .pitch-rate-history-head div:last-child {
+            text-align: left;
+          }
+
+          .pitch-rate-chart {
+            grid-template-columns: repeat(15, minmax(48px, 1fr));
           }
 
           .pitch-proof {
