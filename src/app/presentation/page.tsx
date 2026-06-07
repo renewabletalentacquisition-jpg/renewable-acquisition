@@ -25,15 +25,15 @@ const chapters = [
     number: "02",
     label: "Utility Rates",
     headline: "The utility bill is the competitor.",
-    caption: "Average residential rates climbed from 15.0c/kWh in 2012 to 41.5c/kWh in 2026.",
+    caption: "Average residential rates climbed from 15.0c/kWh in 2012 to 45.0c/kWh in 2024.",
     visual: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1400&q=82",
     frame: "The bill moves.",
     talk: "Even with the recent pullback, the long-term path is still sharply higher than where homeowners started.",
     bridge: "Now break the bill into energy, delivery, and fees.",
     proof: [
-      { label: "+177%", detail: "2012 to 2026." },
+      { label: "+200%", detail: "2012 to 2024." },
       { label: "45.0c", detail: "2024 peak." },
-      { label: "41.5c", detail: "2026 average." },
+      { label: "3X", detail: "Starting rate." },
     ],
   },
   {
@@ -228,10 +228,9 @@ const rateHistory = [
   { year: 2022, rate: 31.0 },
   { year: 2023, rate: 36.0 },
   { year: 2024, rate: 45.0 },
-  { year: 2025, rate: 43.0 },
-  { year: 2026, rate: 41.5 },
 ];
 
+const rateMilestoneYears = new Set([2012, 2017, 2022, 2024]);
 const maxRate = Math.max(...rateHistory.map((item) => item.rate));
 const minRate = Math.min(...rateHistory.map((item) => item.rate));
 const firstRate = rateHistory[0].rate;
@@ -495,11 +494,11 @@ export default function PresentationPage() {
             </div>
 
             {chapter.id === "utility-rates" ? (
-              <div className="pitch-rate-history" aria-label="Sliding average residential electric rate graph from 2012 to 2026">
+              <div className="pitch-rate-history" aria-label="Sliding average residential electric rate graph from 2012 to 2024">
                 <div className="pitch-rate-history-head">
                   <div>
                     <small>Approx. Average Residential Rate</small>
-                    <strong>Slide the rate curve</strong>
+                    <strong>Rates breaking away</strong>
                   </div>
                   <div>
                     <span>{selectedRate.rate.toFixed(1)}c</span>
@@ -509,6 +508,13 @@ export default function PresentationPage() {
 
                 <div className="pitch-rate-graph">
                   <svg viewBox="0 0 1000 320" role="img" aria-label={`Residential rate increased from 15.0 cents in 2012 to ${selectedRate.rate.toFixed(1)} cents in ${selectedRate.year}`}>
+                    <defs>
+                      <linearGradient id="rateSurgeGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+                        <stop offset="0%" stopColor="#2d8a78" />
+                        <stop offset="52%" stopColor="#f3b338" />
+                        <stop offset="100%" stopColor="#d8441f" />
+                      </linearGradient>
+                    </defs>
                     <path className="pitch-rate-grid-line" d="M 0 252 L 1000 252" />
                     <path className="pitch-rate-grid-line" d="M 0 143 L 1000 143" />
                     <path className="pitch-rate-grid-line" d="M 0 34 L 1000 34" />
@@ -522,8 +528,13 @@ export default function PresentationPage() {
                           cy={point.y}
                           r={index === rateIndex ? 10 : 6}
                         />
+                        {rateMilestoneYears.has(point.year) ? (
+                          <text x={Math.min(Math.max(point.x, 40), 960)} y="296" className="pitch-rate-year">
+                            {point.year}
+                          </text>
+                        ) : null}
                         {index === rateIndex ? (
-                          <text x={Math.min(point.x + 20, 900)} y={Math.max(point.y - 18, 28)} className="pitch-rate-label">
+                          <text x={Math.min(point.x + 20, 830)} y={Math.max(point.y - 18, 28)} className="pitch-rate-label">
                             {point.year} - {point.rate.toFixed(1)}c/kWh
                           </text>
                         ) : null}
@@ -533,7 +544,7 @@ export default function PresentationPage() {
                   <div className="pitch-rate-callout">
                     <small>2012 to {selectedRate.year}</small>
                     <strong>{selectedRateIncrease}%</strong>
-                    <span>increase from the starting rate</span>
+                    <span>increase from starting rate</span>
                   </div>
                 </div>
 
@@ -1373,7 +1384,8 @@ export default function PresentationPage() {
           border: 1px solid rgba(21, 51, 66, 0.18);
           border-radius: 6px;
           background:
-            linear-gradient(135deg, rgba(255, 217, 115, 0.46), rgba(45, 138, 120, 0.16)),
+            radial-gradient(circle at 92% 12%, rgba(216, 68, 31, 0.24), transparent 26%),
+            linear-gradient(135deg, rgba(255, 217, 115, 0.52), rgba(216, 68, 31, 0.16) 58%, rgba(45, 138, 120, 0.12)),
             rgba(255, 255, 255, 0.18);
         }
 
@@ -1414,8 +1426,9 @@ export default function PresentationPage() {
           border: 1px solid rgba(21, 51, 66, 0.13);
           border-radius: 6px;
           background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08)),
-            repeating-linear-gradient(90deg, rgba(21, 51, 66, 0.05) 0 1px, transparent 1px 66px);
+            linear-gradient(110deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08)),
+            linear-gradient(90deg, rgba(45, 138, 120, 0.1), rgba(243, 179, 56, 0.12) 54%, rgba(216, 68, 31, 0.2)),
+            repeating-linear-gradient(90deg, rgba(21, 51, 66, 0.05) 0 1px, transparent 1px 84px);
         }
 
         .pitch-rate-graph svg {
@@ -1440,13 +1453,13 @@ export default function PresentationPage() {
 
         .pitch-rate-path-base {
           stroke: rgba(21, 51, 66, 0.18);
-          stroke-width: 10;
+          stroke-width: 9;
         }
 
         .pitch-rate-path-live {
-          stroke: var(--solar);
-          stroke-width: 12;
-          filter: drop-shadow(0 8px 12px rgba(119, 80, 13, 0.18));
+          stroke: url("#rateSurgeGradient");
+          stroke-width: 15;
+          filter: drop-shadow(0 10px 14px rgba(119, 52, 13, 0.24));
         }
 
         .pitch-rate-dot {
@@ -1457,14 +1470,22 @@ export default function PresentationPage() {
         }
 
         .pitch-rate-dot.active {
-          fill: var(--leaf);
+          fill: #d8441f;
         }
 
         .pitch-rate-label {
-          fill: var(--ink);
+          fill: #8f2d19;
           font-size: 34px;
           font-weight: 900;
           letter-spacing: 0;
+        }
+
+        .pitch-rate-year {
+          fill: rgba(21, 51, 66, 0.66);
+          font-size: 26px;
+          font-weight: 950;
+          letter-spacing: 0;
+          text-anchor: middle;
         }
 
         .pitch-rate-callout {
@@ -1522,7 +1543,7 @@ export default function PresentationPage() {
         .pitch-rate-slider input::-webkit-slider-runnable-track {
           height: 8px;
           border-radius: 999px;
-          background: linear-gradient(90deg, var(--leaf), var(--solar), var(--solar-bright));
+          background: linear-gradient(90deg, var(--leaf), var(--solar), #d8441f);
         }
 
         .pitch-rate-slider input::-webkit-slider-thumb {
@@ -1532,14 +1553,14 @@ export default function PresentationPage() {
           appearance: none;
           border: 3px solid var(--ink);
           border-radius: 999px;
-          background: var(--solar-bright);
+          background: #ffcf5f;
           box-shadow: 0 8px 18px rgba(21, 51, 66, 0.2);
         }
 
         .pitch-rate-slider input::-moz-range-track {
           height: 8px;
           border-radius: 999px;
-          background: linear-gradient(90deg, var(--leaf), var(--solar), var(--solar-bright));
+          background: linear-gradient(90deg, var(--leaf), var(--solar), #d8441f);
         }
 
         .pitch-rate-slider input::-moz-range-thumb {
@@ -1547,7 +1568,7 @@ export default function PresentationPage() {
           height: 24px;
           border: 3px solid var(--ink);
           border-radius: 999px;
-          background: var(--solar-bright);
+          background: #ffcf5f;
           box-shadow: 0 8px 18px rgba(21, 51, 66, 0.2);
         }
 
