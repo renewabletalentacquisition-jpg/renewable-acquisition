@@ -397,9 +397,6 @@ export default function PresentationPage() {
           </h1>
           <p>A live iPad close that shows the homeowner the roof, the bill, the grid problem, and why Sunrun solar plus storage is the alternative.</p>
         </div>
-        <p className="pitch-hero-note reveal visible">
-          Real research. Real pain points. Quick captions.
-        </p>
       </section>
 
       <nav id="chapters" className="pitch-chapters" aria-label="Presentation chapters">
